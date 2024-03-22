@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.vishnu.sjce_map.ui.home.HomeFragment"
+        android:label="@string/menu_home"
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_nav_home_to_mapFragment"
+            app:destination="@id/mapFragment" />
+        <action
+            android:id="@+id/action_nav_home_to_departmentFragment"
+            app:destination="@id/departmentFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_home1"
+        android:name="com.vishnu.sjce_map.ui.home.HomeSearchFragment"
+        android:label="fragment_home1"
+        tools:layout="@layout/fragment_home1" />
+    <fragment
+        android:id="@+id/mapFragment"
+        android:name="com.vishnu.sjce_map.ui.map.MapFragment"
+        android:label="fragment_map"
+        tools:layout="@layout/fragment_map" />
+    <fragment
+        android:id="@+id/departmentFragment"
+        android:name="com.vishnu.sjce_map.ui.home.DepartmentFragment"
+        android:label="Departments"
+        tools:layout="@layout/fragment_department" >
+        <action
+            android:id="@+id/action_departmentFragment_to_mapFragment"
+            app:destination="@id/mapFragment" />
+    </fragment>
+</navigation>

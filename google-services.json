@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "924235844444",
+    "project_id": "sjce-map",
+    "storage_bucket": "sjce-map.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:924235844444:android:64adbcaec3515f0316cf99",
+        "android_client_info": {
+          "package_name": "com.vishnu.sjce_map"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBajsc_JL-z1n10KB2cwkFTZCPH5oetYkk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
