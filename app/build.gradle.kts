@@ -51,7 +51,7 @@ dependencies {
 
     implementation(platform(libs.firebase.bom))
     implementation(dependencyNotation = "com.google.firebase:firebase-analytics")
-    implementation(libs.play.services.location)
+//    implementation(libs.play.services.location)
 
     implementation("androidx.appcompat:appcompat:1.4.1")
     implementation("androidx.camera:camera-camera2:1.3.2")
@@ -59,6 +59,8 @@ dependencies {
     implementation("com.google.mlkit:barcode-scanning:17.2.0")
     implementation("com.google.android.gms:play-services-vision:20.1.3")
     implementation("com.squareup.picasso:picasso:2.71828")
+    implementation("com.google.android.gms:play-services-location:18.0.0")
+    implementation("com.google.android.gms:play-services-maps:17.0.1")
 
 
 }

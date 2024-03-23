@@ -1,6 +1,7 @@
 package com.vishnu.sjce_map;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -47,6 +48,8 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
     private ActivityMainBinding binding;
     private HomeSearchFragment homeFragment;
     private Vibrator vibrator;
+    AlertDialog locNotEnableAlertDialog;
+    AlertDialog.Builder locNotEnableBuilder;
     private LocationManager locationManager;
     SharedDataView sharedDataView;
     private GPSLocationProvider gpsLocationProvider;
@@ -73,6 +76,13 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
 
         setSupportActionBar(binding.appBarMain.toolbar);
+
+        locNotEnableBuilder = new AlertDialog.Builder(this);
+
+        locNotEnableBuilder.setView(R.layout.loc_not_enable_dialog);
+        locNotEnableBuilder.setPositiveButton("ENABLE", (dialog, which) -> showLocationSettings(this));
+        locNotEnableBuilder.setNegativeButton("DISABLE", (dialog, which) -> Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show());
+        locNotEnableAlertDialog = locNotEnableBuilder.create();
 
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
@@ -150,6 +160,16 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
         }
     }
 
+    private void showLocNotEnableDialog(boolean showFlag) {
+        if (showFlag) {
+            locNotEnableAlertDialog.setCanceledOnTouchOutside(false);
+            locNotEnableAlertDialog.show();
+        } else {
+            locNotEnableAlertDialog.hide();
+            locNotEnableAlertDialog.cancel();
+        }
+    }
+
     private void startVibration() {
         vibrator.vibrate(VibrationEffect.createOneShot(150, VibrationEffect.EFFECT_DOUBLE_CLICK));
     }
@@ -158,8 +178,9 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
     protected void onResume() {
         super.onResume();
         if (isLocationNotEnabled(this)) {
-            showLocationSettings(this);
+            showLocNotEnableDialog(true);
         } else {
+            showLocNotEnableDialog(false);
             startLocationUpdates();
         }
     }

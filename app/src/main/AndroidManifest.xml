@@ -40,9 +40,6 @@
             android:theme="@style/Theme.SJCEMAP.NoActionBar">
         </activity>
 
-        <receiver android:name=".service.GeofenceBroadcastReceiver" />
-
-
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

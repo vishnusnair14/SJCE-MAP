@@ -1,5 +1,7 @@
 package com.vishnu.sjce_map.ui.map;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,10 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -30,13 +30,16 @@ import java.text.MessageFormat;
 import java.util.Map;
 
 
-public class MapFragment extends Fragment implements OnMapReadyCallback {
+public class MapFragment extends Fragment {
     SharedDataView sharedDataView;
 
     private static final String LOG_TAG = "MapFragment";
-    DecimalFormat decimalFormat = new DecimalFormat("0.000000000");
+    DecimalFormat coordinatesFormat = new DecimalFormat("0.0000000000000");
     private GoogleMap mMap;
-    private static final LatLng MY_LOCATION = new LatLng(12.316649940097205, 76.61397958678371);
+    private String destPlaceLat;
+    private String destPlaceLon;
+    MapView mapView;
+    private static final LatLng BACK_GATE = new LatLng(12.318479671291703, 76.6145840732339);
 
     public MapFragment() {
         // Required empty public constructor
@@ -47,6 +50,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedDataView = new ViewModelProvider(requireActivity()).get(SharedDataView.class);
+        destPlaceLat = "0.0000000000000";
+        destPlaceLon = "0.0000000000000";
     }
 
     private FragmentMapBinding binding;
@@ -56,6 +61,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
         binding = FragmentMapBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
+
 
         sharedDataView.getPlace().observe(getViewLifecycleOwner(), pl -> {
             if (pl != null) {
@@ -75,15 +81,54 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             }
         });
 
+        /* updates LAT, LON TV */
+        sharedDataView.getClientLat().observe(getViewLifecycleOwner(), lat -> {
+            if (lat != null) {
+                sharedDataView.getClientLon().observe(getViewLifecycleOwner(), lon -> {
+                    if (lon != null) {
+                        binding.startPlaceCoordinatesViewTextView.setText((MessageFormat.format("{0}°N\n{1}°E", coordinatesFormat
+                                .format(lat), coordinatesFormat.format(lon))));
+                        binding.startPlaceNameViewTextView.setText(R.string.current_location);
+                    } else {
+                        Toast.makeText(requireContext(), "clientLon: NullRef", Toast.LENGTH_SHORT).show();
+                        Log.i(LOG_TAG, "clientLon: @null-reference");
+                    }
+                });
+            } else {
+                Toast.makeText(requireContext(), "shopLon: NullRef", Toast.LENGTH_SHORT).show();
+                Log.i(LOG_TAG, "shopLon: @null-reference");
+            }
+        });
+
+        binding.assistWalkDirectionImageButton.setOnClickListener(v -> openMapView(String.valueOf(BACK_GATE.latitude),
+                String.valueOf(BACK_GATE.longitude), destPlaceLat, destPlaceLon));
+
+        binding.changeStartTypeTextView.setOnClickListener(v -> Toast.makeText(requireContext(), "change-start-type", Toast.LENGTH_SHORT).show());
         return root;
     }
+
+
+    private void openMapView(String sourceLatitude, String sourceLongitude,
+                             String destinationLatitude, String destinationLongitude) {
+
+        Uri uri = Uri.parse("https://www.google.com/maps/dir/?api=1&destination=" +
+                destinationLatitude + "," + destinationLongitude +
+                "&travelmode=walking");
+
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        intent.setPackage("com.google.android.apps.maps");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
     }
 
-    private void fetchDataFromFirestore(@NonNull String docPath, String key, TextView ltv, TextView ptv) {
+    private void fetchDataFromFirestore(@NonNull String docPath, @NonNull String key, TextView
+            ltv, TextView ptv) {
         DocumentReference documentRef = FirebaseFirestore.getInstance().collection("LocationData").document(docPath);
 
         documentRef.get().addOnCompleteListener(task -> {
@@ -101,9 +146,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                             String placeName = (String) dataMap.get("spot_name");
                             GeoPoint geoPoint = (GeoPoint) dataMap.get("spot_coordinates");
                             ptv.setText(placeName);
+                            binding.endPlaceNameViewTextView.setText(placeName);
                             assert geoPoint != null;
-                            ltv.setText(MessageFormat.format("{0}°N {1}°E", decimalFormat.format(geoPoint.getLatitude()),
-                                    decimalFormat.format(geoPoint.getLongitude())));
+                            binding.endPlaceCoordinatesViewTextView.setText(MessageFormat.format("{0}°N\n{1}°E",
+                                    coordinatesFormat.format(geoPoint.getLatitude()), coordinatesFormat.format(geoPoint.getLongitude())));
+                            ltv.setText(MessageFormat.format("{0}°N {1}°E", coordinatesFormat.format(geoPoint.getLatitude()),
+                                    coordinatesFormat.format(geoPoint.getLongitude())));
+
+                            destPlaceLat = coordinatesFormat.format(geoPoint.getLatitude());
+                            destPlaceLon = coordinatesFormat.format(geoPoint.getLongitude());
 
                         } else {
                             Log.d(LOG_TAG, "value");
@@ -121,11 +172,4 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
-    @Override
-    public void onMapReady(@NonNull GoogleMap googleMap) {
-        mMap = googleMap;
-
-        // Move the camera to a particular location and set the zoom level
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(MY_LOCATION, 10));
-    }
 }

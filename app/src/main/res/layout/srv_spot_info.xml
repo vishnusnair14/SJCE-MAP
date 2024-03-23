@@ -59,6 +59,7 @@
             android:fontFamily="@font/anonymous_pro"
             android:text="$(coords)"
             android:textAlignment="textEnd"
+            android:textSize="12sp"
             card_view:layout_constraintBottom_toBottomOf="parent"
             card_view:layout_constraintEnd_toEndOf="@+id/spotNameSpotInfoView_textView" />
 
