@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -33,6 +34,7 @@ import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
+import com.google.firebase.firestore.GeoPoint;
 import com.vishnu.sjce_map.miscellaneous.SharedDataView;
 import com.vishnu.sjce_map.service.GPSLocationProvider;
 import com.vishnu.sjce_map.service.LocationModel;
@@ -48,7 +50,6 @@ import java.util.Objects;
 public class AuthQRActivity extends AppCompatActivity implements LocationUpdateListener {
     SurfaceView surfaceView;
     TextView txtBarcodeValue;
-    private BarcodeDetector barcodeDetector;
     private LocationManager locationManager;
     SharedDataView sharedDataView;
     private GPSLocationProvider gpsLocationProvider;
@@ -61,13 +62,17 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
     AlertDialog locNotEnableAlertDialog;
     DecimalFormat coordinateFormat = new DecimalFormat("0.000000000");
     private final String LOG_TAG = "AuthQRActivity";
-    Intent i;
+    Intent mainActivity;
+    boolean startActivityFlag = false;
+    GeoPoint SJCE_MAIN_GATE = new GeoPoint(12.313131921516486, 76.61505314496924);
+    GeoPoint SJCE_EXIT_GATE = new GeoPoint(12.318439598446519, 76.61465710202344);
     private boolean alertCallFlag = false;
     AlertDialog.Builder locNotEnableBuilder;
     TextView alertTV;
     private static final int REQUEST_CAMERA_PERMISSION = 201;
     String[] permissions = {
-            Manifest.permission.ACCESS_FINE_LOCATION
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.CAMERA
     };
 
 
@@ -83,7 +88,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
 
         locNotEnableBuilder.setView(R.layout.loc_not_enable_dialog);
         locNotEnableBuilder.setPositiveButton("ENABLE", (dialog, which) -> showLocationSettings(this));
-        locNotEnableBuilder.setNegativeButton("DISABLE", (dialog, which) -> Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show());
+//        locNotEnableBuilder.setNegativeButton("DISABLE", (dialog, which) -> Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show());
         locNotEnableAlertDialog = locNotEnableBuilder.create();
 
         // OnCreate permission request
@@ -102,11 +107,9 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
         locationTV = findViewById(R.id.authActivityCoordinatesView_textView);
         alertTV = findViewById(R.id.alertNotInCampus_textView);
 
-        i = new Intent(AuthQRActivity.this, MainActivity.class);
+        mainActivity = new Intent(AuthQRActivity.this, MainActivity.class);
 
-        byPassBtn.setOnClickListener(v -> {
-            startActivity(i);
-        });
+        byPassBtn.setOnClickListener(v -> startActivity(mainActivity));
 
         byPassBtn.setOnLongClickListener(v -> {
             startVibration();
@@ -123,9 +126,12 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
         initViews();
     }
 
-    private boolean isInsideGeoFence(double lat, double lon) {
+    private boolean isInsideGeoFenceArea(double lat, double lon) {
+        // SJCE-MYSORE BACK EXIT GATE COORDINATES:
         double topLeftLat = 12.318289380014258;
         double topLeftLon = 76.61125779310221;
+
+        // SJCE-MYSORE MAIN ENTRY GATE COORDINATES:
         double bottomRightLat = 12.311264587819064;
         double bottomRightLon = 76.61526699712476;
         return (lat >= bottomRightLat && lat <= topLeftLat && lon >= topLeftLon && lon <= bottomRightLon);
@@ -138,7 +144,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
     }
 
     private void initialiseDetectorsAndSources() {
-        barcodeDetector = new BarcodeDetector.Builder(this)
+        BarcodeDetector barcodeDetector = new BarcodeDetector.Builder(this)
                 .setBarcodeFormats(Barcode.ALL_FORMATS)
                 .build();
 
@@ -189,10 +195,15 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
                     String scannedData = barcodes.valueAt(0).displayValue;
                     // Compare the scanned data with the target string
                     if (scannedData.trim().equals(AUTH_ACCESS_KEY)) {
-                        // Start a new activity when a match is found
-                        if (isInsideGeoFence(currentLocation.lat, currentLocation.lon)) {
-                            startActivity(i);
-                            finish();
+                        // Check whether the user inside defined geofence-area
+                        if (isInsideGeoFenceArea(currentLocation.lat, currentLocation.lon)) {
+                            txtBarcodeValue.setText(R.string.user_authenticated);
+                            // Start a new activity when a match is found
+                            if (!startActivityFlag) {
+                                startActivity(mainActivity);
+                                finish();
+                            }
+                            startActivityFlag = true;
                         } else {
                             runOnUiThread(() -> {
                                 alertTV.setVisibility(View.VISIBLE);
@@ -204,7 +215,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
                     } else {
                         // No match found, update UI accordingly
                         txtBarcodeValue.post(() -> {
-                            txtBarcodeValue.setText("Invalid QR");
+                            txtBarcodeValue.setText(scannedData);
                             alertTV.setVisibility(View.INVISIBLE);
                             alertTV.setText("");
                             alertCallFlag = false;
@@ -234,7 +245,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, gpsLocationProvider);
         } else {
-            Toast.makeText(this, "location-permission-disabled", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Location permission disabled. Enable manually and restart the app", Toast.LENGTH_SHORT).show();
         }
     }
 
