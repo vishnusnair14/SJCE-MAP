@@ -18,9 +18,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/i6"
+        android:icon="@drawable/jss_logo"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/i6"
+        android:roundIcon="@drawable/jss_logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.SJCEMAP"
         tools:targetApi="31">

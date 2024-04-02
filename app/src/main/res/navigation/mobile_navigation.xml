@@ -19,11 +19,6 @@
     </fragment>
 
     <fragment
-        android:id="@+id/nav_home1"
-        android:name="com.vishnu.sjce_map.ui.home.HomeSearchFragment"
-        android:label="fragment_home1"
-        tools:layout="@layout/fragment_home1" />
-    <fragment
         android:id="@+id/mapFragment"
         android:name="com.vishnu.sjce_map.ui.map.MapFragment"
         android:label="fragment_map"

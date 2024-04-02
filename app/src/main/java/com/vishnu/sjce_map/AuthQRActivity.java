@@ -9,6 +9,7 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -19,6 +20,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +37,8 @@ import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 import com.google.firebase.firestore.GeoPoint;
+import com.vishnu.sjce_map.databinding.ActivityAuthQractivityBinding;
+import com.vishnu.sjce_map.miscellaneous.ScanBoundaryAnim;
 import com.vishnu.sjce_map.miscellaneous.SharedDataView;
 import com.vishnu.sjce_map.service.GPSLocationProvider;
 import com.vishnu.sjce_map.service.LocationModel;
@@ -54,6 +58,8 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
     SharedDataView sharedDataView;
     private GPSLocationProvider gpsLocationProvider;
     private CameraSource cameraSource;
+    private static final long TIMEOUT_DURATION = 30 * 1000; // 30 seconds
+    private static final long COUNTDOWN_INTERVAL = 1000; // 1 second
     private Vibrator vibrator;
     LocationModel currentLocation;
     private final String AUTH_ACCESS_KEY = "6117e11901fc7639";   // Keep it confidential
@@ -63,7 +69,11 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
     DecimalFormat coordinateFormat = new DecimalFormat("0.000000000");
     private final String LOG_TAG = "AuthQRActivity";
     Intent mainActivity;
+    boolean isIntentPassedToMain = false;
     boolean startActivityFlag = false;
+    private long remainingTime;
+    private Runnable countdownRunnable;
+    private Handler timeoutHandler;
     GeoPoint SJCE_MAIN_GATE = new GeoPoint(12.313131921516486, 76.61505314496924);
     GeoPoint SJCE_EXIT_GATE = new GeoPoint(12.318439598446519, 76.61465710202344);
     private boolean alertCallFlag = false;
@@ -91,6 +101,9 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
 //        locNotEnableBuilder.setNegativeButton("DISABLE", (dialog, which) -> Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show());
         locNotEnableAlertDialog = locNotEnableBuilder.create();
 
+        timeoutHandler = new Handler(Looper.getMainLooper());
+        startCountdownTimer(findViewById(R.id.countDownTimer_textView));
+
         // OnCreate permission request
         List<String> permissionsToRequest = new ArrayList<>();
         for (String permission : permissions) {
@@ -109,7 +122,10 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
 
         mainActivity = new Intent(AuthQRActivity.this, MainActivity.class);
 
-        byPassBtn.setOnClickListener(v -> startActivity(mainActivity));
+        byPassBtn.setOnClickListener(v -> {
+            startActivity(mainActivity);
+            isIntentPassedToMain = true;
+        });
 
         byPassBtn.setOnLongClickListener(v -> {
             startVibration();
@@ -120,6 +136,11 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         currentLocation = new LocationModel(0.0000000, 0.000000);
         gpsLocationProvider = new GPSLocationProvider(this, this);
+
+        ScanBoundaryAnim scanBoundaryAnim = findViewById(R.id.scanBoundaryAnim);
+
+        Animation animation = AnimationUtils.loadAnimation(this, R.anim.boundary_corner_animation);
+        scanBoundaryAnim.startAnimation(animation);
 
         startLocationUpdates();
 
@@ -184,7 +205,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
             @Override
             public void release() {
 //                Toast.makeText(getApplicationContext(), "Barcode scanner has been stopped", Toast.LENGTH_SHORT).show();
-                Log.i(LOG_TAG, "Barcode scanner has been stopped");
+                Log.i(LOG_TAG, "QR-Code scanner has been stopped");
             }
 
             @Override
@@ -197,30 +218,36 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
                     if (scannedData.trim().equals(AUTH_ACCESS_KEY)) {
                         // Check whether the user inside defined geofence-area
                         if (isInsideGeoFenceArea(currentLocation.lat, currentLocation.lon)) {
-                            txtBarcodeValue.setText(R.string.user_authenticated);
+                            txtBarcodeValue.setVisibility(View.VISIBLE);
+                            txtBarcodeValue.setText(R.string.qr_authenticated);
                             // Start a new activity when a match is found
                             if (!startActivityFlag) {
                                 startActivity(mainActivity);
+                                isIntentPassedToMain = true;
                                 finish();
                             }
                             startActivityFlag = true;
                         } else {
                             runOnUiThread(() -> {
-                                alertTV.setVisibility(View.VISIBLE);
+                                txtBarcodeValue.setTextColor(getColor(R.color.qr_auth_success));
                                 alertTV.setText(R.string.not_in_campus);
-                                txtBarcodeValue.setText("");
+                                txtBarcodeValue.setText(R.string.qr_authenticated);
                                 startTVBlink(alertTV);
+                                resetCountdownTimer();
                             });
                         }
                     } else {
                         // No match found, update UI accordingly
                         txtBarcodeValue.post(() -> {
-                            txtBarcodeValue.setText(scannedData);
-                            alertTV.setVisibility(View.INVISIBLE);
-                            alertTV.setText("");
+                            txtBarcodeValue.setTextColor(getColor(R.color.qr_auth_fail));
+                            txtBarcodeValue.setText(R.string.invalid_qr);
+                            alertTV.setText(" ");
                             alertCallFlag = false;
+                            resetCountdownTimer();
                         });
                     }
+                } else {
+                    txtBarcodeValue.setText(" ");
                 }
             }
         });
@@ -294,6 +321,36 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
         return locationManager == null ||
                 (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) &&
                         !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
+    }
+
+    private void startCountdownTimer(TextView tv) {
+        remainingTime = TIMEOUT_DURATION;
+
+        countdownRunnable = new Runnable() {
+            @Override
+            public void run() {
+                remainingTime -= COUNTDOWN_INTERVAL;
+
+                tv.setText(MessageFormat.format("{0}s left...", remainingTime / 1000));
+                if (remainingTime > 0) {
+                    timeoutHandler.postDelayed(this, COUNTDOWN_INTERVAL);
+                } else {
+                    if (!isIntentPassedToMain) {
+                        Toast.makeText(AuthQRActivity.this, "QR code not found.", Toast.LENGTH_SHORT).show();
+                    }
+                    finish();
+                }
+            }
+        };
+
+        // Post a delayed action to start the countdown
+        timeoutHandler.postDelayed(countdownRunnable, COUNTDOWN_INTERVAL);
+    }
+
+    // Method to reset the countdown timer
+    private void resetCountdownTimer() {
+        timeoutHandler.removeCallbacks(countdownRunnable);
+        startCountdownTimer(findViewById(R.id.countDownTimer_textView));
     }
 
 

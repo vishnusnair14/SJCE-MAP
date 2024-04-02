@@ -9,13 +9,13 @@
     android:autofillHints="75415"
     android:backgroundTintMode="add"
     card_view:cardCornerRadius="15dp"
-    card_view:cardElevation="8dp">
+    card_view:cardElevation="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#3F51B5"
-        android:backgroundTint="#BBB7C3"
+        android:background="#000000"
+        android:backgroundTint="#E6E4EA"
         android:backgroundTintMode="add"
         android:hapticFeedbackEnabled="true"
         android:padding="16dp">
@@ -28,7 +28,8 @@
             android:gravity="center_horizontal|center_vertical"
             android:text="$(spotName)"
             android:textAlignment="center"
-            android:textSize="22sp"
+            android:textColor="#000000"
+            android:textSize="18sp"
             android:textStyle="bold"
             card_view:layout_constraintEnd_toEndOf="parent"
             card_view:layout_constraintStart_toEndOf="@+id/spotImageAllDepartmentInfoView_imageView"
@@ -36,8 +37,8 @@
 
         <ImageView
             android:id="@+id/spotImageAllDepartmentInfoView_imageView"
-            android:layout_width="125dp"
-            android:layout_height="115dp"
+            android:layout_width="85dp"
+            android:layout_height="85dp"
             android:layout_marginStart="5dp"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
@@ -59,6 +60,7 @@
             android:fontFamily="@font/anonymous_pro"
             android:text="$(coords)"
             android:textAlignment="textEnd"
+            android:textSize="11sp"
             card_view:layout_constraintBottom_toBottomOf="parent"
             card_view:layout_constraintEnd_toEndOf="@+id/spotNameAllDepartmentInfoView_textView" />
 

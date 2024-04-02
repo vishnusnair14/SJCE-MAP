@@ -15,7 +15,7 @@
         android:fontFamily="@font/akaya_telivigala"
         android:gravity="center|center_horizontal|center_vertical"
         android:text="@string/all_departments"
-        android:textSize="28sp"
+        android:textSize="26sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -1,6 +1,7 @@
 package com.vishnu.sjce_map.view;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,7 +27,7 @@ import java.util.List;
 
 
 public class SavedPlaceViewAdapter extends RecyclerView.Adapter<SavedPlaceViewAdapter.ViewHolder> {
-    private final List<SavedPlaceViewModel> itemList;
+    private List<SavedPlaceViewModel> itemList;
     private final String LOG_TAG = "SpotViewAdapter";
     private final Context context;
     private HomeFragment homeFragment;
@@ -77,6 +78,12 @@ public class SavedPlaceViewAdapter extends RecyclerView.Adapter<SavedPlaceViewAd
     @Override
     public int getItemCount() {
         return itemList.size();
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void filterList(List<SavedPlaceViewModel> filteredList) {
+        itemList = filteredList;
+        notifyDataSetChanged();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

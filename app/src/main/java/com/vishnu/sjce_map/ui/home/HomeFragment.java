@@ -1,24 +1,29 @@
 package com.vishnu.sjce_map.ui.home;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
+import com.vishnu.sjce_map.MainActivity;
+import com.vishnu.sjce_map.R;
 import com.vishnu.sjce_map.databinding.FragmentHomeBinding;
+import com.vishnu.sjce_map.miscellaneous.SearchQueryListener;
 import com.vishnu.sjce_map.miscellaneous.SharedDataView;
 import com.vishnu.sjce_map.view.SavedPlaceViewAdapter;
 import com.vishnu.sjce_map.view.SavedPlaceViewModel;
@@ -29,15 +34,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements SearchQueryListener {
     private static final String LOG_TAG = "HomeFragment";
     public static SharedDataView sharedDataView;
     List<SavedPlaceViewModel> itemList = new ArrayList<>();
     SavedPlaceViewAdapter savedPlaceViewAdapter;
     FirebaseFirestore db;
     private FragmentHomeBinding binding;
+    MainActivity mainActivity;
     GeoPoint clientGeoPoint;
-    DecimalFormat coordinateFormat = new DecimalFormat("0.000000000");
+    private boolean isKeyboardVisible = false;
+    DecimalFormat coordinateFormat = new DecimalFormat("0.0000000000");
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -72,14 +79,28 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        binding.allDepartmentsShortcutButton.setOnClickListener(v ->
+                NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_departmentFragment));
+
         syncSavedPlacesRecycleView(binding);
         return root;
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Set the search query listener
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).setSearchQueryListener(this);
+        }
+    }
+
+
     @SuppressLint("NotifyDataSetChanged")
     private void syncSavedPlacesRecycleView(@NonNull FragmentHomeBinding binding) {
         RecyclerView recyclerView = binding.spotViewRecycleView;
-        LinearLayoutManager homeLayoutManager = new LinearLayoutManager(requireContext());
+        LinearLayoutManager homeLayoutManager = new LinearLayoutManager(mainActivity);
         recyclerView.setLayoutManager(homeLayoutManager);
 
         itemList.clear();
@@ -127,59 +148,28 @@ public class HomeFragment extends Fragment {
         sharedDataView.setDocPath(path);
     }
 
+    @Override
+    public void onSearchQuerySubmitted(String query) {
 
-    private void openMapView(String sourceLatitude, String sourceLongitude,
-                             String destinationLatitude, String destinationLongitude) {
-
-        Uri uri = Uri.parse("https://www.google.com/maps/dir/" +
-                sourceLatitude + "," + sourceLongitude + "/" +
-                destinationLatitude + "," + destinationLongitude);
-
-        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-        intent.setPackage("com.google.android.apps.maps");
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
     }
 
-//    private void fetchDataFromFirestore(@NonNull String key, ValueCallback cb) {
-//        DocumentReference documentRef = FirebaseFirestore.getInstance().collection("LocationData").document("SJCECampusLocations");
-//
-//        documentRef.get().addOnCompleteListener(task -> {
-//            if (task.isSuccessful()) {
-//                DocumentSnapshot document = task.getResult();
-//                if (document.exists()) {
-//                    // Retrieve data for the specified key
-//                    Object value = document.get(key);
-//
-//                    if (value != null) {
-//                        if (value instanceof Map) {
-//                            Map<String, Object> dataMap = (Map<String, Object>) value;
-//
-//                            // Extract required fields from the dataMap
-//                            String placeName = (String) dataMap.get("place_name");
-//                            GeoPoint geoPoint = (GeoPoint) dataMap.get("coordinates");
-//                            cb.onSuccess(placeName, geoPoint);
-//                        } else {
-//                            Log.d(LOG_TAG, "value");
-//                            cb.onError("value-not-found");
-//                        }
-//                    } else {
-//                        Log.d(LOG_TAG, "key not found");
-//                        cb.onError("key-not-found");
-//                    }
-//                } else {
-//                    Log.d("Firestore", "Error fetching document: ", task.getException());
-//                    cb.onError("error-fetching-document" + task.getException());
-//                }
-//            }
-//        });
-//    }
+    @Override
+    public void onSearchQueryUpdated(String query) {
+        // Filter the itemList based on the search query
+        List<SavedPlaceViewModel> filteredList = new ArrayList<>();
+        for (SavedPlaceViewModel item : itemList) {
+            if (item.getSpot_name().toLowerCase().contains(query.toLowerCase())) {
+                filteredList.add(item);
+            }
+        }
+        // Update the adapter with the filtered list
+        savedPlaceViewAdapter.filterList(filteredList);
+    }
 
     @Override
     public void onResume() {
         super.onResume();
     }
-
 
     @Override
     public void onDestroyView() {

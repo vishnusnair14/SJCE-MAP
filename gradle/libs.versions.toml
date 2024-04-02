@@ -25,6 +25,7 @@ visionBarcodeScanning = "17.0.1"
 zxing = "1.9.13"
 zxingAndroidEmbedded = "4.2.0"
 cameraView = "1.3.2"
+gridlayout = "1.0.0"
 
 [libraries]
 code-scanner = { module = "com.github.yuriy-budiyev:code-scanner", version.ref = "codeScanner" }
@@ -52,6 +53,7 @@ vision-barcode-scanning = { module = "com.google.mlkit:vision-barcode-scanning",
 zxing = { module = "me.dm7.barcodescanner:zxing", version.ref = "zxing" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxingAndroidEmbedded" }
 camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraView" }
+gridlayout = { group = "androidx.gridlayout", name = "gridlayout", version.ref = "gridlayout" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

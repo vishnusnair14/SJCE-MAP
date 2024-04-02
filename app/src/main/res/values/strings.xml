@@ -2,8 +2,8 @@
     <string name="app_name">SJCE-MAP</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-    <string name="nav_header_title">Android Studio</string>
-    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_title">SJCE MAP</string>
+    <string name="nav_header_subtitle">Get map assisted direction to all the different campus locations of SJCE-Mysore</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
@@ -27,8 +27,14 @@
     <string name="change_start_type"><u>change</u></string>
     <string name="scan_a_valid_qr_to_authenticate">SCAN A VALID QRCODE\nTO AUTHENTICATE</string>
     <string name="bypass_auth">byPass Auth</string>
-    <string name="not_in_campus">YOU ARE NOT INSIDE THE SJCE-MYSORE CAMPUS</string>
+    <string name="not_in_campus">YOU ARE NOT INSIDE SJCE-MYSORE CAMPUS</string>
     <string name="_7c0505">#7C0505</string>
     <string name="user_authenticated">User Authenticated Successfully</string>
-    <string name="_inside_the_sjce_mysore">You should scan the QR code from\ninside the SJCE Mysore campus to\nauthenticate this application</string>
+    <string name="_inside_the_sjce_mysore">You should scan the QR code within the\nSJCE Mysore Campus to authenticate</string>
+    <string name="qr_authenticated">QR AUTHENTICATED</string>
+    <string name="invalid_qr">INVALID QR</string>
+    <string name="_app_dev">©2024 vishnu s nair</string>
+    <string name="_enable_your_device_loc">Enable your device location for the better direction assistance.\nPress ENABLE to continue.</string>
+    <string name="location_not_enabled">Device location not enabled</string>
+    <string name="_0s_left">0s left…</string>
 </resources>

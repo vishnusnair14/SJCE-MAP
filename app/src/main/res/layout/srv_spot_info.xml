@@ -9,40 +9,39 @@
     android:autofillHints="75415"
     android:backgroundTintMode="add"
     card_view:cardCornerRadius="15dp"
-    card_view:cardElevation="8dp">
+    card_view:cardElevation="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#3F51B5"
-        android:backgroundTint="#BBB7C3"
+        android:background="#000000"
+        android:backgroundTint="#E6E4EA"
         android:backgroundTintMode="add"
         android:hapticFeedbackEnabled="true"
         android:padding="16dp">
 
         <TextView
             android:id="@+id/spotNameSpotInfoView_textView"
-            android:layout_width="210dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="@font/anonymous_pro"
             android:gravity="center_horizontal|center_vertical"
             android:text="$(spotName)"
             android:textAlignment="center"
-            android:textSize="22sp"
+            android:textColor="#000000"
+            android:textSize="18sp"
             android:textStyle="bold"
+            card_view:layout_constraintBottom_toBottomOf="parent"
             card_view:layout_constraintEnd_toEndOf="parent"
             card_view:layout_constraintStart_toEndOf="@+id/spotImageSpotInfoView_imageView"
             card_view:layout_constraintTop_toTopOf="@+id/spotImageSpotInfoView_imageView" />
 
         <ImageView
             android:id="@+id/spotImageSpotInfoView_imageView"
-            android:layout_width="125dp"
-            android:layout_height="115dp"
+            android:layout_width="85dp"
+            android:layout_height="85dp"
             android:layout_marginStart="5dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
             android:adjustViewBounds="true"
-            android:background="#FFFFFF"
             android:contentDescription="TODO"
             android:cropToPadding="true"
             android:scaleType="centerCrop"
@@ -54,14 +53,13 @@
             android:id="@+id/spotCoordinatesSpotInfoView_textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="5dp"
-            android:layout_marginBottom="5dp"
-            android:fontFamily="@font/anonymous_pro"
+            android:fontFamily="courier new"
             android:text="$(coords)"
             android:textAlignment="textEnd"
-            android:textSize="12sp"
+            android:textColor="#151414"
+            android:textSize="11sp"
             card_view:layout_constraintBottom_toBottomOf="parent"
-            card_view:layout_constraintEnd_toEndOf="@+id/spotNameSpotInfoView_textView" />
+            card_view:layout_constraintEnd_toEndOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

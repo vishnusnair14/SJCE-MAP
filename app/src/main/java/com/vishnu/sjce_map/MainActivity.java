@@ -11,31 +11,35 @@ import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.material.navigation.NavigationView;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.navigation.NavigationView;
 import com.vishnu.sjce_map.databinding.ActivityMainBinding;
-import com.vishnu.sjce_map.databinding.FragmentHomeBinding;
+import com.vishnu.sjce_map.miscellaneous.SearchQueryListener;
 import com.vishnu.sjce_map.miscellaneous.SharedDataView;
 import com.vishnu.sjce_map.service.GPSLocationProvider;
 import com.vishnu.sjce_map.service.LocationModel;
 import com.vishnu.sjce_map.service.LocationUpdateListener;
-import com.vishnu.sjce_map.ui.home.HomeSearchFragment;
+import com.vishnu.sjce_map.ui.home.HomeFragment;
 
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
@@ -46,10 +50,12 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
-    private HomeSearchFragment homeFragment;
     private Vibrator vibrator;
     AlertDialog locNotEnableAlertDialog;
+    private final String LOG_TAG = "MainActivity";
     AlertDialog.Builder locNotEnableBuilder;
+    private SearchQueryListener searchQueryListener;
+    HomeFragment homeFragment;
     private LocationManager locationManager;
     SharedDataView sharedDataView;
     private GPSLocationProvider gpsLocationProvider;
@@ -61,8 +67,6 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
     };
     DecimalFormat coordinateFormat = new DecimalFormat("0.000000000");
 
-    private FragmentHomeBinding homeFragmentbinding;
-
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,8 +75,8 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        homeFragment = new HomeSearchFragment();
         sharedDataView = new ViewModelProvider(this).get(SharedDataView.class);
+        homeFragment = new HomeFragment();
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
 
         setSupportActionBar(binding.appBarMain.toolbar);
@@ -81,7 +85,8 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
 
         locNotEnableBuilder.setView(R.layout.loc_not_enable_dialog);
         locNotEnableBuilder.setPositiveButton("ENABLE", (dialog, which) -> showLocationSettings(this));
-        locNotEnableBuilder.setNegativeButton("DISABLE", (dialog, which) -> Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show());
+//        locNotEnableBuilder.setNegativeButton("DISABLE", (dialog, which) -> Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show());
+
         locNotEnableAlertDialog = locNotEnableBuilder.create();
 
         DrawerLayout drawer = binding.drawerLayout;
@@ -92,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_home1, R.id.nav_settings, R.id.nav_about).setOpenableLayout(drawer).build();
+                R.id.nav_home, R.id.nav_about).setOpenableLayout(drawer).build();
 
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
@@ -115,7 +120,6 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
         gpsLocationProvider = new GPSLocationProvider(this, this);
 
         startLocationUpdates();
-
     }
 
     public void startLocationUpdates() {
@@ -205,35 +209,46 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
 
-        // Get the search item
-//        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+//         Get the search item
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
 
         // Set the query listener
-//        assert searchView != null;
-//        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//            @Override
-//            public boolean onQueryTextSubmit(String query) {
-//                // Handle search query submission
-//                homeFragment.search(MainActivity.this, query, findViewById(R.id.listView),
-//                        getResources().getStringArray(R.array.sjce_place_list),
-//                        findViewById(R.id.placeNameView_textView), findViewById(R.id.coordinatesView_textView));
-//                Toast.makeText(MainActivity.this, query, Toast.LENGTH_SHORT).show();
-//                return true;
-//            }
-//
-//            @Override
-//            public boolean onQueryTextChange(String newText) {
-//                // Handle search query text change
-////                Toast.makeText(MainActivity.this, newText, Toast.LENGTH_SHORT).show();
-//                homeFragment.search(MainActivity.this, newText, findViewById(R.id.listView),
-//                        getResources().getStringArray(R.array.sjce_place_list),
-//                        findViewById(R.id.placeNameView_textView), findViewById(R.id.coordinatesView_textView));
-//
-//                return true;
-//            }
-//        });
+        assert searchView != null;
 
+        searchView.setOnCloseListener(() -> {
+            findViewById(R.id.shortcutOptions_cardView).setVisibility(View.VISIBLE);
+            return false;
+        });
+
+        searchView.setOnClickListener(v -> {
+
+        });
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                if (searchQueryListener != null) {
+                    // searchQueryListener.onSearchQuerySubmitted(query);
+                    Log.i(LOG_TAG, query);
+                }
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                // Handle text change if needed
+                if (searchQueryListener != null) {
+                    searchQueryListener.onSearchQueryUpdated(newText);
+//                    findViewById(R.id.shortcutOptions_cardView).setVisibility(View.GONE);
+                }
+                return false;
+            }
+        });
         return true;
+    }
+
+    public void setSearchQueryListener(SearchQueryListener listener) {
+        this.searchQueryListener = listener;
     }
 
     @Override
