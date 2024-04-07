@@ -18,35 +18,49 @@ import android.view.ViewGroup;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.vishnu.sjce_map.MainActivity;
-import com.vishnu.sjce_map.databinding.FragmentDepartmentBinding;
+import com.vishnu.sjce_map.R;
+import com.vishnu.sjce_map.databinding.FragmentHomeBinding;
+import com.vishnu.sjce_map.databinding.FragmentMainSpotBinding;
 import com.vishnu.sjce_map.miscellaneous.SearchQueryListener;
 import com.vishnu.sjce_map.miscellaneous.SharedDataView;
-import com.vishnu.sjce_map.view.AllDepartmentViewAdapter;
-import com.vishnu.sjce_map.view.AllDepartmentsViewModel;
+import com.vishnu.sjce_map.view.SavedPlaceViewAdapter;
 import com.vishnu.sjce_map.view.SavedPlaceViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class DepartmentFragment extends Fragment implements SearchQueryListener {
-    FragmentDepartmentBinding binding;
-    public static SharedDataView sharedDataView;
-    List<AllDepartmentsViewModel> itemList = new ArrayList<>();
-    AllDepartmentViewAdapter allDepartmentViewAdapter;
-    private final String LOG_TAG = "DepartmentFragment";
+public class MainSpotFragment extends Fragment implements SearchQueryListener {
+    private static final String LOG_TAG = "MainSpotFragment";
+    private FragmentMainSpotBinding binding;
     FirebaseFirestore db;
+    MainActivity mainActivity;
+    public static SharedDataView sharedDataView;
+    List<SavedPlaceViewModel> itemList = new ArrayList<>();
+    SavedPlaceViewAdapter savedPlaceViewAdapter;
 
-    public DepartmentFragment() {
+    public MainSpotFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         db = FirebaseFirestore.getInstance();
+
         sharedDataView = new ViewModelProvider(requireActivity()).get(SharedDataView.class);
+    }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        binding = FragmentMainSpotBinding.inflate(inflater, container, false);
+        View root = binding.getRoot();
+
+        syncSavedPlacesRecycleView(binding);
+
+        return root;
     }
 
     @Override
@@ -59,28 +73,16 @@ public class DepartmentFragment extends Fragment implements SearchQueryListener 
         }
     }
 
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        binding = com.vishnu.sjce_map.databinding.FragmentDepartmentBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
-
-        syncSavedPlacesRecycleView(binding);
-
-        return root;
-    }
-
     @SuppressLint("NotifyDataSetChanged")
-    private void syncSavedPlacesRecycleView(@NonNull FragmentDepartmentBinding binding) {
-        RecyclerView recyclerView = binding.allDepartmentRecycleView;
-        LinearLayoutManager homeLayoutManager = new LinearLayoutManager(requireContext());
+    private void syncSavedPlacesRecycleView(@NonNull FragmentMainSpotBinding binding) {
+        RecyclerView recyclerView = binding.mainCampusSpotViewRecycleView;
+        LinearLayoutManager homeLayoutManager = new LinearLayoutManager(mainActivity);
         recyclerView.setLayoutManager(homeLayoutManager);
 
         itemList.clear();
 
         // Add snapshot listener to listen for real-time updates
-        db.collection("LocationData").document("DepartmentsLocationData")
+        db.collection("LocationData").document("SavedPlaceData")
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) {
                         Log.w("Firestore", "Listen failed.", e);
@@ -88,11 +90,11 @@ public class DepartmentFragment extends Fragment implements SearchQueryListener 
                     }
 
                     if (snapshot != null && snapshot.exists()) {
-                        Map<String, Object> allDepartmentData = snapshot.getData();
-                        if (allDepartmentData != null) {
+                        Map<String, Object> savedPlaceData = snapshot.getData();
+                        if (savedPlaceData != null) {
                             itemList.clear();
-                            for (String field : allDepartmentData.keySet()) {
-                                Map<String, Object> dataMap1 = (Map<String, Object>) allDepartmentData.get(field);
+                            for (String field : savedPlaceData.keySet()) {
+                                Map<String, Object> dataMap1 = (Map<String, Object>) savedPlaceData.get(field);
                                 if (dataMap1 != null) {
                                     String itemName = (String) dataMap1.get("spot_name");
                                     GeoPoint spotCoordinates = (GeoPoint) dataMap1.get("spot_coordinates");
@@ -100,41 +102,48 @@ public class DepartmentFragment extends Fragment implements SearchQueryListener 
                                     String spotNameReference = (String) dataMap1.get("spot_name_reference");
 
                                     assert spotCoordinates != null;
-                                    AllDepartmentsViewModel item = new AllDepartmentsViewModel(itemName, String.valueOf(spotCoordinates.getLatitude()),
+                                    SavedPlaceViewModel item = new SavedPlaceViewModel(itemName, String.valueOf(spotCoordinates.getLatitude()),
                                             String.valueOf(spotCoordinates.getLongitude()), spotNameReference, spotImageURL);
                                     itemList.add(item);
                                 }
                             }
                             // Update the RecyclerView adapter
-                            allDepartmentViewAdapter.notifyDataSetChanged();
+                            savedPlaceViewAdapter.notifyDataSetChanged();
                         }
                     } else {
                         Log.d("Firestore", "Current data: null");
                     }
                 });
 
-        allDepartmentViewAdapter = new AllDepartmentViewAdapter(itemList, requireContext(), this);
-        recyclerView.setAdapter(allDepartmentViewAdapter);
+        savedPlaceViewAdapter = new SavedPlaceViewAdapter(itemList, requireContext(), this);
+        recyclerView.setAdapter(savedPlaceViewAdapter);
     }
 
-    public static void updateDataToSharedView(String pl, String path) {
+    public static void updatePlace(String pl, String path) {
         sharedDataView.setPlace(pl);
         sharedDataView.setDocPath(path);
     }
 
     @Override
     public void onSearchQuerySubmitted(String query) {
-        Log.i(LOG_TAG, "onSearchQuerySubmitted");
+
     }
 
     @Override
     public void onSearchQueryUpdated(String query) {
-        List<AllDepartmentsViewModel> filteredList = new ArrayList<>();
-        for (AllDepartmentsViewModel item : itemList) {
+        List<SavedPlaceViewModel> filteredList = new ArrayList<>();
+        for (SavedPlaceViewModel item : itemList) {
             if (item.getSpot_name().toLowerCase().contains(query.toLowerCase())) {
                 filteredList.add(item);
             }
         }
-        allDepartmentViewAdapter.filterList(filteredList);
+        savedPlaceViewAdapter.filterList(filteredList);
+
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }

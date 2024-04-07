@@ -14,8 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -29,22 +27,23 @@ import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.Map;
 
-
 public class MapFragment extends Fragment {
     SharedDataView sharedDataView;
-
     private static final String LOG_TAG = "MapFragment";
-    DecimalFormat coordinatesFormat = new DecimalFormat("0.0000000000000");
-    private GoogleMap mMap;
+    DecimalFormat coordViewFormat = new DecimalFormat("0.0000000000000");
     private String destPlaceLat;
     private String destPlaceLon;
-    MapView mapView;
-    private static final LatLng BACK_GATE = new LatLng(12.318479671291703, 76.6145840732339);
+    private double clientLat;
+    private FragmentMapBinding binding;
+    private double clientLon;
+    private final LatLng GJB_MAIN_COORD = new LatLng(12.316369879317168, 76.61386933078991);
+    private final LatLng CMS_MAIN_COORD = new LatLng(12.31780527062543, 76.61398336881378);
+    private final LatLng BACK_GATE_COORD = new LatLng(12.318453451797078, 76.61465640667447);
+    private final LatLng DUMMY_LOC_COORD = new LatLng(12.317626645254657, 76.6145323909735 );
 
     public MapFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -54,8 +53,6 @@ public class MapFragment extends Fragment {
         destPlaceLon = "0.0000000000000";
     }
 
-    private FragmentMapBinding binding;
-
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
@@ -63,11 +60,12 @@ public class MapFragment extends Fragment {
         View root = binding.getRoot();
 
 
+        /* Get & set spot-place and associated data */
         sharedDataView.getPlace().observe(getViewLifecycleOwner(), pl -> {
             if (pl != null) {
                 sharedDataView.getDocPath().observe(getViewLifecycleOwner(), path -> {
                     if (path != null) {
-                        fetchDataFromFirestore(path, pl, binding.coordinateViewTextView, binding.placeViewTextView);
+                        getLocData(path, pl, binding.coordinateViewTextView, binding.placeViewTextView);
 //                Log.d(LOG_TAG,"PLACE-NAME: "+ pl);
 //                Toast.makeText(requireContext(), pl, Toast.LENGTH_SHORT).show();
                     } else {
@@ -86,8 +84,10 @@ public class MapFragment extends Fragment {
             if (lat != null) {
                 sharedDataView.getClientLon().observe(getViewLifecycleOwner(), lon -> {
                     if (lon != null) {
-                        binding.startPlaceCoordinatesViewTextView.setText((MessageFormat.format("{0}°N\n{1}°E", coordinatesFormat
-                                .format(lat), coordinatesFormat.format(lon))));
+                        clientLat = lat;
+                        clientLon = lon;
+                        binding.startPlaceCoordinatesViewTextView.setText((MessageFormat.format("{0}°N\n{1}°E", coordViewFormat
+                                .format(lat), coordViewFormat.format(lon))));
                         binding.startPlaceNameViewTextView.setText(R.string.current_location);
                     } else {
                         Toast.makeText(requireContext(), "clientLon: NullRef", Toast.LENGTH_SHORT).show();
@@ -100,25 +100,25 @@ public class MapFragment extends Fragment {
             }
         });
 
-        binding.assistWalkDirectionImageButton.setOnClickListener(v -> openMapView(String.valueOf(BACK_GATE.latitude),
-                String.valueOf(BACK_GATE.longitude), destPlaceLat, destPlaceLon));
+        binding.assistWalkDirectionImageButton.setOnClickListener(v -> {
+            // TODO: set client realtime-loc
+            boolean isInsideGJB = isInsideGJB(DUMMY_LOC_COORD.latitude, DUMMY_LOC_COORD.longitude);
+            boolean isInsideCMS = isInsideCMS(DUMMY_LOC_COORD.latitude, DUMMY_LOC_COORD.longitude);
+
+            if (isInsideGJB) {
+                openMapView(String.valueOf(GJB_MAIN_COORD.latitude), String.valueOf(GJB_MAIN_COORD.longitude),
+                        destPlaceLat, destPlaceLon, true);
+            } else if (isInsideCMS) {
+                openMapView(String.valueOf(CMS_MAIN_COORD.latitude), String.valueOf(CMS_MAIN_COORD.longitude),
+                        destPlaceLat, destPlaceLon, true);
+            } else {
+                openMapView(null, null, destPlaceLat, destPlaceLon, false);
+                Toast.makeText(requireContext(), "NOT INSIDE GJB", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         binding.changeStartTypeTextView.setOnClickListener(v -> Toast.makeText(requireContext(), "change-start-type", Toast.LENGTH_SHORT).show());
         return root;
-    }
-
-
-    private void openMapView(String sourceLatitude, String sourceLongitude,
-                             String destinationLatitude, String destinationLongitude) {
-
-        Uri uri = Uri.parse("https://www.google.com/maps/dir/?api=1&destination=" +
-                destinationLatitude + "," + destinationLongitude +
-                "&travelmode=walking");
-
-        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-        intent.setPackage("com.google.android.apps.maps");
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
     }
 
 
@@ -127,8 +127,50 @@ public class MapFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
     }
 
-    private void fetchDataFromFirestore(@NonNull String docPath, @NonNull String key, TextView
-            ltv, TextView ptv) {
+
+    private boolean isInsideGJB(double lat, double lon) {
+        // golden-jubilee-block boundary
+        double topLeftLat = 12.31700026871531;
+        double topLeftLon = 76.61384665081256;
+        double bottomRightLat = 12.315803282353533;
+        double bottomRightLon = 76.61474608292343;
+
+        return (lat >= bottomRightLat && lat <= topLeftLat && lon >= topLeftLon && lon <= bottomRightLon);
+    }
+
+
+    private boolean isInsideCMS(double lat, double lon) {
+        // CMS-block boundary
+        double topLeftLat = 12.317812749625686;
+        double topLeftLon = 76.61399819105716;
+        double bottomRightLat = 12.31743221981478;
+        double bottomRightLon = 76.61470260061012;
+
+        return (lat >= bottomRightLat && lat <= topLeftLat && lon >= topLeftLon && lon <= bottomRightLon);
+    }
+
+
+    private void openMapView(String sourceLatitude, String sourceLongitude,
+                             String destinationLatitude, String destinationLongitude, boolean isSourceSet) {
+        Uri uri;
+        if (isSourceSet) {
+            uri = Uri.parse("https://www.google.com/maps/dir/?api=1" +
+                    "&origin=" + sourceLatitude + "," + sourceLongitude +
+                    "&destination=" + destinationLatitude + "," + destinationLongitude +
+                    "&travelmode=walking");
+        } else {
+            uri = Uri.parse("https://www.google.com/maps/dir/?api=1&destination=" +
+                    destinationLatitude + "," + destinationLongitude +
+                    "&travelmode=walking");
+        }
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        intent.setPackage("com.google.android.apps.maps");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
+
+    private void getLocData(@NonNull String docPath, @NonNull String key, TextView ltv, TextView ptv) {
         DocumentReference documentRef = FirebaseFirestore.getInstance().collection("LocationData").document(docPath);
 
         documentRef.get().addOnCompleteListener(task -> {
@@ -149,12 +191,12 @@ public class MapFragment extends Fragment {
                             binding.endPlaceNameViewTextView.setText(placeName);
                             assert geoPoint != null;
                             binding.endPlaceCoordinatesViewTextView.setText(MessageFormat.format("{0}°N\n{1}°E",
-                                    coordinatesFormat.format(geoPoint.getLatitude()), coordinatesFormat.format(geoPoint.getLongitude())));
-                            ltv.setText(MessageFormat.format("{0}°N {1}°E", coordinatesFormat.format(geoPoint.getLatitude()),
-                                    coordinatesFormat.format(geoPoint.getLongitude())));
+                                    coordViewFormat.format(geoPoint.getLatitude()), coordViewFormat.format(geoPoint.getLongitude())));
+                            ltv.setText(MessageFormat.format("{0}°N {1}°E", coordViewFormat.format(geoPoint.getLatitude()),
+                                    coordViewFormat.format(geoPoint.getLongitude())));
 
-                            destPlaceLat = coordinatesFormat.format(geoPoint.getLatitude());
-                            destPlaceLon = coordinatesFormat.format(geoPoint.getLongitude());
+                            destPlaceLat = coordViewFormat.format(geoPoint.getLatitude());
+                            destPlaceLon = coordViewFormat.format(geoPoint.getLongitude());
 
                         } else {
                             Log.d(LOG_TAG, "value");

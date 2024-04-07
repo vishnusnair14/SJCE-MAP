@@ -46,6 +46,7 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.camera.view)
     implementation(libs.gridlayout)
+    implementation(libs.legacy.support.v4)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

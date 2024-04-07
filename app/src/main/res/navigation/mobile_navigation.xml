@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_nav_home_to_departmentFragment"
             app:destination="@id/departmentFragment" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_mainspots"
+            app:destination="@id/nav_mainspots" />
     </fragment>
 
     <fragment
@@ -30,6 +33,20 @@
         tools:layout="@layout/fragment_department" >
         <action
             android:id="@+id/action_departmentFragment_to_mapFragment"
+            app:destination="@id/mapFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_about"
+        android:name="com.vishnu.sjce_map.ui.about.AboutFragment"
+        android:label="fragment_about"
+        tools:layout="@layout/fragment_about" />
+    <fragment
+        android:id="@+id/nav_mainspots"
+        android:name="com.vishnu.sjce_map.ui.home.MainSpotFragment"
+        android:label="fragment_main_spot"
+        tools:layout="@layout/fragment_main_spot" >
+        <action
+            android:id="@+id/action_nav_mainspots_to_mapFragment"
             app:destination="@id/mapFragment" />
     </fragment>
 </navigation>

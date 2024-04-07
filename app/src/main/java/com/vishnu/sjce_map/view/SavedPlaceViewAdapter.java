@@ -21,23 +21,24 @@ import com.vishnu.sjce_map.MainActivity;
 import com.vishnu.sjce_map.R;
 import com.vishnu.sjce_map.miscellaneous.SharedDataView;
 import com.vishnu.sjce_map.ui.home.HomeFragment;
+import com.vishnu.sjce_map.ui.home.MainSpotFragment;
 
 import java.text.MessageFormat;
 import java.util.List;
-
+import java.util.Objects;
 
 public class SavedPlaceViewAdapter extends RecyclerView.Adapter<SavedPlaceViewAdapter.ViewHolder> {
     private List<SavedPlaceViewModel> itemList;
     private final String LOG_TAG = "SpotViewAdapter";
     private final Context context;
-    private HomeFragment homeFragment;
+    private final MainSpotFragment mainSpotFragment;
     MainActivity mainActivity;
     SharedDataView sharedDataView;
 
-    public SavedPlaceViewAdapter(List<SavedPlaceViewModel> itemList, Context context, HomeFragment homeFragment) {
+    public SavedPlaceViewAdapter(List<SavedPlaceViewModel> itemList, Context context, MainSpotFragment mainSpotFragment) {
         this.itemList = itemList;
         this.context = context;
-        this.homeFragment = homeFragment;
+        this.mainSpotFragment = mainSpotFragment;
     }
 
     @NonNull
@@ -54,8 +55,9 @@ public class SavedPlaceViewAdapter extends RecyclerView.Adapter<SavedPlaceViewAd
         holder.spotNameTV.setText(savedPlaceViewModel.getSpot_name());
         holder.spotCoordinatesTV.setText(MessageFormat.format("{0}°N\n{1}°E", savedPlaceViewModel.getSpot_lat(), savedPlaceViewModel.getSpot_lon()));
         try {
-            if (savedPlaceViewModel.getSpot_image_url().isEmpty()) {
-                Picasso.get().load("https://firebasestorage.googleapis.com/v0/b/sjce-map.appspot.com/o/SJCE-MAP-IMAGES%2FNO_IMAGE_FOUND_IMG.jpg" +
+            if (savedPlaceViewModel.getSpot_image_url().isEmpty() || Objects.equals(savedPlaceViewModel.getSpot_image_url(), " ")) {
+                Picasso.get().load("https://firebasestorage.googleapis.com/v0/b/" +
+                        "sjce-map.appspot.com/o/SJCE-MAP-IMAGES%2FNO_IMAGE_FOUND_IMG.jpg" +
                         "?alt=media&token=d1309045-5ebd-4aa9-a1ef-64424ffdc4ae").into(holder.spotImageView);
             } else {
                 Picasso.get().load(savedPlaceViewModel.getSpot_image_url()).into(holder.spotImageView);
@@ -66,10 +68,10 @@ public class SavedPlaceViewAdapter extends RecyclerView.Adapter<SavedPlaceViewAd
 
         holder.spotcardView.setOnClickListener(v -> {
             if (itemList.get(position).getSpot_name_reference().equals("sjce_department_blocks")) {
-                NavHostFragment.findNavController(homeFragment).navigate(R.id.action_nav_home_to_departmentFragment);
+                NavHostFragment.findNavController(mainSpotFragment).navigate(R.id.action_nav_home_to_departmentFragment);
             } else {
-                HomeFragment.updatePlace(itemList.get(position).getSpot_name_reference(), "SavedPlaceData");
-                NavHostFragment.findNavController(homeFragment).navigate(R.id.action_nav_home_to_mapFragment);
+                MainSpotFragment.updatePlace(itemList.get(position).getSpot_name_reference(), "SavedPlaceData");
+                NavHostFragment.findNavController(mainSpotFragment).navigate(R.id.action_nav_mainspots_to_mapFragment);
                 Toast.makeText(context, holder.spotNameTV.getText(), Toast.LENGTH_SHORT).show();
             }
         });

@@ -1,5 +1,6 @@
 package com.vishnu.sjce_map.view;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,7 +26,7 @@ import java.util.List;
 
 
 public class AllDepartmentViewAdapter extends RecyclerView.Adapter<AllDepartmentViewAdapter.ViewHolder> {
-    private final List<AllDepartmentsViewModel> itemList;
+    private List<AllDepartmentsViewModel> itemList;
     private final String LOG_TAG = "AllDepartmentViewAdapter";
     private final String NO_IMG_FOUND_URL = "https://firebasestorage.googleapis.com/v0/b/sjce-map.appspot.com/o/SJCE-MAP-IMAGES%2FNO_IMAGE_FOUND_IMG.jpg" +
             "?alt=media&token=d1309045-5ebd-4aa9-a1ef-64424ffdc4ae";
@@ -38,6 +39,12 @@ public class AllDepartmentViewAdapter extends RecyclerView.Adapter<AllDepartment
         this.itemList = itemList;
         this.context = context;
         this.departmentFragment = departmentFragment;
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void filterList(List<AllDepartmentsViewModel> filteredList) {
+        itemList = filteredList;
+        notifyDataSetChanged();
     }
 
     @NonNull

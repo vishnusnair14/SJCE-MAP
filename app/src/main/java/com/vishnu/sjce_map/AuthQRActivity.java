@@ -158,7 +158,6 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
         return (lat >= bottomRightLat && lat <= topLeftLat && lon >= topLeftLon && lon <= bottomRightLon);
     }
 
-
     private void initViews() {
         txtBarcodeValue = findViewById(R.id.txtBarcodeValue_textView);
         surfaceView = findViewById(R.id.surfaceView);
@@ -301,7 +300,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
     }
 
     private void startVibration() {
-        vibrator.vibrate(VibrationEffect.createOneShot(150, VibrationEffect.EFFECT_DOUBLE_CLICK));
+        vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
     }
 
     private void showLocNotEnableDialog(boolean showFlag) {
@@ -364,6 +363,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
     protected void onResume() {
         super.onResume();
         initialiseDetectorsAndSources();
+
         if (isLocationNotEnabled(this)) {
             showLocNotEnableDialog(true);
         } else {
@@ -380,8 +380,6 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
     @Override
     public void onLocationUpdated(double latitude, double longitude) {
         updateRealTimeLoc(latitude, longitude);
-        sharedDataView.setDestLat(latitude);
-        sharedDataView.setDestLon(longitude);
         sharedDataView.setClientLat(latitude);
         sharedDataView.setClientLon(longitude);
     }

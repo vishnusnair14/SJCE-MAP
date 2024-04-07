@@ -3,7 +3,7 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">SJCE MAP</string>
-    <string name="nav_header_subtitle">Get map assisted direction to all the different campus locations of SJCE-Mysore</string>
+    <string name="nav_header_subtitle">Direction assistant for different campus locations of SJCE-Mysore</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
@@ -22,7 +22,7 @@
     <string name="no_barcode_detected">No qrcode detected</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_about">About</string>
-    <string name="all_departments">ALL DEPARTMENTS</string>
+    <string name="all_departments">All Departments</string>
     <string name="current_location">{current_location}</string>
     <string name="change_start_type"><u>change</u></string>
     <string name="scan_a_valid_qr_to_authenticate">SCAN A VALID QRCODE\nTO AUTHENTICATE</string>
@@ -37,4 +37,27 @@
     <string name="_enable_your_device_loc">Enable your device location for the better direction assistance.\nPress ENABLE to continue.</string>
     <string name="location_not_enabled">Device location not enabled</string>
     <string name="_0s_left">0s left…</string>
+    <string name="todo">TODO</string>
+    <string name="coords">$(coords)</string>
+    <string name="spotname">$(spotName)</string>
+    <string name="top_campus_location">Top Campus Location</string>
+    <string name="top_campus_locations">Top Campus Locations</string>
+    <string name="principal_s_office">Principal\'s Office</string>
+    <string name="registration_section">Registration Section</string>
+    <string name="all_departments1">View all Department</string>
+    <string name="administration_block">Administrative Block</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="computer_science_engg"><![CDATA[Computer Science & Engg.]]></string>
+    <string name="mca_dept">MCA Dept.</string>
+    <string name="view_all_sections">View all Sections</string>
+    <string name="ece_dept">ECE Dept.</string>
+    <string name="view_all_departments">View all Departments</string>
+    <string name="sjce_main_parking">SJCE Main Parking</string>
+    <string name="campus_parkings">Campus Parkings</string>
+    <string name="nearby_cafeteria">Nearby Cafeteria</string>
+    <string name="vehicle_parking_2">VEHICLE PARKING 2</string>
+    <string name="mylari_canteen">MYLARI CANTEEN</string>
+    <string name="canteen_1_n_poly_technique">CANTEEN 1\n(POLY-TECHNIQUE)</string>
+    <string name="canteen_n2">CANTEEN\n2</string>
 </resources>

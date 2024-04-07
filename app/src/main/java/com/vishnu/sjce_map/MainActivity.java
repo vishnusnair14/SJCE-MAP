@@ -14,8 +14,6 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.view.ViewTreeObserver;
-import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,7 +31,6 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
-import com.vishnu.sjce_map.databinding.ActivityMainBinding;
 import com.vishnu.sjce_map.miscellaneous.SearchQueryListener;
 import com.vishnu.sjce_map.miscellaneous.SharedDataView;
 import com.vishnu.sjce_map.service.GPSLocationProvider;
@@ -47,9 +44,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements LocationUpdateListener {
-
     private AppBarConfiguration mAppBarConfiguration;
-    private ActivityMainBinding binding;
+    private com.vishnu.sjce_map.databinding.ActivityMainBinding binding;
     private Vibrator vibrator;
     AlertDialog locNotEnableAlertDialog;
     private final String LOG_TAG = "MainActivity";
@@ -72,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        binding = com.vishnu.sjce_map.databinding.ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         sharedDataView = new ViewModelProvider(this).get(SharedDataView.class);
@@ -96,8 +92,7 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        mAppBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.nav_home, R.id.nav_about).setOpenableLayout(drawer).build();
+        mAppBarConfiguration = new AppBarConfiguration.Builder(R.id.nav_home, R.id.nav_about).setOpenableLayout(drawer).build();
 
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
@@ -198,8 +193,7 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
     @Override
     public void onLocationUpdated(double lat, double lon) {
         updateRealTimeLoc(lat, lon);
-        sharedDataView.setDestLat(lat);
-        sharedDataView.setDestLon(lon);
+
         sharedDataView.setClientLat(lat);
         sharedDataView.setClientLon(lon);
     }
@@ -209,10 +203,8 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
 
-//         Get the search item
         SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
 
-        // Set the query listener
         assert searchView != null;
 
         searchView.setOnCloseListener(() -> {
@@ -228,7 +220,6 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
             @Override
             public boolean onQueryTextSubmit(String query) {
                 if (searchQueryListener != null) {
-                    // searchQueryListener.onSearchQuerySubmitted(query);
                     Log.i(LOG_TAG, query);
                 }
                 return true;
@@ -236,10 +227,8 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                // Handle text change if needed
                 if (searchQueryListener != null) {
                     searchQueryListener.onSearchQueryUpdated(newText);
-//                    findViewById(R.id.shortcutOptions_cardView).setVisibility(View.GONE);
                 }
                 return false;
             }
