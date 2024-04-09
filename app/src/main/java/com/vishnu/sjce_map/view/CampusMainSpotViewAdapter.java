@@ -20,22 +20,21 @@ import com.squareup.picasso.Picasso;
 import com.vishnu.sjce_map.MainActivity;
 import com.vishnu.sjce_map.R;
 import com.vishnu.sjce_map.miscellaneous.SharedDataView;
-import com.vishnu.sjce_map.ui.home.HomeFragment;
 import com.vishnu.sjce_map.ui.home.MainSpotFragment;
 
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Objects;
 
-public class SavedPlaceViewAdapter extends RecyclerView.Adapter<SavedPlaceViewAdapter.ViewHolder> {
-    private List<SavedPlaceViewModel> itemList;
+public class CampusMainSpotViewAdapter extends RecyclerView.Adapter<CampusMainSpotViewAdapter.ViewHolder> {
+    private List<CampusMainSpotViewModel> itemList;
     private final String LOG_TAG = "SpotViewAdapter";
     private final Context context;
+    private final String NO_IMG_FOUND_URL = "https://firebasestorage.googleapis.com/v0/b/sjce-map.appspot.com/o/" +
+            "SJCE-MAP-IMAGES%2FNO_IMAGE_FOUND_IMG.jpg?alt=media&token=ec64235b-374c-458a-aaf9-7dc67c110513";
     private final MainSpotFragment mainSpotFragment;
-    MainActivity mainActivity;
-    SharedDataView sharedDataView;
 
-    public SavedPlaceViewAdapter(List<SavedPlaceViewModel> itemList, Context context, MainSpotFragment mainSpotFragment) {
+    public CampusMainSpotViewAdapter(List<CampusMainSpotViewModel> itemList, Context context, MainSpotFragment mainSpotFragment) {
         this.itemList = itemList;
         this.context = context;
         this.mainSpotFragment = mainSpotFragment;
@@ -50,17 +49,15 @@ public class SavedPlaceViewAdapter extends RecyclerView.Adapter<SavedPlaceViewAd
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        SavedPlaceViewModel savedPlaceViewModel = itemList.get(position);
+        CampusMainSpotViewModel campusMainSpotViewModel = itemList.get(position);
 
-        holder.spotNameTV.setText(savedPlaceViewModel.getSpot_name());
-        holder.spotCoordinatesTV.setText(MessageFormat.format("{0}°N\n{1}°E", savedPlaceViewModel.getSpot_lat(), savedPlaceViewModel.getSpot_lon()));
+        holder.spotNameTV.setText(campusMainSpotViewModel.getSpot_name());
+        holder.spotCoordinatesTV.setText(MessageFormat.format("{0}°N\n{1}°E", campusMainSpotViewModel.getSpot_lat(), campusMainSpotViewModel.getSpot_lon()));
         try {
-            if (savedPlaceViewModel.getSpot_image_url().isEmpty() || Objects.equals(savedPlaceViewModel.getSpot_image_url(), " ")) {
-                Picasso.get().load("https://firebasestorage.googleapis.com/v0/b/" +
-                        "sjce-map.appspot.com/o/SJCE-MAP-IMAGES%2FNO_IMAGE_FOUND_IMG.jpg" +
-                        "?alt=media&token=d1309045-5ebd-4aa9-a1ef-64424ffdc4ae").into(holder.spotImageView);
+            if (campusMainSpotViewModel.getSpot_image_url().isEmpty() || Objects.equals(campusMainSpotViewModel.getSpot_image_url(), " ")) {
+                Picasso.get().load(NO_IMG_FOUND_URL).into(holder.spotImageView);
             } else {
-                Picasso.get().load(savedPlaceViewModel.getSpot_image_url()).into(holder.spotImageView);
+                Picasso.get().load(campusMainSpotViewModel.getSpot_image_url()).into(holder.spotImageView);
             }
         } catch (Exception e) {
             Log.e(LOG_TAG, e + " ");
@@ -83,9 +80,15 @@ public class SavedPlaceViewAdapter extends RecyclerView.Adapter<SavedPlaceViewAd
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void filterList(List<SavedPlaceViewModel> filteredList) {
+    public void filterList(List<CampusMainSpotViewModel> filteredList) {
         itemList = filteredList;
         notifyDataSetChanged();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (position == 0) return 1;
+        return position % 3;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

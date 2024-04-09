@@ -1,12 +1,12 @@
 package com.vishnu.sjce_map.view;
 
-public class SavedPlaceViewModel {
+public class CampusMainSpotViewModel {
     private String spot_name;
     private String spot_lat;
     private String spot_lon;
     private String spot_name_reference;
 
-    public SavedPlaceViewModel(String spot_name, String spot_lat, String spot_lon, String spot_name_reference, String spot_image_url) {
+    public CampusMainSpotViewModel(String spot_name, String spot_lat, String spot_lon, String spot_name_reference, String spot_image_url) {
         this.spot_name = spot_name;
         this.spot_lat = spot_lat;
         this.spot_lon = spot_lon;

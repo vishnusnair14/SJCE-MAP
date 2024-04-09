@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
@@ -18,12 +18,13 @@ import android.view.ViewGroup;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.vishnu.sjce_map.MainActivity;
+import com.vishnu.sjce_map.R;
 import com.vishnu.sjce_map.databinding.FragmentDepartmentBinding;
+import com.vishnu.sjce_map.miscellaneous.GridSpacingItemDecoration;
 import com.vishnu.sjce_map.miscellaneous.SearchQueryListener;
 import com.vishnu.sjce_map.miscellaneous.SharedDataView;
 import com.vishnu.sjce_map.view.AllDepartmentViewAdapter;
 import com.vishnu.sjce_map.view.AllDepartmentsViewModel;
-import com.vishnu.sjce_map.view.SavedPlaceViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,8 +75,13 @@ public class DepartmentFragment extends Fragment implements SearchQueryListener 
     @SuppressLint("NotifyDataSetChanged")
     private void syncSavedPlacesRecycleView(@NonNull FragmentDepartmentBinding binding) {
         RecyclerView recyclerView = binding.allDepartmentRecycleView;
-        LinearLayoutManager homeLayoutManager = new LinearLayoutManager(requireContext());
+        GridLayoutManager homeLayoutManager = new GridLayoutManager(requireContext(), 2);
         recyclerView.setLayoutManager(homeLayoutManager);
+
+        // Apply item decoration to set equal padding between items
+        int spacing = getResources().getDimensionPixelSize(R.dimen.grid_spacing); // Set your desired spacing
+        boolean includeEdge = true; // Include spacing at the edges
+        recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, spacing, includeEdge));
 
         itemList.clear();
 

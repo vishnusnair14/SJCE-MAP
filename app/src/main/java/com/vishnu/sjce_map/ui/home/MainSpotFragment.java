@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
@@ -19,12 +19,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.vishnu.sjce_map.MainActivity;
 import com.vishnu.sjce_map.R;
-import com.vishnu.sjce_map.databinding.FragmentHomeBinding;
 import com.vishnu.sjce_map.databinding.FragmentMainSpotBinding;
+import com.vishnu.sjce_map.miscellaneous.GridSpacingItemDecoration;
 import com.vishnu.sjce_map.miscellaneous.SearchQueryListener;
 import com.vishnu.sjce_map.miscellaneous.SharedDataView;
-import com.vishnu.sjce_map.view.SavedPlaceViewAdapter;
-import com.vishnu.sjce_map.view.SavedPlaceViewModel;
+import com.vishnu.sjce_map.view.CampusMainSpotViewAdapter;
+import com.vishnu.sjce_map.view.CampusMainSpotViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,8 +36,8 @@ public class MainSpotFragment extends Fragment implements SearchQueryListener {
     FirebaseFirestore db;
     MainActivity mainActivity;
     public static SharedDataView sharedDataView;
-    List<SavedPlaceViewModel> itemList = new ArrayList<>();
-    SavedPlaceViewAdapter savedPlaceViewAdapter;
+    List<CampusMainSpotViewModel> itemList = new ArrayList<>();
+    CampusMainSpotViewAdapter campusMainSpotViewAdapter;
 
     public MainSpotFragment() {
         // Required empty public constructor
@@ -58,7 +58,7 @@ public class MainSpotFragment extends Fragment implements SearchQueryListener {
         binding = FragmentMainSpotBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        syncSavedPlacesRecycleView(binding);
+        syncMainCampusSpotRecycleView(binding);
 
         return root;
     }
@@ -74,10 +74,15 @@ public class MainSpotFragment extends Fragment implements SearchQueryListener {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private void syncSavedPlacesRecycleView(@NonNull FragmentMainSpotBinding binding) {
+    private void syncMainCampusSpotRecycleView(@NonNull FragmentMainSpotBinding binding) {
         RecyclerView recyclerView = binding.mainCampusSpotViewRecycleView;
-        LinearLayoutManager homeLayoutManager = new LinearLayoutManager(mainActivity);
+        GridLayoutManager homeLayoutManager = new GridLayoutManager(requireContext(), 2);
         recyclerView.setLayoutManager(homeLayoutManager);
+
+        // Apply item decoration to set equal padding between items
+        int spacing = getResources().getDimensionPixelSize(R.dimen.grid_spacing); // Set your desired spacing
+        boolean includeEdge = true; // Include spacing at the edges
+        recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, spacing, includeEdge));
 
         itemList.clear();
 
@@ -102,21 +107,21 @@ public class MainSpotFragment extends Fragment implements SearchQueryListener {
                                     String spotNameReference = (String) dataMap1.get("spot_name_reference");
 
                                     assert spotCoordinates != null;
-                                    SavedPlaceViewModel item = new SavedPlaceViewModel(itemName, String.valueOf(spotCoordinates.getLatitude()),
+                                    CampusMainSpotViewModel item = new CampusMainSpotViewModel(itemName, String.valueOf(spotCoordinates.getLatitude()),
                                             String.valueOf(spotCoordinates.getLongitude()), spotNameReference, spotImageURL);
                                     itemList.add(item);
                                 }
                             }
                             // Update the RecyclerView adapter
-                            savedPlaceViewAdapter.notifyDataSetChanged();
+                            campusMainSpotViewAdapter.notifyDataSetChanged();
                         }
                     } else {
                         Log.d("Firestore", "Current data: null");
                     }
                 });
 
-        savedPlaceViewAdapter = new SavedPlaceViewAdapter(itemList, requireContext(), this);
-        recyclerView.setAdapter(savedPlaceViewAdapter);
+        campusMainSpotViewAdapter = new CampusMainSpotViewAdapter(itemList, requireContext(), this);
+        recyclerView.setAdapter(campusMainSpotViewAdapter);
     }
 
     public static void updatePlace(String pl, String path) {
@@ -131,13 +136,13 @@ public class MainSpotFragment extends Fragment implements SearchQueryListener {
 
     @Override
     public void onSearchQueryUpdated(String query) {
-        List<SavedPlaceViewModel> filteredList = new ArrayList<>();
-        for (SavedPlaceViewModel item : itemList) {
+        List<CampusMainSpotViewModel> filteredList = new ArrayList<>();
+        for (CampusMainSpotViewModel item : itemList) {
             if (item.getSpot_name().toLowerCase().contains(query.toLowerCase())) {
                 filteredList.add(item);
             }
         }
-        savedPlaceViewAdapter.filterList(filteredList);
+        campusMainSpotViewAdapter.filterList(filteredList);
 
     }
 

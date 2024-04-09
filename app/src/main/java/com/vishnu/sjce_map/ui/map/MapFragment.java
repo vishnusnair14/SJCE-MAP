@@ -60,7 +60,7 @@ public class MapFragment extends Fragment {
         View root = binding.getRoot();
 
 
-        /* Get & set spot-place and associated data */
+        /* Get spot-place and associated data */
         sharedDataView.getPlace().observe(getViewLifecycleOwner(), pl -> {
             if (pl != null) {
                 sharedDataView.getDocPath().observe(getViewLifecycleOwner(), path -> {

@@ -28,12 +28,10 @@ import java.util.List;
 public class AllDepartmentViewAdapter extends RecyclerView.Adapter<AllDepartmentViewAdapter.ViewHolder> {
     private List<AllDepartmentsViewModel> itemList;
     private final String LOG_TAG = "AllDepartmentViewAdapter";
-    private final String NO_IMG_FOUND_URL = "https://firebasestorage.googleapis.com/v0/b/sjce-map.appspot.com/o/SJCE-MAP-IMAGES%2FNO_IMAGE_FOUND_IMG.jpg" +
-            "?alt=media&token=d1309045-5ebd-4aa9-a1ef-64424ffdc4ae";
+    private final String NO_IMG_FOUND_URL = "https://firebasestorage.googleapis.com/v0/b/sjce-map.appspot.com/o/" +
+            "SJCE-MAP-IMAGES%2FNO_IMAGE_FOUND_IMG.jpg?alt=media&token=ec64235b-374c-458a-aaf9-7dc67c110513";
     private final Context context;
     private DepartmentFragment departmentFragment;
-    MainActivity mainActivity;
-    SharedDataView sharedDataView;
 
     public AllDepartmentViewAdapter(List<AllDepartmentsViewModel> itemList, Context context, DepartmentFragment departmentFragment) {
         this.itemList = itemList;

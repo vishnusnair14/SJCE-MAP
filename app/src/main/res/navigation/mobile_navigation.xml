@@ -11,14 +11,14 @@
         android:label="@string/menu_home"
         tools:layout="@layout/fragment_home" >
         <action
-            android:id="@+id/action_nav_home_to_mapFragment"
-            app:destination="@id/mapFragment" />
-        <action
             android:id="@+id/action_nav_home_to_departmentFragment"
             app:destination="@id/departmentFragment" />
         <action
             android:id="@+id/action_nav_home_to_nav_mainspots"
             app:destination="@id/nav_mainspots" />
+        <action
+            android:id="@+id/action_nav_home_to_mapFragment"
+            app:destination="@id/mapFragment" />
     </fragment>
 
     <fragment
