@@ -1,5 +1,6 @@
 <!-- item_card_view.xml -->
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/allDepartments_cardView"
@@ -7,16 +8,29 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     android:autofillHints="75415"
+    card_view:cardBackgroundColor="#304251"
     card_view:cardCornerRadius="15dp"
     card_view:cardElevation="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#083451"
+        android:background="#304251"
         android:backgroundTintMode="add"
         android:hapticFeedbackEnabled="true"
         android:padding="16dp">
+
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/spotImageAllDepartmentInfoView_imageView"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:scaleType="centerCrop"
+            app:civ_border_color="#989797"
+            app:civ_border_width="1dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/spotNameAllDepartmentInfoView_textView"
@@ -32,23 +46,6 @@
             card_view:layout_constraintEnd_toEndOf="parent"
             card_view:layout_constraintStart_toStartOf="parent"
             card_view:layout_constraintTop_toBottomOf="@+id/spotImageAllDepartmentInfoView_imageView" />
-
-        <ImageView
-            android:id="@+id/spotImageAllDepartmentInfoView_imageView"
-            android:layout_width="100dp"
-            android:layout_height="95dp"
-            android:layout_marginStart="5dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginEnd="5dp"
-            android:adjustViewBounds="true"
-            android:background="#083451"
-            android:contentDescription="@string/todo"
-            android:cropToPadding="true"
-            android:elevation="8dp"
-            android:scaleType="centerCrop"
-            card_view:layout_constraintEnd_toEndOf="parent"
-            card_view:layout_constraintStart_toStartOf="parent"
-            card_view:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/spotCoordinatesAllDepartmentInfoView_textView"

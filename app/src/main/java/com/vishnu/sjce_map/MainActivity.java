@@ -52,11 +52,12 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
     AlertDialog.Builder locNotEnableBuilder;
     private SearchQueryListener searchQueryListener;
     HomeFragment homeFragment;
-    private LocationManager locationManager;
+    private static LocationManager locationManager;
     SharedDataView sharedDataView;
     private GPSLocationProvider gpsLocationProvider;
     LocationModel currentLocation;
     TextView locationTV;
+    TextView locNotEnaViewTV;
     String[] permissions = {
             Manifest.permission.RECORD_AUDIO,
             Manifest.permission.ACCESS_FINE_LOCATION
@@ -88,7 +89,8 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
         locationTV = findViewById(R.id.coordinatesViewHome_textView);
-
+        locNotEnaViewTV = findViewById(R.id.deviceLocNotEnabledInfoView_textView);
+        locNotEnaViewTV.setVisibility(View.GONE);
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -112,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         currentLocation = new LocationModel(0.0000000, 0.000000);
-        gpsLocationProvider = new GPSLocationProvider(this, this);
+        gpsLocationProvider = new GPSLocationProvider(sharedDataView, this, this, locNotEnaViewTV);
 
         startLocationUpdates();
     }
@@ -126,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
         }
     }
 
-    private boolean isLocationNotEnabled(@NonNull Context context) {
+    public static boolean isLocationNotEnabled(@NonNull Context context) {
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 
         // Check if either GPS or network provider is enabled
@@ -155,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
             locationTV.setText((MessageFormat.format("{0}°N\n{1}°E", coordinateFormat
                     .format(getCurrentLocation().lat), coordinateFormat.format(getCurrentLocation().lon))));
 
-            startVibration();
+//            startVibration();
         }
     }
 
@@ -178,7 +180,9 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
         super.onResume();
         if (isLocationNotEnabled(this)) {
             showLocNotEnableDialog(true);
+            locNotEnaViewTV.setVisibility(View.VISIBLE);
         } else {
+            locNotEnaViewTV.setVisibility(View.GONE);
             showLocNotEnableDialog(false);
             startLocationUpdates();
         }

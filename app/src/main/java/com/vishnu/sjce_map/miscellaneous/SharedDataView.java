@@ -10,6 +10,7 @@ public class SharedDataView extends ViewModel {
     private final MutableLiveData<Double> clientLat = new MutableLiveData<>();
     private final MutableLiveData<Double> clientLon = new MutableLiveData<>();
     private final MutableLiveData<String> place = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isLocProviderEnabled = new MutableLiveData<>();
     private final MutableLiveData<String> docPath = new MutableLiveData<>();
 
     public LiveData<String> getDocPath() {
@@ -18,6 +19,10 @@ public class SharedDataView extends ViewModel {
 
     public LiveData<Double> getClientLat() {
         return clientLat;
+    }
+
+    public LiveData<Boolean> getIsLocProviderEnabled() {
+        return isLocProviderEnabled;
     }
 
     public LiveData<Double> getClientLon() {
@@ -42,6 +47,10 @@ public class SharedDataView extends ViewModel {
 
     public void setPlace(String pl) {
         place.setValue(pl);
+    }
+
+    public void setIsLocProviderEnabled(boolean en) {
+        isLocProviderEnabled.setValue(en);
     }
 
     public void setDocPath(String path) {

@@ -135,7 +135,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         currentLocation = new LocationModel(0.0000000, 0.000000);
-        gpsLocationProvider = new GPSLocationProvider(this, this);
+        gpsLocationProvider = new GPSLocationProvider(sharedDataView, this, this, null);
 
         ScanBoundaryAnim scanBoundaryAnim = findViewById(R.id.scanBoundaryAnim);
 
@@ -209,46 +209,50 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
 
             @Override
             public void receiveDetections(@NonNull Detector.Detections<Barcode> detections) {
-
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
                 if (barcodes.size() != 0) {
                     String scannedData = barcodes.valueAt(0).displayValue;
                     // Compare the scanned data with the target string
-                    if (scannedData.trim().equals(AUTH_ACCESS_KEY)) {
-                        // Check whether the user inside defined geofence-area
-                        if (isInsideGeoFenceArea(currentLocation.lat, currentLocation.lon)) {
-                            txtBarcodeValue.setVisibility(View.VISIBLE);
-                            txtBarcodeValue.setText(R.string.qr_authenticated);
-                            // Start a new activity when a match is found
-                            if (!startActivityFlag) {
-                                startActivity(mainActivity);
-                                isIntentPassedToMain = true;
-                                finish();
-                            }
-                            startActivityFlag = true;
-                        } else {
-                            runOnUiThread(() -> {
-                                txtBarcodeValue.setTextColor(getColor(R.color.qr_auth_success));
-                                alertTV.setText(R.string.not_in_campus);
+                    if (isLocationNotEnabled(AuthQRActivity.this)) {
+                        txtBarcodeValue.setText("Enable your location provider");
+                    } else {
+                        if (scannedData.trim().equals(AUTH_ACCESS_KEY)) {
+                            // Check whether the user inside defined geofence-area
+                            if (isInsideGeoFenceArea(currentLocation.lat, currentLocation.lon)) {
+                                txtBarcodeValue.setVisibility(View.VISIBLE);
                                 txtBarcodeValue.setText(R.string.qr_authenticated);
-                                startTVBlink(alertTV);
+                                // Start a new activity when a match is found
+                                if (!startActivityFlag) {
+                                    startActivity(mainActivity);
+                                    isIntentPassedToMain = true;
+                                    finish();
+                                }
+                                startActivityFlag = true;
+                            } else {
+                                runOnUiThread(() -> {
+                                    txtBarcodeValue.setTextColor(getColor(R.color.qr_auth_success));
+                                    alertTV.setText(R.string.not_in_campus);
+                                    txtBarcodeValue.setText(R.string.qr_authenticated);
+                                    startTVBlink(alertTV);
+                                    resetCountdownTimer();
+                                });
+                            }
+                        } else {
+                            // No match found, update UI accordingly
+                            txtBarcodeValue.post(() -> {
+                                txtBarcodeValue.setTextColor(getColor(R.color.qr_auth_fail));
+                                txtBarcodeValue.setText(R.string.invalid_qr);
+                                alertTV.setText(" ");
+                                alertCallFlag = false;
                                 resetCountdownTimer();
                             });
                         }
-                    } else {
-                        // No match found, update UI accordingly
-                        txtBarcodeValue.post(() -> {
-                            txtBarcodeValue.setTextColor(getColor(R.color.qr_auth_fail));
-                            txtBarcodeValue.setText(R.string.invalid_qr);
-                            alertTV.setText(" ");
-                            alertCallFlag = false;
-                            resetCountdownTimer();
-                        });
                     }
                 } else {
                     txtBarcodeValue.setText(" ");
                 }
             }
+
         });
     }
 

@@ -71,7 +71,7 @@ public class AllDepartmentViewAdapter extends RecyclerView.Adapter<AllDepartment
         holder.spotcardView.setOnClickListener(v -> {
             DepartmentFragment.updateDataToSharedView(itemList.get(position).getSpot_name_reference(), "DepartmentsLocationData");
             NavHostFragment.findNavController(departmentFragment).navigate(R.id.action_departmentFragment_to_mapFragment);
-            Toast.makeText(context, holder.spotNameTV.getText(), Toast.LENGTH_SHORT).show();
+//            Toast.makeText(context, holder.spotNameTV.getText(), Toast.LENGTH_SHORT).show();
 
         });
     }

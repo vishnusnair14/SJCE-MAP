@@ -62,7 +62,7 @@
     <string name="yampa">YAMPA</string>
     <string name="vehicle_parking_1">VEHICLE PARKING 1</string>
     <string name="staff_parking_1_n_admin_block">STAFF PARKING 1\n(admin block)</string>
-    <string name="staff_parking_2_n_cms_block">STAFF PARKING 2\n(CMS BLOCK)</string>
+    <string name="staff_parking_2_n_cms_block">STAFF PARKING 2\n(GJB BLOCK)</string>
     <string name="open_with_google_map">OPEN WITH GOOGLE MAP</string>
     <string name="start_place">Start place:</string>
     <string name="start_place_ncoordinates">Start place\ncoordinates:</string>
@@ -70,4 +70,8 @@
     <string name="loc_coords">$(loc_coords)</string>
     <string name="place">$(place)</string>
     <string name="end_place_coord">$(end_place_coord)</string>
+    <string name="sjce_main_library">SJCE CENTRAL LIBRARY</string>
+    <string name="end_place">End place:</string>
+    <string name="image">IMAGE</string>
+    <string name="google_images">Google Images</string>
 </resources>

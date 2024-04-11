@@ -80,8 +80,7 @@ public class DepartmentFragment extends Fragment implements SearchQueryListener 
 
         // Apply item decoration to set equal padding between items
         int spacing = getResources().getDimensionPixelSize(R.dimen.grid_spacing); // Set your desired spacing
-        boolean includeEdge = true; // Include spacing at the edges
-        recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, spacing, includeEdge));
+        recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, spacing, true));
 
         itemList.clear();
 

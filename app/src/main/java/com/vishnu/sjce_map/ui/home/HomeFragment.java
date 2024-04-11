@@ -1,5 +1,8 @@
 package com.vishnu.sjce_map.ui.home;
 
+import android.content.Context;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,9 +16,12 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.vishnu.sjce_map.MainActivity;
 import com.vishnu.sjce_map.R;
 import com.vishnu.sjce_map.databinding.FragmentHomeBinding;
 import com.vishnu.sjce_map.miscellaneous.SharedDataView;
+import com.vishnu.sjce_map.service.GPSLocationProvider;
+import com.vishnu.sjce_map.service.LocationUpdateListener;
 
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
@@ -59,6 +65,18 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        sharedDataView.getIsLocProviderEnabled().observe(getViewLifecycleOwner(), en -> {
+            if (en != null) {
+                if (en) {
+                    binding.deviceLocNotEnabledInfoViewTextView.setVisibility(View.GONE);
+                } else {
+                    binding.deviceLocNotEnabledInfoViewTextView.setVisibility(View.VISIBLE);
+                }
+            } else {
+                Log.i(LOG_TAG, "isLocProviderEnabled: @null-reference");
+            }
+        });
+
         /* shortcut button click listeners */
         binding.registrationSectionSCBButton.setOnClickListener(v -> {
             updateShortcutBtnData("registration_dept_scb");
@@ -95,6 +113,21 @@ public class HomeFragment extends Fragment {
 
         binding.viewAllDepartmentSCBButton.setOnClickListener(v ->
                 NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_departmentFragment));
+
+        binding.sjceMainLibrarySCBButton.setOnClickListener(v -> {
+            updateShortcutBtnData("sjce_main_library_scb");
+            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
+        });
+
+        binding.sjceISSeminarHallSCBButton.setOnClickListener(v -> {
+            updateShortcutBtnData("sjce_is_seminar_hall_scb");
+            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
+        });
+
+        binding.sjceAuditorium2SCBButton.setOnClickListener(v -> {
+            updateShortcutBtnData("sjce_auditorium2_scb");
+            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
+        });
 
         binding.sjceMainParkingSCBButton.setOnClickListener(v -> {
             updateShortcutBtnData("sjce_main_parking_scb");
@@ -141,7 +174,13 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        if (MainActivity.isLocationNotEnabled(requireContext())) {
+            binding.deviceLocNotEnabledInfoViewTextView.setVisibility(View.VISIBLE);
+        } else {
+            binding.deviceLocNotEnabledInfoViewTextView.setVisibility(View.GONE);
+        }
     }
+
 
     @Override
     public void onDestroyView() {
