@@ -79,7 +79,7 @@ public class DepartmentFragment extends Fragment implements SearchQueryListener 
         recyclerView.setLayoutManager(homeLayoutManager);
 
         // Apply item decoration to set equal padding between items
-        int spacing = getResources().getDimensionPixelSize(R.dimen.grid_spacing); // Set your desired spacing
+        int spacing = getResources().getDimensionPixelSize(R.dimen.grid_spacing);
         recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, spacing, true));
 
         itemList.clear();
@@ -129,7 +129,7 @@ public class DepartmentFragment extends Fragment implements SearchQueryListener 
 
     @Override
     public void onSearchQuerySubmitted(String query) {
-        Log.i(LOG_TAG, "onSearchQuerySubmitted");
+        Log.i(LOG_TAG, "onSearchQuerySubmitted: " + query);
     }
 
     @Override

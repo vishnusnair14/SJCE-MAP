@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Build;
@@ -20,14 +21,19 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
@@ -36,11 +42,10 @@ import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
-import com.google.firebase.firestore.GeoPoint;
-import com.vishnu.sjce_map.databinding.ActivityAuthQractivityBinding;
 import com.vishnu.sjce_map.miscellaneous.ScanBoundaryAnim;
 import com.vishnu.sjce_map.miscellaneous.SharedDataView;
 import com.vishnu.sjce_map.service.GPSLocationProvider;
+import com.vishnu.sjce_map.service.GeoFence;
 import com.vishnu.sjce_map.service.LocationModel;
 import com.vishnu.sjce_map.service.LocationUpdateListener;
 
@@ -56,6 +61,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
     TextView txtBarcodeValue;
     private LocationManager locationManager;
     SharedDataView sharedDataView;
+    private SharedPreferences authPreference;
     private GPSLocationProvider gpsLocationProvider;
     private CameraSource cameraSource;
     private static final long TIMEOUT_DURATION = 30 * 1000; // 30 seconds
@@ -64,24 +70,31 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
     LocationModel currentLocation;
     private final String AUTH_ACCESS_KEY = "6117e11901fc7639";   // Keep it confidential
     Button byPassBtn;
+    private AnimationSet zoomInOutAnimation;
     TextView locationTV;
     AlertDialog locNotEnableAlertDialog;
     DecimalFormat coordinateFormat = new DecimalFormat("0.000000000");
     private final String LOG_TAG = "AuthQRActivity";
     Intent mainActivity;
+    ScanBoundaryAnim scanBoundaryAnim;
     boolean isIntentPassedToMain = false;
     boolean startActivityFlag = false;
     private long remainingTime;
+    private boolean isAuthenticated = false;
     private Runnable countdownRunnable;
     private Handler timeoutHandler;
-    GeoPoint SJCE_MAIN_GATE = new GeoPoint(12.313131921516486, 76.61505314496924);
-    GeoPoint SJCE_EXIT_GATE = new GeoPoint(12.318439598446519, 76.61465710202344);
+    ProgressBar statusProgressBar;
+    TextView authStatusTV;
+    CardView authScanCardView;
+    TextView countDownTmrTV;
     private boolean alertCallFlag = false;
     AlertDialog.Builder locNotEnableBuilder;
+
     TextView alertTV;
     private static final int REQUEST_CAMERA_PERMISSION = 201;
     String[] permissions = {
             Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.CAMERA
     };
 
@@ -96,13 +109,17 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         locNotEnableBuilder = new AlertDialog.Builder(this);
 
+        // Initialize SharedPreferences
+        authPreference = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+
         locNotEnableBuilder.setView(R.layout.loc_not_enable_dialog);
         locNotEnableBuilder.setPositiveButton("ENABLE", (dialog, which) -> showLocationSettings(this));
-//        locNotEnableBuilder.setNegativeButton("DISABLE", (dialog, which) -> Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show());
         locNotEnableAlertDialog = locNotEnableBuilder.create();
 
+        // Check if the user is authenticated
+        isAuthenticated = authPreference.getBoolean("isAuthenticated", false);
+
         timeoutHandler = new Handler(Looper.getMainLooper());
-        startCountdownTimer(findViewById(R.id.countDownTimer_textView));
 
         // OnCreate permission request
         List<String> permissionsToRequest = new ArrayList<>();
@@ -119,6 +136,12 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
         byPassBtn = findViewById(R.id.byPassAuth_button);
         locationTV = findViewById(R.id.authActivityCoordinatesView_textView);
         alertTV = findViewById(R.id.alertNotInCampus_textView);
+        authStatusTV = findViewById(R.id.authStatusView_textView);
+        statusProgressBar = findViewById(R.id.progressBar);
+        authScanCardView = findViewById(R.id.authScan_cardView);
+        scanBoundaryAnim = findViewById(R.id.scanBoundaryAnim);
+        surfaceView = findViewById(R.id.surfaceView);
+        countDownTmrTV = findViewById(R.id.countDownTimer_textView);
 
         mainActivity = new Intent(AuthQRActivity.this, MainActivity.class);
 
@@ -135,7 +158,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         currentLocation = new LocationModel(0.0000000, 0.000000);
-        gpsLocationProvider = new GPSLocationProvider(sharedDataView, this, this, null);
+        gpsLocationProvider = new GPSLocationProvider(sharedDataView, this, this, null, this);
 
         ScanBoundaryAnim scanBoundaryAnim = findViewById(R.id.scanBoundaryAnim);
 
@@ -143,27 +166,59 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
         scanBoundaryAnim.startAnimation(animation);
 
         startLocationUpdates();
-
-        initViews();
+        initAuth();
     }
 
-    private boolean isInsideGeoFenceArea(double lat, double lon) {
-        // SJCE-MYSORE BACK EXIT GATE COORDINATES:
-        double topLeftLat = 12.318289380014258;
-        double topLeftLon = 76.61125779310221;
-
-        // SJCE-MYSORE MAIN ENTRY GATE COORDINATES:
-        double bottomRightLat = 12.311264587819064;
-        double bottomRightLon = 76.61526699712476;
-        return (lat >= bottomRightLat && lat <= topLeftLat && lon >= topLeftLon && lon <= bottomRightLon);
+    public void initAuth() {
+        if (!isLocationNotEnabled(this)) {
+            showAuthStatusMsgView("Checking");
+            new Handler().postDelayed(() -> {
+                if (!isAuthenticated) {
+                    showScanView();
+                    initialiseDetectorsAndSources();
+                } else {
+                    showAuthStatusMsgView("Signing in...");
+                    new Handler().postDelayed(() -> {
+                        startActivity(mainActivity);
+                        isIntentPassedToMain = true;
+                        startActivityFlag = true;
+                        finish();
+                    }, 1500);
+                }
+            }, 1500);
+        } else {
+            showAuthStatusMsgView("Enable dev loc");
+            authStatusTV.setOnClickListener(v -> showLocationSettings(this));
+            showLocNotEnableDialog(true);
+        }
     }
 
-    private void initViews() {
-        txtBarcodeValue = findViewById(R.id.txtBarcodeValue_textView);
-        surfaceView = findViewById(R.id.surfaceView);
+    private void showAuthStatusMsgView(String msg) {
+        surfaceView.setVisibility(View.GONE);
+        scanBoundaryAnim.setVisibility(View.GONE);
+        authStatusTV.setVisibility(View.VISIBLE);
+        countDownTmrTV.setVisibility(View.GONE);
+
+        if (msg != null) {
+            authStatusTV.setText(msg);
+        }
     }
+
+    private void showScanView() {
+        authStatusTV.setVisibility(View.GONE);
+        statusProgressBar.setVisibility(View.GONE);
+
+        surfaceView.setVisibility(View.VISIBLE);
+        scanBoundaryAnim.setVisibility(View.VISIBLE);
+        countDownTmrTV.setVisibility(View.VISIBLE);
+        startCountdownTimer();
+    }
+
 
     private void initialiseDetectorsAndSources() {
+        txtBarcodeValue = findViewById(R.id.txtBarcodeValue_textView);
+
+
         BarcodeDetector barcodeDetector = new BarcodeDetector.Builder(this)
                 .setBarcodeFormats(Barcode.ALL_FORMATS)
                 .build();
@@ -199,7 +254,6 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
             }
         });
 
-
         barcodeDetector.setProcessor(new Detector.Processor<>() {
             @Override
             public void release() {
@@ -212,17 +266,23 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
                 if (barcodes.size() != 0) {
                     String scannedData = barcodes.valueAt(0).displayValue;
+
                     // Compare the scanned data with the target string
-                    if (isLocationNotEnabled(AuthQRActivity.this)) {
-                        txtBarcodeValue.setText("Enable your location provider");
-                    } else {
-                        if (scannedData.trim().equals(AUTH_ACCESS_KEY)) {
+                    if (scannedData.trim().equals(AUTH_ACCESS_KEY)) {
+                        if (isLocationNotEnabled(AuthQRActivity.this)) {
+                            txtBarcodeValue.setTextColor(getColor(R.color.enable_loc_provider));
+                            txtBarcodeValue.setText(R.string.enable_your_location_provider);
+                        } else {
                             // Check whether the user inside defined geofence-area
-                            if (isInsideGeoFenceArea(currentLocation.lat, currentLocation.lon)) {
+                            if (GeoFence.isInsideGeoFenceArea(currentLocation.lat, currentLocation.lon)) {
                                 txtBarcodeValue.setVisibility(View.VISIBLE);
                                 txtBarcodeValue.setText(R.string.qr_authenticated);
+
                                 // Start a new activity when a match is found
                                 if (!startActivityFlag) {
+                                    authPreference.edit().putBoolean("isAuthenticated", true).apply();
+                                    isAuthenticated = true;
+
                                     startActivity(mainActivity);
                                     isIntentPassedToMain = true;
                                     finish();
@@ -237,22 +297,21 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
                                     resetCountdownTimer();
                                 });
                             }
-                        } else {
-                            // No match found, update UI accordingly
-                            txtBarcodeValue.post(() -> {
-                                txtBarcodeValue.setTextColor(getColor(R.color.qr_auth_fail));
-                                txtBarcodeValue.setText(R.string.invalid_qr);
-                                alertTV.setText(" ");
-                                alertCallFlag = false;
-                                resetCountdownTimer();
-                            });
                         }
+                    } else {
+                        // No match found, update UI accordingly
+                        txtBarcodeValue.post(() -> {
+                            txtBarcodeValue.setTextColor(getColor(R.color.qr_auth_fail));
+                            txtBarcodeValue.setText(R.string.invalid_qr);
+                            alertTV.setText(" ");
+                            alertCallFlag = false;
+                            resetCountdownTimer();
+                        });
                     }
                 } else {
                     txtBarcodeValue.setText(" ");
                 }
             }
-
         });
     }
 
@@ -326,7 +385,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
                         !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
     }
 
-    private void startCountdownTimer(TextView tv) {
+    private void startCountdownTimer() {
         remainingTime = TIMEOUT_DURATION;
 
         countdownRunnable = new Runnable() {
@@ -334,7 +393,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
             public void run() {
                 remainingTime -= COUNTDOWN_INTERVAL;
 
-                tv.setText(MessageFormat.format("{0}s left...", remainingTime / 1000));
+                countDownTmrTV.setText(MessageFormat.format("{0}s left...", remainingTime / 1000));
                 if (remainingTime > 0) {
                     timeoutHandler.postDelayed(this, COUNTDOWN_INTERVAL);
                 } else {
@@ -350,23 +409,24 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
         timeoutHandler.postDelayed(countdownRunnable, COUNTDOWN_INTERVAL);
     }
 
-    // Method to reset the countdown timer
+    /* Method to reset the countdown timer */
     private void resetCountdownTimer() {
         timeoutHandler.removeCallbacks(countdownRunnable);
-        startCountdownTimer(findViewById(R.id.countDownTimer_textView));
+        startCountdownTimer();
     }
 
 
     @Override
     protected void onPause() {
         super.onPause();
-        cameraSource.release();
+        if (cameraSource != null) {
+            cameraSource.release();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        initialiseDetectorsAndSources();
 
         if (isLocationNotEnabled(this)) {
             showLocNotEnableDialog(true);

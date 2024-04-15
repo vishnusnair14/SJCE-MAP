@@ -34,7 +34,7 @@
     <string name="qr_authenticated">QR AUTHENTICATED</string>
     <string name="invalid_qr">INVALID QR</string>
     <string name="_app_dev">©2024 vishnu s nair</string>
-    <string name="_enable_your_device_loc">Enable your device location for the better direction assistance.\nPress ENABLE to continue.</string>
+    <string name="_enable_your_device_loc">Enable your device location provider for the better direction assistance.\nPress ENABLE to continue.</string>
     <string name="location_not_enabled">Device location not enabled</string>
     <string name="_0s_left">0s left…</string>
     <string name="todo">TODO</string>
@@ -74,4 +74,10 @@
     <string name="end_place">End place:</string>
     <string name="image">IMAGE</string>
     <string name="google_images">Google Images</string>
+    <string name="enable_your_location_provider">Enable your location provider</string>
+    <string name="enable_your_device_gps_location">Enable your device\'s GPS location</string>
+    <string name="is_seminar_hall">IS SEMINAR HALL</string>
+    <string name="checking">please wait…</string>
+    <string name="signing_in">signing in…</string>
+    <string name="enble_dev_loc">"Enable your device's GPS "</string>
 </resources>

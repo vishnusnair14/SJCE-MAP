@@ -2,8 +2,10 @@ package com.vishnu.sjce_map;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Build;
@@ -30,10 +32,15 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.material.navigation.NavigationView;
 import com.vishnu.sjce_map.miscellaneous.SearchQueryListener;
 import com.vishnu.sjce_map.miscellaneous.SharedDataView;
+import com.vishnu.sjce_map.miscellaneous.SoundNotify;
 import com.vishnu.sjce_map.service.GPSLocationProvider;
+import com.vishnu.sjce_map.service.GeoFence;
 import com.vishnu.sjce_map.service.LocationModel;
 import com.vishnu.sjce_map.service.LocationUpdateListener;
 import com.vishnu.sjce_map.ui.home.HomeFragment;
@@ -44,11 +51,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements LocationUpdateListener {
+    private final String LOG_TAG = "MainActivity";
     private AppBarConfiguration mAppBarConfiguration;
     private com.vishnu.sjce_map.databinding.ActivityMainBinding binding;
     private Vibrator vibrator;
+    private SharedPreferences authPreference;
     AlertDialog locNotEnableAlertDialog;
-    private final String LOG_TAG = "MainActivity";
     AlertDialog.Builder locNotEnableBuilder;
     private SearchQueryListener searchQueryListener;
     HomeFragment homeFragment;
@@ -58,10 +66,14 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
     LocationModel currentLocation;
     TextView locationTV;
     TextView locNotEnaViewTV;
+
     String[] permissions = {
             Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.ACCESS_FINE_LOCATION
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION
     };
+
     DecimalFormat coordinateFormat = new DecimalFormat("0.000000000");
 
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
@@ -78,11 +90,12 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
 
         setSupportActionBar(binding.appBarMain.toolbar);
 
-        locNotEnableBuilder = new AlertDialog.Builder(this);
+        /* Initialize SharedPreferences */
+        authPreference = getSharedPreferences("MyPrefs", MODE_PRIVATE);
 
+        locNotEnableBuilder = new AlertDialog.Builder(this);
         locNotEnableBuilder.setView(R.layout.loc_not_enable_dialog);
         locNotEnableBuilder.setPositiveButton("ENABLE", (dialog, which) -> showLocationSettings(this));
-//        locNotEnableBuilder.setNegativeButton("DISABLE", (dialog, which) -> Toast.makeText(this, "Cancelled", Toast.LENGTH_SHORT).show());
 
         locNotEnableAlertDialog = locNotEnableBuilder.create();
 
@@ -114,10 +127,11 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         currentLocation = new LocationModel(0.0000000, 0.000000);
-        gpsLocationProvider = new GPSLocationProvider(sharedDataView, this, this, locNotEnaViewTV);
+        gpsLocationProvider = new GPSLocationProvider(sharedDataView, this, this, locNotEnaViewTV, null);
 
         startLocationUpdates();
     }
+
 
     public void startLocationUpdates() {
         /* Register the listener with the Location Manager to receive location updates */
@@ -131,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
     public static boolean isLocationNotEnabled(@NonNull Context context) {
         locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 
-        // Check if either GPS or network provider is enabled
+        /* Check if either GPS or network provider is enabled */
         return locationManager == null ||
                 (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) &&
                         !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
@@ -157,7 +171,14 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
             locationTV.setText((MessageFormat.format("{0}°N\n{1}°E", coordinateFormat
                     .format(getCurrentLocation().lat), coordinateFormat.format(getCurrentLocation().lon))));
 
-//            startVibration();
+            if (!GeoFence.isInsideGeoFenceArea(lat, lon)) {
+                if (authPreference.getBoolean("isAuthenticated", false)) {
+                    authPreference.edit().putBoolean("isAuthenticated", false).apply();
+
+                    SoundNotify.playGeoFenceBoundaryExceedNotify();
+                    Toast.makeText(this, "Device exceeded geofence boundary,\nre-authentication required", Toast.LENGTH_LONG).show();
+                }
+            }
         }
     }
 
@@ -191,6 +212,11 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (!GeoFence.isInsideGeoFenceArea(currentLocation.lat, currentLocation.lon)) {
+            authPreference.edit().putBoolean("isAuthenticated", false).apply();
+            Toast.makeText(this, "Device exceeded geofence boundary,\nre-authentication required", Toast.LENGTH_SHORT).show();
+            Log.i(LOG_TAG, "isAuthenticated: False");
+        }
         locationManager.removeUpdates(gpsLocationProvider);
     }
 
@@ -200,6 +226,20 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
 
         sharedDataView.setClientLat(lat);
         sharedDataView.setClientLon(lon);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 101) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, start geofencing
+                Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
+            } else {
+                // Permission denied, handle accordingly
+                Toast.makeText(this, "Permission denied!", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
 

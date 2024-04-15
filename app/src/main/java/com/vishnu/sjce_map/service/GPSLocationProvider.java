@@ -7,15 +7,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.lifecycle.ViewModelProvider;
 
+import com.vishnu.sjce_map.AuthQRActivity;
 import com.vishnu.sjce_map.miscellaneous.SharedDataView;
-
-import org.w3c.dom.Text;
 
 @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
 public class GPSLocationProvider implements LocationListener {
@@ -23,13 +20,16 @@ public class GPSLocationProvider implements LocationListener {
     SharedDataView sharedDataView;
     private final LocationUpdateListener locationUpdateListener;
     TextView locNotEnaViewTV;
+    AuthQRActivity authQRActivity;
 
 
-    public GPSLocationProvider(SharedDataView sharedDataView, Context context, LocationUpdateListener callback, TextView locNotEnaViewTV) {
+    public GPSLocationProvider(SharedDataView sharedDataView, Context context,
+                               LocationUpdateListener callback, TextView locNotEnaViewTV, AuthQRActivity authQRActivity) {
         this.context = context;
         this.locationUpdateListener = callback;
         this.locNotEnaViewTV = locNotEnaViewTV;
         this.sharedDataView = sharedDataView;
+        this.authQRActivity = authQRActivity;
     }
 
     @Override
@@ -50,6 +50,7 @@ public class GPSLocationProvider implements LocationListener {
             locNotEnaViewTV.setVisibility(View.GONE);
             sharedDataView.setIsLocProviderEnabled(true);
         }
+        authQRActivity.initAuth();
     }
 
     @Override

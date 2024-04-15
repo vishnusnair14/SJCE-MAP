@@ -1,9 +1,12 @@
 package com.vishnu.sjce_map.ui.home;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.content.Context;
-import android.location.LocationManager;
-import android.os.Build;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,8 +23,7 @@ import com.vishnu.sjce_map.MainActivity;
 import com.vishnu.sjce_map.R;
 import com.vishnu.sjce_map.databinding.FragmentHomeBinding;
 import com.vishnu.sjce_map.miscellaneous.SharedDataView;
-import com.vishnu.sjce_map.service.GPSLocationProvider;
-import com.vishnu.sjce_map.service.LocationUpdateListener;
+import com.vishnu.sjce_map.miscellaneous.SoundNotify;
 
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
@@ -29,6 +31,7 @@ import java.text.MessageFormat;
 public class HomeFragment extends Fragment {
     private static final String LOG_TAG = "HomeFragment";
     public static SharedDataView sharedDataView;
+    private SharedPreferences authPreference;
     FirebaseFirestore db;
     private FragmentHomeBinding binding;
     DecimalFormat coordinateFormat = new DecimalFormat("0.0000000000");
@@ -47,6 +50,8 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        authPreference = requireContext().getSharedPreferences("MyPrefs", MODE_PRIVATE);
+
         /* updates LAT, LON TV */
         sharedDataView.getClientLat().observe(getViewLifecycleOwner(), lat -> {
             if (lat != null) {
@@ -55,13 +60,13 @@ public class HomeFragment extends Fragment {
                         binding.coordinatesViewHomeTextView.setText((MessageFormat.format("{0}°N\n{1}°E", coordinateFormat
                                 .format(lat), coordinateFormat.format(lon))));
                     } else {
-                        Toast.makeText(requireContext(), "clientLon: NullRef", Toast.LENGTH_SHORT).show();
-                        Log.i(LOG_TAG, "clientLon: @null-reference");
+                        Toast.makeText(requireContext(), "getClientLon: NullRef", Toast.LENGTH_SHORT).show();
+                        Log.i(LOG_TAG, "getClientLon: @null-reference");
                     }
                 });
             } else {
-                Toast.makeText(requireContext(), "shopLon: NullRef", Toast.LENGTH_SHORT).show();
-                Log.i(LOG_TAG, "shopLon: @null-reference");
+                Toast.makeText(requireContext(), "clientLat: NullRef", Toast.LENGTH_SHORT).show();
+                Log.i(LOG_TAG, "clientLat: @null-reference");
             }
         });
 
@@ -74,6 +79,12 @@ public class HomeFragment extends Fragment {
                 }
             } else {
                 Log.i(LOG_TAG, "isLocProviderEnabled: @null-reference");
+            }
+        });
+
+        binding.deviceLocNotEnabledInfoViewTextView.setOnClickListener(v -> {
+            if (binding.deviceLocNotEnabledInfoViewTextView.getVisibility() == View.VISIBLE) {
+                showLocationSettings(requireContext());
             }
         });
 
@@ -162,13 +173,24 @@ public class HomeFragment extends Fragment {
 
         });
 
+        binding.exceedBoundaryBypassButton.setOnClickListener(v -> {
+            authPreference.edit().putBoolean("isAuthenticated", false).apply();
 
+            SoundNotify.playGeoFenceBoundaryExceedNotify();
+            Toast.makeText(requireContext(), "Device exceeded geofence boundary,\nre-authentication required",
+                    Toast.LENGTH_LONG).show();
+        });
         return root;
     }
 
     private void updateShortcutBtnData(String pl) {
         sharedDataView.setPlace(pl);
         sharedDataView.setDocPath("ShortcutPlaceData");
+    }
+
+    private void showLocationSettings(Context context) {
+        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+        context.startActivity(intent);
     }
 
     @Override

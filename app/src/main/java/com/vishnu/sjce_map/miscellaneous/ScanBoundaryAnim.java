@@ -2,7 +2,6 @@ package com.vishnu.sjce_map.miscellaneous;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
@@ -12,7 +11,6 @@ import androidx.annotation.NonNull;
 import com.vishnu.sjce_map.R;
 
 public class ScanBoundaryAnim extends View {
-    private Paint paint;
     private final float scaleFactor = 1.0f;
     private final float strokeWidth = 25;
 
@@ -32,7 +30,7 @@ public class ScanBoundaryAnim extends View {
     }
 
     private void init() {
-        paint = new Paint();
+        Paint paint = new Paint();
         paint.setARGB(255, 0, 0, 0);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(strokeWidth);
@@ -51,8 +49,8 @@ public class ScanBoundaryAnim extends View {
 
         // Draw L-shaped lines at each corner
         drawCornerLines(canvas, centerX - (float) scaledWidth / 2, centerY - (float) scaledHeight / 2);
-//        drawCornerLines(canvas, centerX + (float) scaledWidth / 2, centerY - scaledHeight / 2);
-//        drawCornerLines(canvas, centerX - scaledWidth / 2, centerY + scaledHeight / 2);
+        drawCornerLines(canvas, centerX + (float) scaledWidth / 2, centerY - (float) scaledHeight / 2);
+        drawCornerLines(canvas, centerX - (float) scaledWidth / 2, centerY + (float) scaledHeight / 2);
         drawCornerLines(canvas, centerX + (float) scaledWidth / 2, centerY + (float) scaledHeight / 2);
     }
 

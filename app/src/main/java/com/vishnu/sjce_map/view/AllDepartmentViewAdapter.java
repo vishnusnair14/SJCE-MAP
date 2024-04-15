@@ -54,25 +54,24 @@ public class AllDepartmentViewAdapter extends RecyclerView.Adapter<AllDepartment
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        AllDepartmentsViewModel AllDepartmentsViewModel = itemList.get(position);
+        AllDepartmentsViewModel viewModel = itemList.get(position);
 
-        holder.spotNameTV.setText(AllDepartmentsViewModel.getSpot_name());
-        holder.spotCoordinatesTV.setText(MessageFormat.format("{0}°N\n{1}°E", AllDepartmentsViewModel.getSpot_lat(), AllDepartmentsViewModel.getSpot_lon()));
+        holder.spotNameTV.setText(viewModel.getSpot_name());
+        holder.spotCoordinatesTV.setText(MessageFormat.format("{0}°N\n{1}°E", viewModel.getSpot_lat(), viewModel.getSpot_lon()));
         try {
-            if (AllDepartmentsViewModel.getSpot_image_url().isEmpty()) {
+            if (viewModel.getSpot_image_url().isEmpty()) {
                 Picasso.get().load(NO_IMG_FOUND_URL).into(holder.spotImageView);
             } else {
-                Picasso.get().load(AllDepartmentsViewModel.getSpot_image_url()).into(holder.spotImageView);
+                Picasso.get().load(viewModel.getSpot_image_url()).into(holder.spotImageView);
             }
         } catch (Exception e) {
+            Picasso.get().load(NO_IMG_FOUND_URL).into(holder.spotImageView);
             Log.e(LOG_TAG, e + " ");
         }
 
         holder.spotcardView.setOnClickListener(v -> {
             DepartmentFragment.updateDataToSharedView(itemList.get(position).getSpot_name_reference(), "DepartmentsLocationData");
             NavHostFragment.findNavController(departmentFragment).navigate(R.id.action_departmentFragment_to_mapFragment);
-//            Toast.makeText(context, holder.spotNameTV.getText(), Toast.LENGTH_SHORT).show();
-
         });
     }
 

@@ -33,7 +33,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)
@@ -53,7 +52,6 @@ dependencies {
 
     implementation(platform(libs.firebase.bom))
     implementation(dependencyNotation = "com.google.firebase:firebase-analytics")
-//    implementation(libs.play.services.location)
 
     implementation("androidx.appcompat:appcompat:1.4.1")
     implementation("androidx.camera:camera-camera2:1.3.2")

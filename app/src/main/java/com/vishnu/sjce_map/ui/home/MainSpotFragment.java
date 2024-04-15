@@ -34,7 +34,6 @@ public class MainSpotFragment extends Fragment implements SearchQueryListener {
     private static final String LOG_TAG = "MainSpotFragment";
     private FragmentMainSpotBinding binding;
     FirebaseFirestore db;
-    MainActivity mainActivity;
     public static SharedDataView sharedDataView;
     List<CampusMainSpotViewModel> itemList = new ArrayList<>();
     CampusMainSpotViewAdapter campusMainSpotViewAdapter;
@@ -80,9 +79,7 @@ public class MainSpotFragment extends Fragment implements SearchQueryListener {
         recyclerView.setLayoutManager(homeLayoutManager);
 
         // Apply item decoration to set equal padding between items
-        int spacing = getResources().getDimensionPixelSize(R.dimen.grid_spacing); // Set your desired spacing
-        boolean includeEdge = true; // Include spacing at the edges
-        recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, spacing, includeEdge));
+        recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, 18, true));
 
         itemList.clear();
 
@@ -90,7 +87,7 @@ public class MainSpotFragment extends Fragment implements SearchQueryListener {
         db.collection("LocationData").document("SavedPlaceData")
                 .addSnapshotListener((snapshot, e) -> {
                     if (e != null) {
-                        Log.w("Firestore", "Listen failed.", e);
+                        Log.w(LOG_TAG, "Listen failed.", e);
                         return;
                     }
 
@@ -116,7 +113,7 @@ public class MainSpotFragment extends Fragment implements SearchQueryListener {
                             campusMainSpotViewAdapter.notifyDataSetChanged();
                         }
                     } else {
-                        Log.d("Firestore", "Current data: null");
+                        Log.d(LOG_TAG, "Current data: null");
                     }
                 });
 

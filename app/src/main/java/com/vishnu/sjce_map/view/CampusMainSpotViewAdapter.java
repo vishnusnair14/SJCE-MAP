@@ -31,6 +31,8 @@ public class CampusMainSpotViewAdapter extends RecyclerView.Adapter<CampusMainSp
     private final String LOG_TAG = "SpotViewAdapter";
     private final Context context;
     private final MainSpotFragment mainSpotFragment;
+    String NO_IMG_FOUND_URL = "https://firebasestorage.googleapis.com/v0/b/sjce-map.appspot.com/o/" +
+            "SJCE-MAP-IMAGES%2FNO_IMAGE_FOUND_IMG.jpg?alt=media&token=ec64235b-374c-458a-aaf9-7dc67c110513";
 
     public CampusMainSpotViewAdapter(List<CampusMainSpotViewModel> itemList, Context context, MainSpotFragment mainSpotFragment) {
         this.itemList = itemList;
@@ -53,8 +55,7 @@ public class CampusMainSpotViewAdapter extends RecyclerView.Adapter<CampusMainSp
         holder.spotCoordinatesTV.setText(MessageFormat.format("{0}°N\n{1}°E", campusMainSpotViewModel.getSpot_lat(), campusMainSpotViewModel.getSpot_lon()));
         try {
             if (campusMainSpotViewModel.getSpot_image_url().isEmpty() || Objects.equals(campusMainSpotViewModel.getSpot_image_url(), " ")) {
-                String NO_IMG_FOUND_URL = "https://firebasestorage.googleapis.com/v0/b/sjce-map.appspot.com/o/" +
-                        "SJCE-MAP-IMAGES%2FNO_IMAGE_FOUND_IMG.jpg?alt=media&token=ec64235b-374c-458a-aaf9-7dc67c110513";
+
                 Picasso.get().load(NO_IMG_FOUND_URL).into(holder.spotImageView);
             } else {
                 Picasso.get().load(campusMainSpotViewModel.getSpot_image_url()).into(holder.spotImageView);
