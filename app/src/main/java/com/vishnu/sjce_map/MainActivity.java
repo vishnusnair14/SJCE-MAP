@@ -19,10 +19,13 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
+import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -36,6 +39,7 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.navigation.NavigationView;
+import com.vishnu.sjce_map.miscellaneous.Overlay360View;
 import com.vishnu.sjce_map.miscellaneous.SearchQueryListener;
 import com.vishnu.sjce_map.miscellaneous.SharedDataView;
 import com.vishnu.sjce_map.miscellaneous.SoundNotify;
@@ -66,6 +70,7 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
     LocationModel currentLocation;
     TextView locationTV;
     TextView locNotEnaViewTV;
+    private ConstraintLayout mapLayout;
 
     String[] permissions = {
             Manifest.permission.RECORD_AUDIO,
@@ -103,6 +108,8 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
         NavigationView navigationView = binding.navView;
         locationTV = findViewById(R.id.coordinatesViewHome_textView);
         locNotEnaViewTV = findViewById(R.id.deviceLocNotEnabledInfoView_textView);
+        mapLayout = findViewById(R.id.mapFragmentLayout_constraintLayout);
+
         locNotEnaViewTV.setVisibility(View.GONE);
 
         // Passing each menu ID as a set of Ids because each
@@ -130,13 +137,16 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
         gpsLocationProvider = new GPSLocationProvider(sharedDataView, this, this, locNotEnaViewTV, null);
 
         startLocationUpdates();
+
     }
 
 
     public void startLocationUpdates() {
         /* Register the listener with the Location Manager to receive location updates */
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, gpsLocationProvider);
+        if (ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000,
+                    1, gpsLocationProvider);
         } else {
             Toast.makeText(this, "location-permission-disabled", Toast.LENGTH_SHORT).show();
         }
@@ -229,7 +239,8 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 101) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {

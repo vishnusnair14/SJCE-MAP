@@ -21,10 +21,6 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.AnimationUtils;
-import android.view.animation.ScaleAnimation;
-import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -42,7 +38,6 @@ import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
-import com.vishnu.sjce_map.miscellaneous.ScanBoundaryAnim;
 import com.vishnu.sjce_map.miscellaneous.SharedDataView;
 import com.vishnu.sjce_map.service.GPSLocationProvider;
 import com.vishnu.sjce_map.service.GeoFence;
@@ -64,19 +59,17 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
     private SharedPreferences authPreference;
     private GPSLocationProvider gpsLocationProvider;
     private CameraSource cameraSource;
-    private static final long TIMEOUT_DURATION = 30 * 1000; // 30 seconds
-    private static final long COUNTDOWN_INTERVAL = 1000; // 1 second
+    private static final long TIMEOUT_DURATION = 30 * 1000;
+    private static final long COUNTDOWN_INTERVAL = 1000;
     private Vibrator vibrator;
     LocationModel currentLocation;
     private final String AUTH_ACCESS_KEY = "6117e11901fc7639";   // Keep it confidential
     Button byPassBtn;
-    private AnimationSet zoomInOutAnimation;
     TextView locationTV;
     AlertDialog locNotEnableAlertDialog;
     DecimalFormat coordinateFormat = new DecimalFormat("0.000000000");
     private final String LOG_TAG = "AuthQRActivity";
     Intent mainActivity;
-    ScanBoundaryAnim scanBoundaryAnim;
     boolean isIntentPassedToMain = false;
     boolean startActivityFlag = false;
     private long remainingTime;
@@ -89,7 +82,6 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
     TextView countDownTmrTV;
     private boolean alertCallFlag = false;
     AlertDialog.Builder locNotEnableBuilder;
-
     TextView alertTV;
     private static final int REQUEST_CAMERA_PERMISSION = 201;
     String[] permissions = {
@@ -139,7 +131,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
         authStatusTV = findViewById(R.id.authStatusView_textView);
         statusProgressBar = findViewById(R.id.progressBar);
         authScanCardView = findViewById(R.id.authScan_cardView);
-        scanBoundaryAnim = findViewById(R.id.scanBoundaryAnim);
+//        scanBoundaryAnim = findViewById(R.id.scanBoundaryAnim);
         surfaceView = findViewById(R.id.surfaceView);
         countDownTmrTV = findViewById(R.id.countDownTimer_textView);
 
@@ -159,11 +151,6 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         currentLocation = new LocationModel(0.0000000, 0.000000);
         gpsLocationProvider = new GPSLocationProvider(sharedDataView, this, this, null, this);
-
-        ScanBoundaryAnim scanBoundaryAnim = findViewById(R.id.scanBoundaryAnim);
-
-        Animation animation = AnimationUtils.loadAnimation(this, R.anim.boundary_corner_animation);
-        scanBoundaryAnim.startAnimation(animation);
 
         startLocationUpdates();
         initAuth();
@@ -187,15 +174,17 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
                 }
             }, 1500);
         } else {
-            showAuthStatusMsgView("Enable dev loc");
+            showAuthStatusMsgView("Enable device's GPS");
+            statusProgressBar.setVisibility(View.GONE);
             authStatusTV.setOnClickListener(v -> showLocationSettings(this));
             showLocNotEnableDialog(true);
         }
     }
 
     private void showAuthStatusMsgView(String msg) {
+        statusProgressBar.setVisibility(View.VISIBLE);
         surfaceView.setVisibility(View.GONE);
-        scanBoundaryAnim.setVisibility(View.GONE);
+//        scanBoundaryAnim.setVisibility(View.GONE);
         authStatusTV.setVisibility(View.VISIBLE);
         countDownTmrTV.setVisibility(View.GONE);
 
@@ -209,7 +198,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
         statusProgressBar.setVisibility(View.GONE);
 
         surfaceView.setVisibility(View.VISIBLE);
-        scanBoundaryAnim.setVisibility(View.VISIBLE);
+//        scanBoundaryAnim.setVisibility(View.VISIBLE);
         countDownTmrTV.setVisibility(View.VISIBLE);
         startCountdownTimer();
     }
