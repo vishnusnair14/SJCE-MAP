@@ -51,17 +51,15 @@
         android:id="@+id/assistWalkDirection_imageButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="5dp"
+        android:layout_marginEnd="15dp"
         android:fontFamily="@font/anonymous_pro"
-        android:text="@string/open_with_google_map"
+        android:text="Get Direction"
         android:textSize="12sp"
         android:textStyle="bold"
-        app:cornerRadius="10dp"
         app:icon="@drawable/baseline_directions_walk_24"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/horizontalScrollView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/coordinateView_textView" />
 
     <TextView
         android:id="@+id/googleImageBanner_textView"
@@ -78,32 +76,16 @@
         android:id="@+id/viewIn360Deg_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
         android:enabled="false"
         android:fontFamily="@font/anonymous_pro"
         android:text="View in 360°"
-        android:textAllCaps="false"
+        android:textSize="12sp"
         android:textStyle="bold"
+        app:icon="@drawable/baseline_360_24"
         app:layout_constraintBottom_toTopOf="@+id/horizontalScrollView"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/coordinateView_textView" />
-
-    <FrameLayout
-        android:id="@+id/overlayContainer"
-        android:layout_width="match_parent"
-        android:layout_height="375dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/horizontalScrollView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/coordinateView_textView">
-
-        <WebView
-            android:id="@+id/overlayWebView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-    </FrameLayout>
 
     <HorizontalScrollView
         android:id="@+id/horizontalScrollView"
@@ -111,10 +93,10 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="3dp"
         android:layout_marginEnd="3dp"
-        android:layout_marginBottom="25dp"
+        android:layout_marginBottom="15dp"
         android:background="#FFFCFC"
         android:elevation="5dp"
-        app:layout_constraintBottom_toTopOf="@+id/assistWalkDirection_imageButton"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 

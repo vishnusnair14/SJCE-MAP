@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
@@ -32,6 +33,7 @@ import java.util.Map;
 
 public class DepartmentFragment extends Fragment implements SearchQueryListener {
     FragmentDepartmentBinding binding;
+    RecyclerView deptFragRecycleView;
     public static SharedDataView sharedDataView;
     List<AllDepartmentsViewModel> itemList = new ArrayList<>();
     AllDepartmentViewAdapter allDepartmentViewAdapter;
@@ -42,12 +44,25 @@ public class DepartmentFragment extends Fragment implements SearchQueryListener 
         // Required empty public constructor
     }
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         db = FirebaseFirestore.getInstance();
         sharedDataView = new ViewModelProvider(requireActivity()).get(SharedDataView.class);
+    }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        binding = com.vishnu.sjce_map.databinding.FragmentDepartmentBinding.inflate(inflater, container, false);
+        View root = binding.getRoot();
+
+        deptFragRecycleView = binding.allDepartmentRecycleView;
+
+        syncSavedPlacesRecycleView(binding);
+
+        return root;
     }
 
     @Override
@@ -60,18 +75,6 @@ public class DepartmentFragment extends Fragment implements SearchQueryListener 
         }
     }
 
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        binding = com.vishnu.sjce_map.databinding.FragmentDepartmentBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
-
-        syncSavedPlacesRecycleView(binding);
-
-        return root;
-    }
-
     @SuppressLint("NotifyDataSetChanged")
     private void syncSavedPlacesRecycleView(@NonNull FragmentDepartmentBinding binding) {
         RecyclerView recyclerView = binding.allDepartmentRecycleView;
@@ -79,8 +82,7 @@ public class DepartmentFragment extends Fragment implements SearchQueryListener 
         recyclerView.setLayoutManager(homeLayoutManager);
 
         // Apply item decoration to set equal padding between items
-        int spacing = getResources().getDimensionPixelSize(R.dimen.grid_spacing);
-        recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, spacing, true));
+        recyclerView.addItemDecoration(new GridSpacingItemDecoration(2, 18, true));
 
         itemList.clear();
 

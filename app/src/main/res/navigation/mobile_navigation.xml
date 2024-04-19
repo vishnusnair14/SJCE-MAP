@@ -24,13 +24,13 @@
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.vishnu.sjce_map.ui.map.MapFragment"
-        android:label="Details"
+        android:label="Map Details"
         tools:layout="@layout/fragment_map" />
     <fragment
         android:id="@+id/departmentFragment"
         android:name="com.vishnu.sjce_map.ui.home.DepartmentFragment"
-        android:label="Departments"
-        tools:layout="@layout/fragment_department" >
+        android:label="All Departments"
+        tools:layout="@layout/fragment_department">
         <action
             android:id="@+id/action_departmentFragment_to_mapFragment"
             app:destination="@id/mapFragment" />
@@ -43,7 +43,7 @@
     <fragment
         android:id="@+id/nav_mainspots"
         android:name="com.vishnu.sjce_map.ui.home.MainSpotFragment"
-        android:label="Destinations"
+        android:label="All Destinations"
         tools:layout="@layout/fragment_main_spot">
         <action
             android:id="@+id/action_nav_mainspots_to_mapFragment"

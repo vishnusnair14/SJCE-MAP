@@ -11,9 +11,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
@@ -32,6 +34,9 @@ public class HomeFragment extends Fragment {
     private static final String LOG_TAG = "HomeFragment";
     public static SharedDataView sharedDataView;
     private SharedPreferences authPreference;
+    private static final String SCROLL_POSITION_KEY = "scroll_position";
+    ScrollView scrollView;
+    private int savedScrollPosition = 0;
     FirebaseFirestore db;
     private FragmentHomeBinding binding;
     DecimalFormat coordinateFormat = new DecimalFormat("0.0000000000");
@@ -51,6 +56,8 @@ public class HomeFragment extends Fragment {
         View root = binding.getRoot();
 
         authPreference = requireContext().getSharedPreferences("MyPrefs", MODE_PRIVATE);
+
+        scrollView = binding.homeFragmentScrollView;
 
         /* updates LAT, LON TV */
         sharedDataView.getClientLat().observe(getViewLifecycleOwner(), lat -> {
@@ -166,11 +173,13 @@ public class HomeFragment extends Fragment {
         });
 
         binding.yampaCafeteriaSCBButton.setOnClickListener(v -> {
-
+            updateShortcutBtnData("sjce_yampa_cafeteria_sbc");
+            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
         });
 
         binding.mylariCafeteriaSCBButton.setOnClickListener(v -> {
-
+            updateShortcutBtnData("sjce_mylari_cafeteria_scb");
+            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
         });
 
         binding.exceedBoundaryBypassButton.setOnClickListener(v -> {
@@ -183,6 +192,16 @@ public class HomeFragment extends Fragment {
         return root;
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if (savedInstanceState != null) {
+            // Restore scroll position if available
+            savedScrollPosition = savedInstanceState.getInt(SCROLL_POSITION_KEY, 0);
+            scrollView.post(() -> scrollView.scrollTo(0, savedScrollPosition));
+        }
+    }
+
     private void updateShortcutBtnData(String pl) {
         sharedDataView.setPlace(pl);
         sharedDataView.setDocPath("ShortcutPlaceData");
@@ -191,6 +210,14 @@ public class HomeFragment extends Fragment {
     private void showLocationSettings(Context context) {
         Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
         context.startActivity(intent);
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // Save the scroll position
+        savedScrollPosition = scrollView.getScrollY();
+        outState.putInt(SCROLL_POSITION_KEY, savedScrollPosition);
     }
 
     @Override

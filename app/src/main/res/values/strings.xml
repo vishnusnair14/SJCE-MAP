@@ -82,4 +82,6 @@
     <string name="enble_dev_loc">"Enable your device's GPS "</string>
     <string name="_360_view">360° View</string>
     <string name="back">Back</string>
+    <string name="please_wait">Please wait...</string>
+    <string name="authentication">Authentication</string>
 </resources>

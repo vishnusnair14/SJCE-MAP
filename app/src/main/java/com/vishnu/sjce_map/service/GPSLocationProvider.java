@@ -50,7 +50,9 @@ public class GPSLocationProvider implements LocationListener {
             locNotEnaViewTV.setVisibility(View.GONE);
             sharedDataView.setIsLocProviderEnabled(true);
         }
-        authQRActivity.initAuth();
+        if (authQRActivity != null) {
+            authQRActivity.initAuth();
+        }
     }
 
     @Override

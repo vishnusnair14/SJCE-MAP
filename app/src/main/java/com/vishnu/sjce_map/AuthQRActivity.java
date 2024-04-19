@@ -80,6 +80,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
     TextView authStatusTV;
     CardView authScanCardView;
     TextView countDownTmrTV;
+    TextView authBannerTV;
     private boolean alertCallFlag = false;
     AlertDialog.Builder locNotEnableBuilder;
     TextView alertTV;
@@ -134,6 +135,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
 //        scanBoundaryAnim = findViewById(R.id.scanBoundaryAnim);
         surfaceView = findViewById(R.id.surfaceView);
         countDownTmrTV = findViewById(R.id.countDownTimer_textView);
+        authBannerTV = findViewById(R.id.authBanner_textView);
 
         mainActivity = new Intent(AuthQRActivity.this, MainActivity.class);
 
@@ -158,12 +160,17 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
 
     public void initAuth() {
         if (!isLocationNotEnabled(this)) {
+            authStatusTV.setOnClickListener(null);
+            authBannerTV.setText(R.string.please_wait);
             showAuthStatusMsgView("Checking");
             new Handler().postDelayed(() -> {
                 if (!isAuthenticated) {
+                    authStatusTV.setOnClickListener(null);
+                    authBannerTV.setText(R.string.scan_a_valid_qr_to_authenticate);
                     showScanView();
                     initialiseDetectorsAndSources();
                 } else {
+                    authStatusTV.setOnClickListener(null);
                     showAuthStatusMsgView("Signing in...");
                     new Handler().postDelayed(() -> {
                         startActivity(mainActivity);
@@ -174,7 +181,8 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
                 }
             }, 1500);
         } else {
-            showAuthStatusMsgView("Enable device's GPS");
+            authBannerTV.setText(R.string.authentication);
+            showAuthStatusMsgView("Enable device's GPS provider");
             statusProgressBar.setVisibility(View.GONE);
             authStatusTV.setOnClickListener(v -> showLocationSettings(this));
             showLocNotEnableDialog(true);

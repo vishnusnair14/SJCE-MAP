@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
@@ -28,6 +26,7 @@ import com.squareup.picasso.Picasso;
 import com.vishnu.sjce_map.databinding.FragmentMapBinding;
 import com.vishnu.sjce_map.miscellaneous.Overlay360View;
 import com.vishnu.sjce_map.miscellaneous.SharedDataView;
+import com.vishnu.sjce_map.service.GeoFence;
 
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
@@ -42,8 +41,6 @@ public class MapFragment extends Fragment {
     private String destPlaceLon;
     private double clientLat;
     String gmap360ViewUrl;
-    Overlay360View overlay360View;
-    OnBackPressedCallback onBackPressedCallback;
     Overlay360View gmap360ViewPopup;
     ConstraintLayout layout;
     private FragmentMapBinding binding;
@@ -60,7 +57,6 @@ public class MapFragment extends Fragment {
     private final LatLng DUMMY_LOC_COORD = new LatLng(12.317626645254657, 76.6145323909735);
 
     public MapFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -79,6 +75,7 @@ public class MapFragment extends Fragment {
         View root = binding.getRoot();
 
         layout = binding.mapFragmentLayoutConstraintLayout;
+        binding.assistWalkDirectionImageButton.setEnabled(false);
 
         /* Get spot-place and associated data */
         sharedDataView.getPlace().observe(getViewLifecycleOwner(), pl -> {
@@ -116,49 +113,7 @@ public class MapFragment extends Fragment {
             }
         });
 
-        binding.assistWalkDirectionImageButton.setOnClickListener(v -> {
-            // TODO: set client realtime-loc
-            boolean isInsideGJB = isInsideGJB(clientLat, clientLon);
-            boolean isInsideCMS = isInsideCMS(clientLat, clientLon);
-
-            if (isInsideGJB) {
-                openMapView(String.valueOf(GJB_MAIN_COORD.latitude), String.valueOf(GJB_MAIN_COORD.longitude),
-                        destPlaceLat, destPlaceLon, true);
-                Toast.makeText(requireContext(), "You are inside GJB,\nsource set from: GJB MAIN ENTRY", Toast.LENGTH_LONG).show();
-                Log.i(LOG_TAG, "You are inside GJB, source set from: GJB MAIN ENTRY");
-            } else if (isInsideCMS) {
-                openMapView(String.valueOf(CMS_MAIN_COORD.latitude), String.valueOf(CMS_MAIN_COORD.longitude),
-                        destPlaceLat, destPlaceLon, true);
-                Toast.makeText(requireContext(), "You are inside CMS,\nsource set from: CMS MAIN ENTRY", Toast.LENGTH_LONG).show();
-                Log.i(LOG_TAG, "You are inside CMS, source set from: CMS MAIN ENTRY");
-            } else {
-                openMapView(null, null, destPlaceLat, destPlaceLon, false);
-            }
-        });
-
         return root;
-    }
-
-
-    private boolean isInsideGJB(double lat, double lon) {
-        // golden-jubilee-block boundary
-        double topLeftLat = 12.31700026871531;
-        double topLeftLon = 76.61384665081256;
-        double bottomRightLat = 12.315803282353533;
-        double bottomRightLon = 76.61474608292343;
-
-        return (lat >= bottomRightLat && lat <= topLeftLat && lon >= topLeftLon && lon <= bottomRightLon);
-    }
-
-
-    private boolean isInsideCMS(double lat, double lon) {
-        // CMS-block boundary
-        double topLeftLat = 12.317812749625686;
-        double topLeftLon = 76.61399819105716;
-        double bottomRightLat = 12.31743221981478;
-        double bottomRightLon = 76.61470260061012;
-
-        return (lat >= bottomRightLat && lat <= topLeftLat && lon >= topLeftLon && lon <= bottomRightLon);
     }
 
 
@@ -198,7 +153,7 @@ public class MapFragment extends Fragment {
                             Map<String, Object> dataMap = (Map<String, Object>) value;
 
                             // Extract required fields from the dataMap
-                            String placeName = (String) Objects.requireNonNull(dataMap.get("spot_name")).toString().toUpperCase();
+                            String placeName = Objects.requireNonNull(dataMap.get("spot_name")).toString().toUpperCase();
                             String spotImageUrl = (String) dataMap.get("spot_image_url");
                             GeoPoint geoPoint = (GeoPoint) dataMap.get("spot_coordinates");
                             String spot360ViewUrl = (String) dataMap.get("spot_360_view_gmap_url");
@@ -228,6 +183,36 @@ public class MapFragment extends Fragment {
                                     gmap360ViewPopup.showAtLocation(requireActivity().getWindow()
                                             .getDecorView(), Gravity.CENTER, 0, 0);
                                 });
+                            }
+                            if (geoPoint != null) {
+                                if ((geoPoint.getLatitude() == 0.00) && (geoPoint.getLongitude() == 0.00)) {
+                                    binding.assistWalkDirectionImageButton.setEnabled(false);
+                                    binding.assistWalkDirectionImageButton.setOnClickListener(null);
+                                } else {
+                                    binding.assistWalkDirectionImageButton.setEnabled(true);
+                                    binding.assistWalkDirectionImageButton.setOnClickListener(v -> {
+                                        // TODO: set client realtime-loc
+                                        boolean isInsideGJB = GeoFence.isInsideGJB(clientLat, clientLon);
+                                        boolean isInsideCMS = GeoFence.isInsideCMS(clientLat, clientLon);
+
+                                        if (isInsideGJB) {
+                                            openMapView(String.valueOf(GJB_MAIN_COORD.latitude), String.valueOf(GJB_MAIN_COORD.longitude),
+                                                    destPlaceLat, destPlaceLon, true);
+                                            Toast.makeText(requireContext(), "You are inside GJB,\nsource set from: GJB MAIN ENTRY", Toast.LENGTH_LONG).show();
+                                            Log.i(LOG_TAG, "You are inside GJB, source set from: GJB MAIN ENTRY");
+                                        } else if (isInsideCMS) {
+                                            openMapView(String.valueOf(CMS_MAIN_COORD.latitude), String.valueOf(CMS_MAIN_COORD.longitude),
+                                                    destPlaceLat, destPlaceLon, true);
+                                            Toast.makeText(requireContext(), "You are inside CMS,\nsource set from: CMS MAIN ENTRY", Toast.LENGTH_LONG).show();
+                                            Log.i(LOG_TAG, "You are inside CMS, source set from: CMS MAIN ENTRY");
+                                        } else {
+                                            openMapView(null, null, destPlaceLat, destPlaceLon, false);
+                                        }
+                                    });
+                                }
+                            } else {
+                                binding.assistWalkDirectionImageButton.setEnabled(false);
+                                binding.assistWalkDirectionImageButton.setOnClickListener(null);
                             }
 
                             if (Objects.equals(spotImageUrl, "")) {

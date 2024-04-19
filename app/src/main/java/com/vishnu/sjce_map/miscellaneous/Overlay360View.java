@@ -10,15 +10,14 @@ import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.PopupWindow;
 
+import com.vishnu.sjce_map.MainActivity;
 import com.vishnu.sjce_map.R;
 
 public class Overlay360View extends PopupWindow {
-    String gmap360ViewUrl;
     Button backBtn;
 
-    public Overlay360View(Context context , String gmap360ViewUrl) {
+    public Overlay360View(Context context, String gmap360ViewUrl) {
         super(context);
-        this.gmap360ViewUrl = gmap360ViewUrl;
 
         String htmlContent = """
                 <!DOCTYPE html>
@@ -48,7 +47,7 @@ public class Overlay360View extends PopupWindow {
             });
         }
 
-        contentView.setBackgroundColor(Color.parseColor("#9B9999"));
+        contentView.setBackgroundColor(Color.parseColor("#D5D0D0"));
 
         webView.loadData(htmlContent, "text/html", "UTF-8");
     }
