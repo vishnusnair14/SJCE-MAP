@@ -321,7 +321,7 @@
                             android:layout_weight="1"
                             android:backgroundTint="#4F702A"
                             android:fontFamily="@font/anonymous_pro"
-                            android:text="SJCE AUD 2"
+                            android:text="SJCE AUD 1"
                             android:textSize="12sp" />
                     </LinearLayout>
 
@@ -547,8 +547,10 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="5dp"
         android:layout_marginBottom="5dp"
+        android:backgroundTint="#770F0F"
         android:fontFamily="@font/anonymous_pro"
         android:text="Exceed boundary"
+        android:textColor="#FFC107"
         android:textSize="11sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"

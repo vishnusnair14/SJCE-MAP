@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_logout"
+        android:icon="@drawable/baseline_logout_24"
+        android:iconTint="#DCD7D7"
+        android:orderInCategory="100"
+        android:title="@string/logout" />
+    <item
+        android:id="@+id/action_delete_account"
+        android:icon="@drawable/baseline_delete_forever_24"
+        android:iconTint="#DCD7D7"
+        android:orderInCategory="100"
+        android:title="@string/delete_acc" />
+    <item
+        android:id="@+id/action_search"
+        android:icon="@android:drawable/ic_menu_search"
+        android:iconTint="#F6EFEF"
+        android:title="@string/search"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView" />
+</menu>

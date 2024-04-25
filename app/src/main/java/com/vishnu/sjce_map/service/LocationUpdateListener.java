@@ -1,5 +1,5 @@
 package com.vishnu.sjce_map.service;
 
 public interface LocationUpdateListener {
-    void onLocationUpdated(double latitude, double longitude);
+    void onLocationUpdated(double lat, double lon);
 }

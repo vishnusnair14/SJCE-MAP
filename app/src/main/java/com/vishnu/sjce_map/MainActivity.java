@@ -2,7 +2,6 @@ package com.vishnu.sjce_map;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,17 +14,15 @@ import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.OnBackPressedCallback;
-import androidx.activity.OnBackPressedDispatcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -35,11 +32,12 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
-import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.GeofencingClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.material.navigation.NavigationView;
-import com.vishnu.sjce_map.miscellaneous.Overlay360View;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.vishnu.sjce_map.miscellaneous.SearchQueryListener;
 import com.vishnu.sjce_map.miscellaneous.SharedDataView;
 import com.vishnu.sjce_map.miscellaneous.SoundNotify;
@@ -52,16 +50,20 @@ import com.vishnu.sjce_map.ui.home.HomeFragment;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements LocationUpdateListener {
     private final String LOG_TAG = "MainActivity";
     private AppBarConfiguration mAppBarConfiguration;
     private com.vishnu.sjce_map.databinding.ActivityMainBinding binding;
     private Vibrator vibrator;
-    private SharedPreferences authPreference;
+    private SharedPreferences preferences;
     AlertDialog locNotEnableAlertDialog;
     AlertDialog.Builder locNotEnableBuilder;
+    DocumentReference RegisteredUsersCredentialsRef;
+    DocumentReference RegisteredUsersEmailRef;
     private SearchQueryListener searchQueryListener;
     HomeFragment homeFragment;
     private static LocationManager locationManager;
@@ -70,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
     LocationModel currentLocation;
     TextView locationTV;
     TextView locNotEnaViewTV;
-    private ConstraintLayout mapLayout;
+    FirebaseAuth mAuth;
 
     String[] permissions = {
             Manifest.permission.RECORD_AUDIO,
@@ -89,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
         binding = com.vishnu.sjce_map.databinding.ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        mAuth = FirebaseAuth.getInstance();
         sharedDataView = new ViewModelProvider(this).get(SharedDataView.class);
         homeFragment = new HomeFragment();
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
@@ -96,7 +99,10 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
         setSupportActionBar(binding.appBarMain.toolbar);
 
         /* Initialize SharedPreferences */
-        authPreference = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+
+        RegisteredUsersCredentialsRef = FirebaseFirestore.getInstance().collection("AuthenticationData").document("RegisteredUsersCredentials");
+        RegisteredUsersEmailRef = FirebaseFirestore.getInstance().collection("AuthenticationData").document("RegisteredUsersEmail");
 
         locNotEnableBuilder = new AlertDialog.Builder(this);
         locNotEnableBuilder.setView(R.layout.loc_not_enable_dialog);
@@ -106,9 +112,23 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
 
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
+        View headerView = navigationView.getHeaderView(0);
+
+        TextView emailView = headerView.findViewById(R.id.regEmailIdView_textView);
+
+        if (mAuth.getCurrentUser() != null) {
+            if (mAuth.getCurrentUser().isEmailVerified()) {
+                emailView.setText(MessageFormat.format("{0} {1}",
+                        mAuth.getCurrentUser().getEmail(), "(verified)"));
+            } else {
+                emailView.setText(mAuth.getCurrentUser().getEmail());
+            }
+        } else {
+            emailView.setText("");
+        }
+
         locationTV = findViewById(R.id.coordinatesViewHome_textView);
         locNotEnaViewTV = findViewById(R.id.deviceLocNotEnabledInfoView_textView);
-        mapLayout = findViewById(R.id.mapFragmentLayout_constraintLayout);
 
         locNotEnaViewTV.setVisibility(View.GONE);
 
@@ -182,11 +202,12 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
                     .format(getCurrentLocation().lat), coordinateFormat.format(getCurrentLocation().lon))));
 
             if (!GeoFence.isInsideGeoFenceArea(lat, lon)) {
-                if (authPreference.getBoolean("isAuthenticated", false)) {
-                    authPreference.edit().putBoolean("isAuthenticated", false).apply();
+                if (preferences.getBoolean("isAlreadyScanned", false)) {
+                    preferences.edit().putBoolean("isAlreadyScanned", false).apply();
 
-                    SoundNotify.playGeoFenceBoundaryExceedNotify();
-                    Toast.makeText(this, "Device exceeded geofence boundary,\nre-authentication required", Toast.LENGTH_LONG).show();
+                    SoundNotify.playGeoFenceBoundaryExceedAlert();
+                    Toast.makeText(this, "Device exceeded geofence boundary," +
+                            "\nre-authentication required", Toast.LENGTH_LONG).show();
                 }
             }
         }
@@ -206,6 +227,99 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
         vibrator.vibrate(VibrationEffect.createOneShot(150, VibrationEffect.EFFECT_DOUBLE_CLICK));
     }
 
+    private void executeLogoutPrefs() {
+        FirebaseAuth.getInstance().signOut();
+        preferences.edit().putString("username", null).apply();
+        preferences.edit().putString("password", null).apply();
+        preferences.edit().putBoolean("isRemembered", false).apply();
+        preferences.edit().putBoolean("isAlreadyScanned", false).apply();
+        preferences.edit().putBoolean("isInitialLogin", true).apply();
+
+        startVibration();
+        Toast.makeText(this, "Logout successful", Toast.LENGTH_SHORT).show();
+        finish();
+    }
+
+    private void showLogoutDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Logout");
+        builder.setMessage("Are you sure you want to logout?");
+        builder.setPositiveButton("Logout", (dialog, which) -> {
+            // Perform logout action
+            executeLogoutPrefs();
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+        builder.show();
+    }
+
+    private void executeDelAccPrefs() {
+        Map<String, Object> updates = new HashMap<>();
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        assert user != null;
+        updates.put(user.getUid().trim(), FieldValue.delete());
+
+        user.delete()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        preferences.edit().clear().apply();
+                        Toast.makeText(this, "Account deleted successfully", Toast.LENGTH_LONG).show();
+                        finish();
+                    } else {
+                        Toast.makeText(this, "Failed to delete account" + task.getException(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+
+        /* Delete user credentials from "RegisteredUsersCredentials" db bucket */
+        RegisteredUsersCredentialsRef.update(updates)
+                .addOnSuccessListener(aVoid -> Log.d(LOG_TAG, "Credentials deleted successfully"))
+                .addOnFailureListener(e -> Log.w(LOG_TAG, "Error deleting credentials", e));
+
+        /* Delete registered email from "RegisteredUsersEmail" db bucket */
+        RegisteredUsersEmailRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                List<String> emailAddresses = (List<String>) documentSnapshot.get("email_addresses");
+
+                if (emailAddresses != null) {
+                    emailAddresses.remove(user.getEmail());
+
+                    updates.put("email_addresses", emailAddresses);
+
+                    // Perform the update operation
+                    RegisteredUsersEmailRef.update(updates)
+                            .addOnSuccessListener(aVoid -> Log.d(LOG_TAG, "Email removed successfully"))
+                            .addOnFailureListener(e -> Log.w(LOG_TAG, "Error removing email", e));
+                } else {
+                    Log.d(LOG_TAG, "Array field 'email_addresses' is null");
+                }
+            } else {
+                Log.d(LOG_TAG, "Document does not exist");
+            }
+        });
+
+        preferences.edit().putString("username", null).apply();
+        preferences.edit().putString("password", null).apply();
+        preferences.edit().putBoolean("isRemembered", false).apply();
+        preferences.edit().putBoolean("isAlreadyScanned", false).apply();
+        preferences.edit().putBoolean("isInitialLogin", true).apply();
+        finish();
+    }
+
+
+    private void showDelAccDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Delete Account");
+        builder.setMessage("Are you sure you want to delete this account forever?");
+        builder.setPositiveButton("Delete", (dialog, which) -> {
+            // Perform account-deletion action
+            executeDelAccPrefs();
+        });
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+        builder.show();
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -223,7 +337,7 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
     protected void onDestroy() {
         super.onDestroy();
         if (!GeoFence.isInsideGeoFenceArea(currentLocation.lat, currentLocation.lon)) {
-            authPreference.edit().putBoolean("isAuthenticated", false).apply();
+            preferences.edit().putBoolean("isAuthenticated", false).apply();
             Toast.makeText(this, "Device exceeded geofence boundary,\nre-authentication required", Toast.LENGTH_SHORT).show();
             Log.i(LOG_TAG, "isAuthenticated: False");
         }
@@ -256,7 +370,7 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.option_menu, menu);
 
         SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
 
@@ -289,6 +403,19 @@ public class MainActivity extends AppCompatActivity implements LocationUpdateLis
             }
         });
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_logout) {
+            // Handle settings menu item click
+            showLogoutDialog();
+            return true;
+        } else if (id == R.id.action_delete_account) {
+            showDelAccDialog();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void setSearchQueryListener(SearchQueryListener listener) {

@@ -2,6 +2,7 @@
 agp = "8.3.1"
 codeScanner = "2.3.0"
 core = "3.4.1"
+firebaseAuth = "22.3.1"
 firebaseBom = "32.7.4"
 junit = "4.13.2"
 junitVersion = "1.1.5"
@@ -27,10 +28,12 @@ zxingAndroidEmbedded = "4.2.0"
 cameraView = "1.3.2"
 gridlayout = "1.0.0"
 legacySupportV4 = "1.0.0"
+preference = "1.2.1"
 
 [libraries]
 code-scanner = { module = "com.github.yuriy-budiyev:code-scanner", version.ref = "codeScanner" }
 core = { module = "com.google.zxing:core", version.ref = "core" }
+firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuth" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -56,6 +59,7 @@ zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", ve
 camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraView" }
 gridlayout = { group = "androidx.gridlayout", name = "gridlayout", version.ref = "gridlayout" }
 legacy-support-v4 = { group = "androidx.legacy", name = "legacy-support-v4", version.ref = "legacySupportV4" }
+preference = { group = "androidx.preference", name = "preference", version.ref = "preference" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

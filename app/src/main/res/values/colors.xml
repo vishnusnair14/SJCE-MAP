@@ -16,6 +16,11 @@
     <color name="qr_auth_success">#0A420C</color>
     <color name="enable_loc_provider">#630303</color>
     <color name="qr_auth_fail">#5E0C06</color>
+    <color name="emailET_value_restore">#918E8E</color>
+    <color name="signing_in">#206123</color>
+    <color name="please_wait">#0D5288</color>
+    <color name="checking">#B8730D</color>
+    <color name="pswdET_value_restore">#918E8E</color>
 
 
 </resources>

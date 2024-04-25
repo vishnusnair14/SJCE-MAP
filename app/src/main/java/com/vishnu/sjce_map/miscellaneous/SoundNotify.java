@@ -5,7 +5,7 @@ import android.media.ToneGenerator;
 import android.os.Handler;
 
 public class SoundNotify {
-    public static void playGeoFenceBoundaryExceedNotify() {
+    public static void playGeoFenceBoundaryExceedAlert() {
         ToneGenerator toneGenerator = new ToneGenerator(AudioManager.STREAM_ALARM, ToneGenerator.MAX_VOLUME);
         toneGenerator.startTone(ToneGenerator.TONE_CDMA_ABBR_INTERCEPT);
 

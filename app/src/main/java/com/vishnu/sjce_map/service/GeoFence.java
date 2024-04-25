@@ -14,12 +14,12 @@ public class GeoFence {
         double bottomRightLon = 76.61526699712476;
 
         // TEST BOUNDARIES (KKY)
-        double topLeftLat1 = 10.754605223078789;
-        double topLeftLon1 = 76.79775902053301;
+        double topLeftLat1 = 10.75491109814538;
+        double topLeftLon1 =   76.7975270188964;
 
         // TEST BOUNDARIES (KKY)
-        double bottomRightLat1 = 10.75449683752582;
-        double bottomRightLon1 = 76.79792999933173;
+        double bottomRightLat1 = 10.754315279857288;
+        double bottomRightLon1 =  76.79830840048628;
 
         return (lat >= bottomRightLat1 && lat <= topLeftLat1 && lon >= topLeftLon1 && lon <= bottomRightLon1);
     }

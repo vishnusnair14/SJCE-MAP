@@ -46,12 +46,15 @@ dependencies {
     implementation(libs.camera.view)
     implementation(libs.gridlayout)
     implementation(libs.legacy.support.v4)
+    implementation(libs.preference)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
     implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
     implementation(dependencyNotation = "com.google.firebase:firebase-analytics")
+
 
     implementation("androidx.appcompat:appcompat:1.4.1")
     implementation("androidx.camera:camera-camera2:1.3.2")
@@ -61,7 +64,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-vision:20.1.3")
 
     implementation("com.squareup.picasso:picasso:2.71828")
-    implementation ("de.hdodenhof:circleimageview:3.1.0")
+    implementation("de.hdodenhof:circleimageview:3.1.0")
 
     implementation("com.google.android.gms:play-services-location:18.0.0")
     implementation("com.google.android.gms:play-services-maps:17.0.1")

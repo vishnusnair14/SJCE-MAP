@@ -38,11 +38,15 @@ import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.vishnu.sjce_map.miscellaneous.SharedDataView;
 import com.vishnu.sjce_map.service.GPSLocationProvider;
 import com.vishnu.sjce_map.service.GeoFence;
 import com.vishnu.sjce_map.service.LocationModel;
 import com.vishnu.sjce_map.service.LocationUpdateListener;
+import com.vishnu.sjce_map.ui.authentication.AuthenticationActivity;
+import com.vishnu.sjce_map.ui.authentication.HelpActivity;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -56,7 +60,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
     TextView txtBarcodeValue;
     private LocationManager locationManager;
     SharedDataView sharedDataView;
-    private SharedPreferences authPreference;
+    private SharedPreferences preferences;
     private GPSLocationProvider gpsLocationProvider;
     private CameraSource cameraSource;
     private static final long TIMEOUT_DURATION = 30 * 1000;
@@ -70,20 +74,28 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
     DecimalFormat coordinateFormat = new DecimalFormat("0.000000000");
     private final String LOG_TAG = "AuthQRActivity";
     Intent mainActivity;
+    Intent helpActivity;
+    Intent authenticationActivity;
+    Intent authQRActivity;
     boolean isIntentPassedToMain = false;
     boolean startActivityFlag = false;
     private long remainingTime;
-    private boolean isAuthenticated = false;
     private Runnable countdownRunnable;
     private Handler timeoutHandler;
-    ProgressBar statusProgressBar;
-    TextView authStatusTV;
     CardView authScanCardView;
     TextView countDownTmrTV;
+    TextView statusTV;
+    ProgressBar statusPB;
+    TextView helpViewTV;
+    FirebaseAuth mAuth;
     TextView authBannerTV;
     private boolean alertCallFlag = false;
     AlertDialog.Builder locNotEnableBuilder;
     TextView alertTV;
+    FirebaseUser user;
+    private boolean isAlreadyScanned = false;
+    private boolean isRemembered = false;
+    private boolean isInitialLogin = false;
     private static final int REQUEST_CAMERA_PERMISSION = 201;
     String[] permissions = {
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -102,15 +114,14 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         locNotEnableBuilder = new AlertDialog.Builder(this);
 
-        // Initialize SharedPreferences
-        authPreference = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        mAuth = FirebaseAuth.getInstance();
+        user = mAuth.getCurrentUser();
+
+        preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
 
         locNotEnableBuilder.setView(R.layout.loc_not_enable_dialog);
         locNotEnableBuilder.setPositiveButton("ENABLE", (dialog, which) -> showLocationSettings(this));
         locNotEnableAlertDialog = locNotEnableBuilder.create();
-
-        // Check if the user is authenticated
-        isAuthenticated = authPreference.getBoolean("isAuthenticated", false);
 
         timeoutHandler = new Handler(Looper.getMainLooper());
 
@@ -129,92 +140,100 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
         byPassBtn = findViewById(R.id.byPassAuth_button);
         locationTV = findViewById(R.id.authActivityCoordinatesView_textView);
         alertTV = findViewById(R.id.alertNotInCampus_textView);
-        authStatusTV = findViewById(R.id.authStatusView_textView);
-        statusProgressBar = findViewById(R.id.progressBar);
         authScanCardView = findViewById(R.id.authScan_cardView);
-//        scanBoundaryAnim = findViewById(R.id.scanBoundaryAnim);
         surfaceView = findViewById(R.id.surfaceView);
+        txtBarcodeValue = findViewById(R.id.txtBarcodeValue_textView);
         countDownTmrTV = findViewById(R.id.countDownTimer_textView);
-        authBannerTV = findViewById(R.id.authBanner_textView);
+        authBannerTV = findViewById(R.id.authBannerAuthQrActivity_textView);
+        helpViewTV = findViewById(R.id.helpView_textView);
+        statusPB = findViewById(R.id.statusPB_progressBar);
+        statusTV = findViewById(R.id.statusViewAuthQRActivity_textView);
+
+        helpViewTV.setVisibility(View.GONE);
 
         mainActivity = new Intent(AuthQRActivity.this, MainActivity.class);
+        helpActivity = new Intent(AuthQRActivity.this, HelpActivity.class);
+        authenticationActivity = new Intent(AuthQRActivity.this, AuthenticationActivity.class);
+        authQRActivity = new Intent(AuthQRActivity.this, AuthQRActivity.class);
+
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        currentLocation = new LocationModel(0.0000000000, 0.000000000);
+        gpsLocationProvider = new GPSLocationProvider(sharedDataView, this, this, null, this);
 
         byPassBtn.setOnClickListener(v -> {
             startActivity(mainActivity);
             isIntentPassedToMain = true;
         });
 
-        byPassBtn.setOnLongClickListener(v -> {
-            startVibration();
-            Toast.makeText(AuthQRActivity.this, "long-pressed", Toast.LENGTH_SHORT).show();
-            return false;
+        helpViewTV.setOnClickListener(v -> {
+            startActivity(helpActivity);
+            finish();
         });
 
-        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        currentLocation = new LocationModel(0.0000000, 0.000000);
-        gpsLocationProvider = new GPSLocationProvider(sharedDataView, this, this, null, this);
-
         startLocationUpdates();
-        initAuth();
+        init();
     }
 
-    public void initAuth() {
-        if (!isLocationNotEnabled(this)) {
-            authStatusTV.setOnClickListener(null);
-            authBannerTV.setText(R.string.please_wait);
-            showAuthStatusMsgView("Checking");
-            new Handler().postDelayed(() -> {
-                if (!isAuthenticated) {
-                    authStatusTV.setOnClickListener(null);
-                    authBannerTV.setText(R.string.scan_a_valid_qr_to_authenticate);
-                    showScanView();
-                    initialiseDetectorsAndSources();
+    private void init() {
+        setMsgView();
+        statusTV.setTextColor(getColor(R.color.checking));
+        statusTV.setText(R.string.checking);
+
+        isAlreadyScanned = preferences.getBoolean("isAlreadyScanned", false);
+        isRemembered = preferences.getBoolean("isRemembered", false);
+        isInitialLogin = preferences.getBoolean("isInitialLogin", false);
+
+        new Handler().postDelayed(() -> {
+            if (!isAlreadyScanned) {
+                setScanView();
+            } else {
+                if (isInitialLogin || !isRemembered || user == null) {
+                    startActivity(authenticationActivity);
+                    finish();
                 } else {
-                    authStatusTV.setOnClickListener(null);
-                    showAuthStatusMsgView("Signing in...");
+                    statusTV.setTextColor(getColor(R.color.signing_in));
+                    statusTV.setText(R.string.signing_in);
                     new Handler().postDelayed(() -> {
                         startActivity(mainActivity);
-                        isIntentPassedToMain = true;
-                        startActivityFlag = true;
                         finish();
-                    }, 1500);
+                    }, 1200);
                 }
-            }, 1500);
-        } else {
-            authBannerTV.setText(R.string.authentication);
-            showAuthStatusMsgView("Enable device's GPS provider");
-            statusProgressBar.setVisibility(View.GONE);
-            authStatusTV.setOnClickListener(v -> showLocationSettings(this));
-            showLocNotEnableDialog(true);
-        }
+            }
+        }, 1200);
     }
 
-    private void showAuthStatusMsgView(String msg) {
-        statusProgressBar.setVisibility(View.VISIBLE);
-        surfaceView.setVisibility(View.GONE);
-//        scanBoundaryAnim.setVisibility(View.GONE);
-        authStatusTV.setVisibility(View.VISIBLE);
-        countDownTmrTV.setVisibility(View.GONE);
 
-        if (msg != null) {
-            authStatusTV.setText(msg);
-        }
-    }
-
-    private void showScanView() {
-        authStatusTV.setVisibility(View.GONE);
-        statusProgressBar.setVisibility(View.GONE);
-
-        surfaceView.setVisibility(View.VISIBLE);
-//        scanBoundaryAnim.setVisibility(View.VISIBLE);
-        countDownTmrTV.setVisibility(View.VISIBLE);
+    private void setScanView() {
+        initialiseScanDetectorsAndSources();
         startCountdownTimer();
+        statusPB.setVisibility(View.GONE);
+        statusTV.setVisibility(View.GONE);
+        surfaceView.setVisibility(View.VISIBLE);
+        helpViewTV.setVisibility(View.VISIBLE);
+        countDownTmrTV.setVisibility(View.VISIBLE);
+        txtBarcodeValue.setVisibility(View.VISIBLE);
+        alertTV.setVisibility(View.VISIBLE);
+        locationTV.setVisibility(View.VISIBLE);
+        authBannerTV.setText(R.string.scan_a_valid_qr_to_authenticate);
     }
 
+    private void setMsgView() {
+        statusPB.setVisibility(View.VISIBLE);
+        statusTV.setVisibility(View.VISIBLE);
+        surfaceView.setVisibility(View.GONE);
+        helpViewTV.setVisibility(View.GONE);
+        countDownTmrTV.setVisibility(View.GONE);
+        txtBarcodeValue.setVisibility(View.GONE);
+        alertTV.setVisibility(View.GONE);
+        locationTV.setVisibility(View.GONE);
+        authBannerTV.setText(R.string.please_wait);
 
-    private void initialiseDetectorsAndSources() {
-        txtBarcodeValue = findViewById(R.id.txtBarcodeValue_textView);
+        if (cameraSource != null) {
+            cameraSource.release();
+        }
+    }
 
+    private void initialiseScanDetectorsAndSources() {
 
         BarcodeDetector barcodeDetector = new BarcodeDetector.Builder(this)
                 .setBarcodeFormats(Barcode.ALL_FORMATS)
@@ -237,7 +256,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
                     }
 
                 } catch (IOException e) {
-                    Log.e("AuthQRActivity", Objects.requireNonNull(e.getMessage()));
+                    Log.e(LOG_TAG, Objects.requireNonNull(e.getMessage()));
                 }
             }
 
@@ -267,27 +286,60 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
                     // Compare the scanned data with the target string
                     if (scannedData.trim().equals(AUTH_ACCESS_KEY)) {
                         if (isLocationNotEnabled(AuthQRActivity.this)) {
+                            helpViewTV.setVisibility(View.GONE);
                             txtBarcodeValue.setTextColor(getColor(R.color.enable_loc_provider));
                             txtBarcodeValue.setText(R.string.enable_your_location_provider);
                         } else {
                             // Check whether the user inside defined geofence-area
                             if (GeoFence.isInsideGeoFenceArea(currentLocation.lat, currentLocation.lon)) {
-                                txtBarcodeValue.setVisibility(View.VISIBLE);
-                                txtBarcodeValue.setText(R.string.qr_authenticated);
-
-                                // Start a new activity when a match is found
                                 if (!startActivityFlag) {
-                                    authPreference.edit().putBoolean("isAuthenticated", true).apply();
-                                    isAuthenticated = true;
+                                    runOnUiThread(() -> {
+                                        preferences.edit().putBoolean("isAlreadyScanned", true).apply();
 
-                                    startActivity(mainActivity);
-                                    isIntentPassedToMain = true;
-                                    finish();
+                                        txtBarcodeValue.setVisibility(View.VISIBLE);
+                                        helpViewTV.setVisibility(View.GONE);
+                                        txtBarcodeValue.setText(R.string.qr_authenticated);
+                                        alertTV.setVisibility(View.GONE);
+
+                                        resetCountdownTimer();
+                                        setMsgView();
+                                        if (isAlreadyScanned && isInitialLogin && !isRemembered) {
+                                            statusTV.setTextColor(getColor(R.color.please_wait));
+                                            statusTV.setText(R.string.please_login);
+                                            stopCountdownTimer();
+
+                                            new Handler().postDelayed(() -> {
+                                                startActivity(authenticationActivity);
+                                                finish();
+                                            }, 1200);
+                                        } else if (!isRemembered) {
+                                            statusTV.setTextColor(getColor(R.color.please_wait));
+                                            statusTV.setText(R.string.please_login);
+                                            stopCountdownTimer();
+
+                                            new Handler().postDelayed(() -> {
+                                                startActivity(authenticationActivity);
+                                                finish();
+                                            }, 1200);
+                                        } else {
+                                            statusTV.setTextColor(getColor(R.color.signing_in));
+                                            statusTV.setText(R.string.signing_in);
+                                            stopCountdownTimer();
+
+                                            new Handler().postDelayed(() -> {
+                                                startActivity(mainActivity);
+                                                finish();
+                                            }, 1200);
+                                        }
+                                        startActivityFlag = true;
+                                    });
+                                    startVibration();
                                 }
-                                startActivityFlag = true;
                             } else {
                                 runOnUiThread(() -> {
                                     txtBarcodeValue.setTextColor(getColor(R.color.qr_auth_success));
+                                    helpViewTV.setVisibility(View.VISIBLE);
+                                    alertTV.setVisibility(View.VISIBLE);
                                     alertTV.setText(R.string.not_in_campus);
                                     txtBarcodeValue.setText(R.string.qr_authenticated);
                                     startTVBlink(alertTV);
@@ -298,6 +350,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
                     } else {
                         // No match found, update UI accordingly
                         txtBarcodeValue.post(() -> {
+                            helpViewTV.setVisibility(View.GONE);
                             txtBarcodeValue.setTextColor(getColor(R.color.qr_auth_fail));
                             txtBarcodeValue.setText(R.string.invalid_qr);
                             alertTV.setText(" ");
@@ -319,6 +372,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
             blinkAnimation.setRepeatMode(Animation.REVERSE);
             blinkAnimation.setRepeatCount(Animation.INFINITE);
 
+            tv.setVisibility(View.VISIBLE);
             tv.setText(R.string.not_in_campus);
             tv.setTextColor(getColor(R.color.alert_text_red));
             tv.startAnimation(blinkAnimation);
@@ -355,7 +409,7 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
             locationTV.setText((MessageFormat.format("{0}°N\n{1}°E", coordinateFormat
                     .format(getCurrentLocation().lat), coordinateFormat.format(getCurrentLocation().lon))));
 
-            startVibration();
+//            startVibration();
         }
     }
 
@@ -412,6 +466,9 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
         startCountdownTimer();
     }
 
+    private void stopCountdownTimer() {
+        timeoutHandler.removeCallbacks(countdownRunnable);
+    }
 
     @Override
     protected void onPause() {
@@ -424,7 +481,9 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
     @Override
     protected void onResume() {
         super.onResume();
+        startLocationUpdates();
 
+        alertTV.setVisibility(View.GONE);
         if (isLocationNotEnabled(this)) {
             showLocNotEnableDialog(true);
         } else {
@@ -439,9 +498,9 @@ public class AuthQRActivity extends AppCompatActivity implements LocationUpdateL
     }
 
     @Override
-    public void onLocationUpdated(double latitude, double longitude) {
-        updateRealTimeLoc(latitude, longitude);
-        sharedDataView.setClientLat(latitude);
-        sharedDataView.setClientLon(longitude);
+    public void onLocationUpdated(double lat, double lon) {
+        updateRealTimeLoc(lat, lon);
+        sharedDataView.setClientLat(lat);
+        sharedDataView.setClientLon(lon);
     }
 }

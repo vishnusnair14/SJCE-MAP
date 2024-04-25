@@ -183,9 +183,9 @@ public class HomeFragment extends Fragment {
         });
 
         binding.exceedBoundaryBypassButton.setOnClickListener(v -> {
-            authPreference.edit().putBoolean("isAuthenticated", false).apply();
+            authPreference.edit().putBoolean("isAlreadyScanned", false).apply();
 
-            SoundNotify.playGeoFenceBoundaryExceedNotify();
+            SoundNotify.playGeoFenceBoundaryExceedAlert();
             Toast.makeText(requireContext(), "Device exceeded geofence boundary,\nre-authentication required",
                     Toast.LENGTH_LONG).show();
         });
@@ -196,7 +196,6 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         if (savedInstanceState != null) {
-            // Restore scroll position if available
             savedScrollPosition = savedInstanceState.getInt(SCROLL_POSITION_KEY, 0);
             scrollView.post(() -> scrollView.scrollTo(0, savedScrollPosition));
         }
@@ -215,7 +214,6 @@ public class HomeFragment extends Fragment {
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        // Save the scroll position
         savedScrollPosition = scrollView.getScrollY();
         outState.putInt(SCROLL_POSITION_KEY, savedScrollPosition);
     }

@@ -23,15 +23,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="15dp"
-        app:cardCornerRadius="20dp"
+        app:cardCornerRadius="25dp"
         app:cardElevation="4dp"
-        app:layout_constraintBottom_toBottomOf="@+id/byPassAuth_button"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.3">
+        app:layout_constraintVertical_bias="0.2">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -40,7 +38,7 @@
             android:padding="16dp">
 
             <TextView
-                android:id="@+id/authBanner_textView"
+                android:id="@+id/authBannerAuthQrActivity_textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/aldrich"
@@ -67,48 +65,23 @@
                 android:textAlignment="center"
                 android:textSize="12sp"
                 android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="@+id/authBanner_textView"
-                app:layout_constraintStart_toStartOf="@+id/authBanner_textView"
-                app:layout_constraintTop_toBottomOf="@+id/authBanner_textView" />
-
-            <ProgressBar
-                android:id="@+id/progressBar"
-                style="?android:attr/progressBarStyle"
-                android:layout_width="25sp"
-                android:layout_height="25sp"
-                android:layout_marginEnd="5dp"
-                android:indeterminateBehavior="repeat"
-                android:indeterminateTint="#626361"
-                app:layout_constraintBottom_toBottomOf="@+id/authStatusView_textView"
-                app:layout_constraintEnd_toStartOf="@+id/authStatusView_textView"
-                app:layout_constraintTop_toTopOf="@+id/authStatusView_textView" />
-
-            <TextView
-                android:id="@+id/authStatusView_textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="45dp"
-                android:fontFamily="@font/anonymous_pro"
-                android:text="@string/checking"
-                android:textColor="#4F702A"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView8" />
+                app:layout_constraintEnd_toEndOf="@+id/authBannerAuthQrActivity_textView"
+                app:layout_constraintStart_toStartOf="@+id/authBannerAuthQrActivity_textView"
+                app:layout_constraintTop_toBottomOf="@+id/authBannerAuthQrActivity_textView" />
 
             <SurfaceView
                 android:id="@+id/surfaceView"
                 android:layout_width="250dp"
                 android:layout_height="250dp"
-                android:layout_marginTop="45dp"
+                android:layout_marginTop="40dp"
                 android:elevation="12dp"
                 android:paddingLeft="5dp"
                 android:paddingTop="5dp"
                 android:paddingRight="5dp"
                 android:paddingBottom="5dp"
-                app:layout_constraintEnd_toEndOf="@+id/authBanner_textView"
-                app:layout_constraintStart_toStartOf="@+id/authBanner_textView"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="@+id/authBannerAuthQrActivity_textView"
+                app:layout_constraintStart_toStartOf="@+id/authBannerAuthQrActivity_textView"
                 app:layout_constraintTop_toBottomOf="@+id/textView8" />
 
 
@@ -116,14 +89,52 @@
                 android:id="@+id/countDownTimer_textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:layout_marginEnd="35dp"
+                android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
                 android:fontFamily="courier new"
                 android:text="@string/_0s_left"
                 android:textSize="11sp"
+                android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@+id/txtBarcodeValue_textView"
+                app:layout_constraintEnd_toEndOf="@+id/surfaceView"
+                app:layout_constraintTop_toBottomOf="@+id/surfaceView" />
+
+            <TextView
+                android:id="@+id/statusViewAuthQRActivity_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:fontFamily="@font/anonymous_pro"
+                android:text="@string/checking"
+                android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView8" />
+
+            <ProgressBar
+                android:id="@+id/statusPB_progressBar"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="21dp"
+                android:layout_height="21dp"
+                android:layout_marginEnd="5dp"
+                android:indeterminateTint="#7C7979"
+                app:layout_constraintBottom_toBottomOf="@+id/statusViewAuthQRActivity_textView"
+                app:layout_constraintEnd_toStartOf="@+id/statusViewAuthQRActivity_textView"
+                app:layout_constraintTop_toTopOf="@+id/statusViewAuthQRActivity_textView" />
+
+            <TextView
+                android:id="@+id/helpView_textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:fontFamily="courier new"
+                android:foregroundGravity="center"
+                android:gravity="center|center_horizontal|center_vertical"
+                android:textColor="#5A0808"
+                android:textStyle="bold"
+                android:visibility="gone"
+                app:drawableLeftCompat="@drawable/baseline_help_24"
+                app:layout_constraintStart_toStartOf="@+id/surfaceView"
                 app:layout_constraintTop_toBottomOf="@+id/surfaceView" />
 
             <TextView
@@ -131,7 +142,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="25dp"
                 android:layout_alignParentTop="true"
-                android:layout_marginTop="25dp"
+                android:layout_marginTop="10dp"
                 android:fontFamily="@font/anonymous_pro"
                 android:gravity="center"
                 android:paddingLeft="5dp"
@@ -140,22 +151,21 @@
                 android:paddingBottom="5dp"
                 android:textColor="@color/black"
                 android:textStyle="bold"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="@+id/surfaceView"
                 app:layout_constraintStart_toStartOf="@+id/surfaceView"
-                app:layout_constraintTop_toBottomOf="@+id/surfaceView" />
+                app:layout_constraintTop_toBottomOf="@+id/helpView_textView" />
 
             <TextView
                 android:id="@+id/authActivityCoordinatesView_textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:layout_marginEnd="1dp"
-                android:layout_marginBottom="1dp"
                 android:background="#52ECECEC"
                 android:fontFamily="courier new"
                 android:textSize="11sp"
                 android:textStyle="bold"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/alertNotInCampus_textView" />
 
@@ -168,6 +178,7 @@
                 android:fontFamily="@font/anonymous_pro"
                 android:textAlignment="center"
                 android:textStyle="bold"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/txtBarcodeValue_textView" />

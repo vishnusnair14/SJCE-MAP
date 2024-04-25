@@ -19,6 +19,9 @@
         <action
             android:id="@+id/action_nav_home_to_mapFragment"
             app:destination="@id/mapFragment" />
+        <action
+            android:id="@+id/action_nav_home_to_nav_about"
+            app:destination="@id/nav_about" />
     </fragment>
 
     <fragment
