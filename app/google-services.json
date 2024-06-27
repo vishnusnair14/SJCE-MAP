@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:924235844444:android:64adbcaec3515f0316cf99",
+        "mobilesdk_app_id": "1:924235844444:android:8748d72dc32dd89f16cf99",
         "android_client_info": {
-          "package_name": "com.vishnu.sjce_map"
+          "package_name": "com.vishnu.sjcemap"
         }
       },
       "oauth_client": [],

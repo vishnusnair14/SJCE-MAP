@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/nav_home"
-        android:name="com.vishnu.sjce_map.ui.home.HomeFragment"
+        android:name="com.vishnu.sjcemap.ui.home.HomeFragment"
         android:label="@string/menu_home"
         tools:layout="@layout/fragment_home" >
         <action
@@ -26,12 +26,12 @@
 
     <fragment
         android:id="@+id/mapFragment"
-        android:name="com.vishnu.sjce_map.ui.map.MapFragment"
+        android:name="com.vishnu.sjcemap.ui.map.MapFragment"
         android:label="Map Details"
         tools:layout="@layout/fragment_map" />
     <fragment
         android:id="@+id/departmentFragment"
-        android:name="com.vishnu.sjce_map.ui.home.DepartmentFragment"
+        android:name="com.vishnu.sjcemap.ui.home.DepartmentFragment"
         android:label="All Departments"
         tools:layout="@layout/fragment_department">
         <action
@@ -40,12 +40,12 @@
     </fragment>
     <fragment
         android:id="@+id/nav_about"
-        android:name="com.vishnu.sjce_map.ui.about.AboutFragment"
+        android:name="com.vishnu.sjcemap.ui.about.AboutFragment"
         android:label="About"
         tools:layout="@layout/fragment_about" />
     <fragment
         android:id="@+id/nav_mainspots"
-        android:name="com.vishnu.sjce_map.ui.home.MainSpotFragment"
+        android:name="com.vishnu.sjcemap.ui.home.AllLocationsFragment"
         android:label="All Destinations"
         tools:layout="@layout/fragment_main_spot">
         <action

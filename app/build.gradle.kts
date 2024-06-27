@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace = "com.vishnu.sjce_map"
+    namespace = "com.vishnu.sjcemap"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.vishnu.sjce_map"
+        applicationId = "com.vishnu.sjcemap"
         minSdk = 29
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode =4
+        versionName = "4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -20,7 +20,10 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
     compileOptions {
@@ -41,7 +44,6 @@ dependencies {
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation(libs.play.services.maps)
-    implementation(libs.firebase.firestore)
     implementation(libs.activity)
     implementation(libs.camera.view)
     implementation(libs.gridlayout)
@@ -51,9 +53,16 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth)
-    implementation(dependencyNotation = "com.google.firebase:firebase-analytics")
+    implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
+    implementation("com.google.firebase:firebase-analytics")
+
+    // Add the dependency for the Firebase Authentication library
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-storage")
+    implementation("com.google.firebase:firebase-database:21.0.0")
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
 
 
     implementation("androidx.appcompat:appcompat:1.4.1")
@@ -66,6 +75,9 @@ dependencies {
     implementation("com.squareup.picasso:picasso:2.71828")
     implementation("de.hdodenhof:circleimageview:3.1.0")
 
-    implementation("com.google.android.gms:play-services-location:18.0.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
     implementation("com.google.android.gms:play-services-maps:17.0.1")
+
+    implementation("org.greenrobot:eventbus:3.3.0")
+
 }

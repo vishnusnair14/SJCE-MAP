@@ -24,7 +24,7 @@
     <TextView
         android:id="@+id/textView11"
         android:layout_width="match_parent"
-        android:layout_height="100dp"
+        android:layout_height="55sp"
         android:background="#910C0C"
         android:backgroundTint="#D88811"
         android:fontFamily="@font/aldrich"
@@ -32,7 +32,7 @@
         android:scaleType="centerCrop"
         android:text="SJCE MAP"
         android:textColor="#FFFFFF"
-        android:textSize="30sp"
+        android:textSize="28sp"
         android:textStyle="bold"
         app:civ_border_color="#989797"
         app:civ_border_width="1dp"
@@ -43,45 +43,48 @@
     <ImageView
         android:id="@+id/spotImageSpotInfoView_imageView"
         android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_height="125dp"
         android:layout_marginTop="10dp"
         android:elevation="8dp"
         android:scaleType="fitCenter"
         android:src="@drawable/jss_logo"
         app:civ_border_color="#989797"
         app:civ_border_width="1dp"
+        app:layout_constraintBottom_toTopOf="@+id/getStartedLauncherActivity_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView11" />
+        app:layout_constraintTop_toBottomOf="@+id/textView11"
+        app:layout_constraintVertical_bias="0.25" />
 
     <TextView
         android:id="@+id/textView12"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="5dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="10dp"
         android:fontFamily="@font/autour_one"
         android:gravity="center"
-        android:text="Sri Jayachamarajendra College of Engineering"
-        android:textSize="18sp"
+        android:text="Sri Jayachamarajendra College\nof Engineering, Mysuru"
+        android:textSize="15sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spotImageSpotInfoView_imageView" />
+        app:layout_constraintTop_toBottomOf="@+id/textView9" />
 
     <TextView
         android:id="@+id/textView13"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="5dp"
+        android:layout_marginEnd="10dp"
         android:fontFamily="@font/amiko"
         android:gravity="center"
-        android:text="JSS Science and Technology University, Mysore 570006"
-        android:textSize="12sp"
+        android:text="JSS Science and Technology University, Mysuru 570006"
+        android:textSize="11sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView12" />
 
@@ -91,11 +94,24 @@
         android:layout_height="wrap_content"
         android:fontFamily="@font/acme"
         android:gravity="center"
-        android:text="Direction assistant app of SJCE Mysore"
         android:textColor="#18465A"
         android:textSize="20sp"
         app:layout_constraintBottom_toTopOf="@+id/getStartedLauncherActivity_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView13" />
+
+    <TextView
+        android:id="@+id/textView9"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:fontFamily="@font/anonymous_pro"
+        android:text="JSS Mahavidyapeetha"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/spotImageSpotInfoView_imageView" />
 </androidx.constraintlayout.widget.ConstraintLayout>

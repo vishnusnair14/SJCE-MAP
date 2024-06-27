@@ -8,8 +8,8 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.vishnu.sjce_map" />
-                  <option name="mobileSdkAppId" value="1:924235844444:android:64adbcaec3515f0316cf99" />
+                  <option name="appId" value="com.vishnu.sjcemap" />
+                  <option name="mobileSdkAppId" value="1:924235844444:android:8748d72dc32dd89f16cf99" />
                   <option name="projectId" value="sjce-map" />
                   <option name="projectNumber" value="924235844444" />
                 </ConnectionSetting>

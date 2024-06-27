@@ -6,14 +6,16 @@
         android:name="android.hardware.camera"
         android:required="false" />
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
         android:allowBackup="true"
@@ -25,9 +27,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SJCEMAP"
         tools:targetApi="31">
-        <activity
-            android:name=".CheckActivity"
-            android:exported="false" />
+
         <activity
             android:name=".LauncherActivity"
             android:exported="true">
@@ -46,13 +46,23 @@
             android:exported="false"
             android:label="HELP" />
         <activity
-            android:name=".ui.authentication.AuthenticationActivity"
+            android:name=".ui.authentication.AuthorizationActivity"
             android:exported="false"
             android:label="AUTHENTICATION" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:theme="@style/Theme.SJCEMAP.NoActionBar" />
+
+        <service
+            android:name=".service.LocationService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+
+        <service
+            android:name=".service.GPSProviderService"
+            android:foregroundServiceType="location" />
 
         <meta-data
             android:name="preloaded_fonts"

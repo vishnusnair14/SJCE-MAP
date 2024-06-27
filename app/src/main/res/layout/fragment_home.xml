@@ -19,6 +19,7 @@
         android:textColor="#FFC107"
         android:textSize="12sp"
         android:textStyle="bold"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -82,71 +83,31 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView3">
 
-                <LinearLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:layout_height="match_parent">
 
-                    <LinearLayout
+                    <Button
+                        android:id="@+id/viewAllTopLocationSCB_button2"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <Button
-                            android:id="@+id/registrationSectionSCB_button"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="4dp"
-                            android:layout_weight="1"
-                            android:backgroundTint="#0C5793"
-                            android:fontFamily="@font/anonymous_pro"
-                            android:text="@string/registration_section"
-                            android:textSize="12sp" />
-
-                        <Button
-                            android:id="@+id/adminBlockSCB_button"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
-                            android:layout_weight="1"
-                            android:backgroundTint="#0C5793"
-                            android:fontFamily="@font/anonymous_pro"
-                            android:text="@string/administration_block"
-                            android:textSize="12sp" />
-                    </LinearLayout>
-
-                    <!-- Second Row -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <Button
-                            android:id="@+id/principalOfficeSCB_button"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="4dp"
-                            android:layout_weight="1"
-                            android:backgroundTint="#0C5793"
-                            android:fontFamily="@font/anonymous_pro"
-                            android:text="@string/principal_s_office"
-                            android:textSize="12sp" />
-
-                        <Button
-                            android:id="@+id/viewAllTopLocationSCB_button"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
-                            android:layout_weight="1"
-                            android:backgroundTint="#304251"
-                            android:elevation="10dp"
-                            android:fontFamily="@font/anonymous_pro"
-                            android:text="@string/view_all_locations"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </LinearLayout>
+                        android:layout_gravity="center"
+                        android:layout_marginStart="25dp"
+                        android:layout_marginTop="25dp"
+                        android:layout_marginEnd="25dp"
+                        android:layout_marginBottom="25dp"
+                        android:layout_weight="1"
+                        android:backgroundTint="#304251"
+                        android:elevation="10dp"
+                        android:fontFamily="@font/anonymous_pro"
+                        android:text="@string/view_all_locations"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.cardview.widget.CardView>
 
@@ -177,72 +138,32 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView32">
 
-                <LinearLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/linearLayout"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:layout_height="wrap_content">
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <Button
+                        android:id="@+id/viewAllDepartmentSCB_button"
+                        android:layout_width="347dp"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <Button
-                            android:id="@+id/cseDeptSCB_button"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="4dp"
-                            android:layout_weight="2"
-                            android:backgroundTint="#0C5793"
-                            android:fontFamily="@font/anonymous_pro"
-                            android:text="@string/computer_science_engg"
-                            android:textSize="12sp" />
-
-                        <Button
-                            android:id="@+id/mcaDeptSCB_button"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
-                            android:layout_weight="1"
-                            android:backgroundTint="#0C5793"
-                            android:elegantTextHeight="true"
-                            android:fontFamily="@font/anonymous_pro"
-                            android:text="@string/mca_dept"
-                            android:textSize="12sp" />
-                    </LinearLayout>
+                        android:layout_marginStart="25dp"
+                        android:layout_marginTop="25dp"
+                        android:layout_marginEnd="25dp"
+                        android:layout_marginBottom="25dp"
+                        android:backgroundTint="#304251"
+                        android:elevation="10dp"
+                        android:fontFamily="@font/anonymous_pro"
+                        android:text="@string/view_all_departments"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <!-- Second Row -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <Button
-                            android:id="@+id/eceDeptSCB_button"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="4dp"
-                            android:layout_weight="1"
-                            android:backgroundTint="#0C5793"
-                            android:fontFamily="@font/anonymous_pro"
-                            android:text="@string/ece_dept"
-                            android:textSize="12sp" />
-
-                        <Button
-                            android:id="@+id/viewAllDepartmentSCB_button"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="4dp"
-                            android:layout_weight="2"
-                            android:backgroundTint="#304251"
-                            android:elevation="10dp"
-                            android:fontFamily="@font/anonymous_pro"
-                            android:text="@string/view_all_departments"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.cardview.widget.CardView>
 
             <TextView
@@ -320,6 +241,7 @@
                             android:layout_marginStart="5dp"
                             android:layout_weight="1"
                             android:backgroundTint="#4F702A"
+                            android:enabled="false"
                             android:fontFamily="@font/anonymous_pro"
                             android:text="SJCE AUD 1"
                             android:textSize="12sp" />
@@ -395,6 +317,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:backgroundTint="#4F702A"
+                            android:enabled="false"
                             android:fontFamily="@font/anonymous_pro"
                             android:text="@string/staff_parking_1_n_admin_block"
                             android:textSize="12sp" />
@@ -423,6 +346,7 @@
                             android:layout_marginEnd="5dp"
                             android:layout_weight="1"
                             android:backgroundTint="#4F702A"
+                            android:enabled="false"
                             android:fontFamily="@font/anonymous_pro"
                             android:text="@string/vehicle_parking_1"
                             android:textSize="12sp" />
@@ -433,6 +357,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:backgroundTint="#4F702A"
+                            android:enabled="false"
                             android:fontFamily="@font/anonymous_pro"
                             android:text="@string/vehicle_parking_2"
                             android:textSize="12sp" />
@@ -518,6 +443,7 @@
                             android:layout_marginEnd="4dp"
                             android:layout_weight="3"
                             android:backgroundTint="#C57909"
+                            android:enabled="false"
                             android:fontFamily="@font/anonymous_pro"
                             android:text="@string/canteen_1_n_poly_technique"
                             android:textSize="12sp" />
@@ -529,6 +455,7 @@
                             android:layout_marginStart="4dp"
                             android:layout_weight="2"
                             android:backgroundTint="#C57909"
+                            android:enabled="false"
                             android:fontFamily="@font/anonymous_pro"
                             android:gravity="center|center_horizontal|center_vertical"
                             android:text="CANTEEN\n2"

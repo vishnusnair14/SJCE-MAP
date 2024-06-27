@@ -139,5 +139,13 @@
     <string name="email_not_verified">(verified)</string>
     <string name="verify_login_with_registered_account"><![CDATA[Verify & login with registered account]]></string>
     <string name="please_wait_while_we_checking">Please wait, while we checking…</string>
-    <string name="please_login">Please login</string>
+    <string name="please_login">Redirecting to login…</string>
+    <string name="sjce_map">SJCE-MAP</string>
+    <string name="please_enable_yr_gps">Please enable your GPS</string>
+    <string name="LOGIN">LOGIN</string>
+    <string name="REGISTER">REGISTER</string>
+    <string name="gps_initialization_under">GPS is not initialized. Please wait while android system initialize GPS, This may take only few seconds…\n</string>
+    <string name="device_location_not_enabled">Device location not enabled!</string>
+    <string name="authentication_works_properly_only_if_device_location_are_enabled">Authentication works properly, only if device location are enabled</string>
+    <string name="init_gps_please_wait">Initializing GPS...</string>
 </resources>
