@@ -27,7 +27,7 @@ For the purposes of this Privacy Policy:
 
 
 
-- __Country__ refers to: Karnataka,  India
+- __Country__ refers to: All Indian Region
 
 - __Device__ means any device that can access the Service such as a computer, a cellphone or a digital tablet.
 
