@@ -1,5 +1,6 @@
 package com.vishnu.sjcemap.ui.about;
 
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -7,10 +8,16 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.vishnu.sjcemap.R;
 
+import java.util.Objects;
+
 public class AboutFragment extends Fragment {
+    DocumentReference dr;
 
 
     public AboutFragment() {
@@ -21,6 +28,8 @@ public class AboutFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        dr = db.collection("DeveloperData").document("AppData");
 
     }
 
@@ -28,6 +37,22 @@ public class AboutFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_about, container, false);
+        View view = inflater.inflate(R.layout.fragment_about, container, false);
+
+        TextView p = view.findViewById(R.id.privacyPolicyContent_textView);
+
+        /* listener for: mainNavigationBarBottomTextOnClickLink */
+        dr.addSnapshotListener((snapshot, e) -> {
+            if (snapshot != null && snapshot.exists()) {
+                if (snapshot.contains("privacy_policy")) {
+                    if (!Objects.requireNonNull(snapshot.get("privacy_policy")).toString().isEmpty()) {
+                        p.setText((String) snapshot.get("privacy_policy"));
+                    } else {
+                        p.setText("");
+                    }
+                }
+            }
+        });
+        return view;
     }
 }

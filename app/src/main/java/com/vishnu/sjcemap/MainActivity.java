@@ -36,10 +36,7 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.navigation.NavigationView;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.vishnu.sjcemap.callbacks.SearchQueryListener;
 import com.vishnu.sjcemap.miscellaneous.SharedDataView;
@@ -47,12 +44,8 @@ import com.vishnu.sjcemap.service.GPSProviderService;
 import com.vishnu.sjcemap.service.GeoFence;
 import com.vishnu.sjcemap.service.LocationService;
 
-import java.text.DecimalFormat;
-import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
@@ -67,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
     private double client_lat;
     private double client_lon;
     TextView locNotEnaViewTV;
-    FirebaseAuth mAuth;
     FirebaseFirestore db;
     String[] permissions = {
             Manifest.permission.RECORD_AUDIO,
@@ -92,12 +84,15 @@ public class MainActivity extends AppCompatActivity {
 
         setSupportActionBar(binding.appBarMain.toolbar);
 
-        mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
         locationTV = findViewById(R.id.coordinatesViewHome_textView);
         locNotEnaViewTV = findViewById(R.id.deviceLocNotEnabledInfoView_textView);
         locNotEnaViewTV.setVisibility(View.GONE);
+
+        // Register the receiver
+        IntentFilter filter = new IntentFilter(LocationService.ACTION_LOCATION_BROADCAST);
+        registerReceiver(locationReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         sharedDataView = new ViewModelProvider(this).get(SharedDataView.class);
@@ -109,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
         preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
 
         DocumentReference dr = db.collection("DeveloperData").document("AppData");
+
         RegisteredUsersCredentialsRef = db.collection("AuthenticationData")
                 .document("RegisteredUsersCredentials");
         RegisteredUsersEmailRef = db.collection("AuthenticationData")
@@ -120,20 +116,6 @@ public class MainActivity extends AppCompatActivity {
 
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
-        View headerView = navigationView.getHeaderView(0);
-
-        TextView emailView = headerView.findViewById(R.id.regEmailIdView_textView);
-
-        if (mAuth.getCurrentUser() != null) {
-            if (mAuth.getCurrentUser().isEmailVerified()) {
-                emailView.setText(MessageFormat.format("{0} {1}",
-                        mAuth.getCurrentUser().getEmail(), "(verified)"));
-            } else {
-                emailView.setText(mAuth.getCurrentUser().getEmail());
-            }
-        } else {
-            emailView.setText("");
-        }
 
         TextView navBtmBannerTV = findViewById(R.id.textView10);
 
@@ -189,8 +171,6 @@ public class MainActivity extends AppCompatActivity {
         if (!permissionsToRequest.isEmpty()) {
             ActivityCompat.requestPermissions(this, permissionsToRequest.toArray(new String[0]), 1);
         }
-
-
     }
 
 
@@ -212,9 +192,9 @@ public class MainActivity extends AppCompatActivity {
             Intent serviceIntent = new Intent(this, LocationService.class);
             serviceIntent.setAction(LocationService.ACTION_ENABLE_BROADCAST);
             startService(serviceIntent);
-            Toast.makeText(this, "MainAct: Location service started", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "MainAct: Location service started", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(this, "Location service is already running", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "Location service is already running", Toast.LENGTH_SHORT).show();
             Log.i(LOG_TAG, "Location service is already running");
         }
     }
@@ -223,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
         Intent serviceIntent = new Intent(this, LocationService.class);
         serviceIntent.setAction(LocationService.ACTION_DISABLE_BROADCAST);
         stopService(serviceIntent);
-        Toast.makeText(this, "MainAct: Location service stopped!", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "MainAct: Location service stopped!", Toast.LENGTH_SHORT).show();
     }
 
     private void startGPSProviderService() {
@@ -257,84 +237,21 @@ public class MainActivity extends AppCompatActivity {
         vibrator.vibrate(VibrationEffect.createOneShot(150, VibrationEffect.EFFECT_DOUBLE_CLICK));
     }
 
-    private void executeLogoutPrefs() {
-        FirebaseAuth.getInstance().signOut();
-        preferences.edit().putString("username", null).apply();
-        preferences.edit().putString("password", null).apply();
-        preferences.edit().putBoolean("isRemembered", false).apply();
-        preferences.edit().putBoolean("isAlreadyScanned", false).apply();
-        preferences.edit().putBoolean("isInitialLogin", true).apply();
-
-        startVibration();
-        Toast.makeText(this, "Logout successful", Toast.LENGTH_SHORT).show();
-        finish();
-    }
 
     private void showLogoutDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Logout");
-        builder.setMessage("Are you sure you want to logout?");
-        builder.setPositiveButton("Logout", (dialog, which) -> {
-            // Perform logout action
-            executeLogoutPrefs();
+        builder.setTitle("Reset");
+        builder.setMessage("Are you sure you want to reset. This will remove all your saved preferences?");
+        builder.setPositiveButton("Reset", (dialog, which) -> {
+            // Perform reset action
+            preferences.edit().putBoolean("isAlreadyScanned", false).apply();
+            startVibration();
+            Toast.makeText(this, "Reset successful", Toast.LENGTH_SHORT).show();
+
+            finish();
         });
         builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
         builder.show();
-    }
-
-    private void executeDelAccPrefs() {
-        Map<String, Object> updates = new HashMap<>();
-
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
-        assert user != null;
-        updates.put(user.getUid().trim(), FieldValue.delete());
-
-        user.delete()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        preferences.edit().clear().apply();
-                        Toast.makeText(this, "Account deleted successfully", Toast.LENGTH_LONG).show();
-                        finish();
-                    } else {
-                        Toast.makeText(this, "Failed to delete account" + task.getException(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-
-
-        /* Delete user credentials from "RegisteredUsersCredentials" db bucket */
-        RegisteredUsersCredentialsRef.update(updates)
-                .addOnSuccessListener(aVoid -> Log.d(LOG_TAG, "Credentials deleted successfully"))
-                .addOnFailureListener(e -> Log.w(LOG_TAG, "Error deleting credentials", e));
-
-        /* Delete registered email from "RegisteredUsersEmail" db bucket */
-        RegisteredUsersEmailRef.get().addOnSuccessListener(documentSnapshot -> {
-            if (documentSnapshot.exists()) {
-                List<String> emailAddresses = (List<String>) documentSnapshot.get("email_addresses");
-
-                if (emailAddresses != null) {
-                    emailAddresses.remove(user.getEmail());
-
-                    updates.put("email_addresses", emailAddresses);
-
-                    // Perform the update operation
-                    RegisteredUsersEmailRef.update(updates)
-                            .addOnSuccessListener(aVoid -> Log.d(LOG_TAG, "Email removed successfully"))
-                            .addOnFailureListener(e -> Log.w(LOG_TAG, "Error removing email", e));
-                } else {
-                    Log.d(LOG_TAG, "Array field 'email_addresses' is null");
-                }
-            } else {
-                Log.d(LOG_TAG, "Document does not exist");
-            }
-        });
-
-        preferences.edit().putString("username", null).apply();
-        preferences.edit().putString("password", null).apply();
-        preferences.edit().putBoolean("isRemembered", false).apply();
-        preferences.edit().putBoolean("isAlreadyScanned", false).apply();
-        preferences.edit().putBoolean("isInitialLogin", true).apply();
-        finish();
     }
 
     public static boolean isLocationNotEnabled(@NonNull Context context) {
@@ -347,44 +264,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void showDelAccDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Delete Account");
-        builder.setMessage("Are you sure you want to delete this account forever?");
-        builder.setPositiveButton("Delete", (dialog, which) -> {
-            // Perform account-deletion action
-            executeDelAccPrefs();
-        });
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-        builder.show();
-    }
-
     @Override
     protected void onStart() {
         super.onStart();
-        startLocationService();
-        startGPSProviderService();
-
-        IntentFilter filter = new IntentFilter(LocationService.ACTION_LOCATION_BROADCAST);
-        registerReceiver(locationReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        stopLocationService();
-        stopGPSProviderService();
-
-        unregisterReceiver(locationReceiver);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        startLocationService();
+        startGPSProviderService();
 
         if (isLocationNotEnabled(this)) {
-            showLocNotEnableDialog(true);
-            locNotEnaViewTV.setVisibility(View.VISIBLE);
+            if (!preferences.getBoolean("isAlreadyScanned", false)) {
+                showLocNotEnableDialog(true);
+                locNotEnaViewTV.setVisibility(View.VISIBLE);
+            }
         } else {
             locNotEnaViewTV.setVisibility(View.GONE);
             showLocNotEnableDialog(false);
@@ -399,13 +299,19 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Device exceeded geofence boundary,\nre-authentication required", Toast.LENGTH_SHORT).show();
             Log.i(LOG_TAG, "isAuthenticated: False");
         }
-        unregisterReceiver(locationReceiver);
-        stopLocationService();
+        try {
+            unregisterReceiver(locationReceiver);
+            stopLocationService();
+        } catch (Exception e) {
+            Log.e(LOG_TAG, e.toString());
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        stopLocationService();
+        stopGPSProviderService();
     }
 
     @Override
@@ -467,8 +373,6 @@ public class MainActivity extends AppCompatActivity {
             // Handle settings menu item click
             showLogoutDialog();
             return true;
-        } else if (id == R.id.action_delete_account) {
-            showDelAccDialog();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -479,7 +383,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
+        NavController navController = Navigation.findNavController(this,
+                R.id.nav_host_fragment_content_main);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
     }

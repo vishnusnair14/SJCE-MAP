@@ -7,10 +7,9 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
-    <string name="menu_home">Home</string>
-    <string name="menu_gallery">Gallery</string>
-    <string name="menu_slideshow">Slideshow</string>
+    <string name="menu_home">HOME</string>
     <string name="search">Search</string>
+    <string name="menu_about">ABOUT</string>
 
     <string-array name="sjce_place_list">
         <item>CMS</item>
@@ -21,19 +20,18 @@
 
     <string name="no_barcode_detected">No qrcode detected</string>
     <string name="menu_settings">Settings</string>
-    <string name="menu_about">About</string>
     <string name="all_departments">All Departments</string>
     <string name="current_location">{current_location}</string>
     <string name="change_start_type"><u>change</u></string>
-    <string name="scan_a_valid_qr_to_authenticate">Scan a valid QR to authenticate</string>
-    <string name="bypass_auth">byPass Auth</string>
+    <string name="scan_a_valid_qr_to_authenticate">SCAN A QR TO AUTHENTICATE</string>
+    <string name="bypass_auth">Bypass Auth.</string>
     <string name="not_in_campus">YOU ARE NOT INSIDE SJCE-MYSORE CAMPUS</string>
     <string name="_7c0505">#7C0505</string>
     <string name="user_authenticated">User Authenticated Successfully</string>
     <string name="_inside_the_sjce_mysore">You should scan the QR code within the\nSJCE Mysore Campus to authenticate</string>
     <string name="qr_authenticated">QR AUTHENTICATED</string>
     <string name="invalid_qr">INVALID QR</string>
-    <string name="_app_dev">©2024 vishnu s nair</string>
+    <string name="_app_dev">©2024 vishnustechnologies</string>
     <string name="_enable_your_device_loc">Enable your device location provider for the better direction assistance.\nPress ENABLE to continue.</string>
     <string name="location_not_enabled">Device location not enabled</string>
     <string name="_0s_left">0s left…</string>
@@ -49,20 +47,20 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="computer_science_engg"><![CDATA[Computer Science & Engg.]]></string>
     <string name="mca_dept">MCA Dept.</string>
-    <string name="view_all_locations">View all Locations</string>
+    <string name="view_all_locations">View all Spots</string>
     <string name="ece_dept">ECE Dept.</string>
     <string name="view_all_departments">View all Departments</string>
     <string name="sjce_main_parking">SJCE Main Parking</string>
     <string name="campus_parkings">Campus Parkings</string>
     <string name="nearby_cafeteria">Cafeterias</string>
-    <string name="vehicle_parking_2">VEHICLE PARKING 2</string>
-    <string name="mylari_canteen">MYLARI CANTEEN</string>
-    <string name="canteen_1_n_poly_technique">CANTEEN 1\n(POLY-TECHNIQUE)</string>
-    <string name="canteen_n2">CANTEEN\n2</string>
+    <string name="vehicle_parking_2">Parking 2</string>
+    <string name="mylari_canteen">Annapurna Canteen</string>
+    <string name="canteen_1_n_poly_technique">Canteen 1</string>
+    <string name="canteen_n2">Canteen 2</string>
     <string name="yampa">YAMPA</string>
-    <string name="vehicle_parking_1">VEHICLE PARKING 1</string>
-    <string name="staff_parking_1_n_admin_block">STAFF PARKING 1\n(admin block)</string>
-    <string name="staff_parking_2_n_cms_block">STAFF PARKING 2\n(GJB BLOCK)</string>
+    <string name="vehicle_parking_1">Parking 1</string>
+    <string name="staff_parking_1_n_admin_block">Staff Parking 1</string>
+    <string name="staff_parking_2_n_cms_block">Staff Parking 2</string>
     <string name="open_with_google_map">OPEN WITH GOOGLE MAP</string>
     <string name="start_place">Start place:</string>
     <string name="start_place_ncoordinates">Start place\ncoordinates:</string>
@@ -70,13 +68,13 @@
     <string name="loc_coords">$(loc_coords)</string>
     <string name="place">$(place)</string>
     <string name="end_place_coord">$(end_place_coord)</string>
-    <string name="sjce_main_library">SJCE CENTRAL LIBRARY</string>
+    <string name="sjce_main_library">SJCE Library</string>
     <string name="end_place">End place:</string>
     <string name="image">IMAGE</string>
     <string name="google_images">Google Images</string>
     <string name="enable_your_location_provider">Enable your location provider</string>
     <string name="enable_your_device_gps_location">Enable your device\'s GPS provider</string>
-    <string name="is_seminar_hall">IS SEMINAR HALL</string>
+    <string name="is_seminar_hall">IS Seminar Hall</string>
     <string name="checking">Checking…</string>
     <string name="signing_in">Signing in…</string>
     <string name="enable_dev_loc">"Enable your device's GPS "</string>
@@ -112,7 +110,7 @@
     <string name="length_should_be_6_or_more">Length should be 6 or more!</string>
     <string name="email_address_had_already_taken">Email address has already taken!</string>
     <string name="please_verify_your_email_id">Please verify your email id</string>
-    <string name="logout">Logout</string>
+    <string name="reset">Reset</string>
     <string name="email_verification_link_sent">Email verification link sent</string>
     <string name="set_a_new_password">Set a new password:</string>
     <string name="re_enter_the_password">Re-enter the password:</string>
@@ -144,8 +142,18 @@
     <string name="please_enable_yr_gps">Please enable your GPS</string>
     <string name="LOGIN">LOGIN</string>
     <string name="REGISTER">REGISTER</string>
-    <string name="gps_initialization_under">GPS is not initialized. Please wait while android system initialize GPS, This may take only few seconds…\n</string>
+    <string name="gps_initialization_under">Please wait while android system initialize GPS, This may take only few seconds…</string>
     <string name="device_location_not_enabled">Device location not enabled!</string>
-    <string name="authentication_works_properly_only_if_device_location_are_enabled">Authentication works properly, only if device location are enabled</string>
-    <string name="init_gps_please_wait">Initializing GPS...</string>
+    <string name="authentication_works_properly_only_if_device_location_are_enabled">Authentication works properly only if device location is enabled.</string>
+    <string name="init_gps_please_wait">Initializing GPS…</string>
+    <string name="starting_app">Starting app…</string>
+    <string name="TODO">TODO</string>
+    <string name="empty" />
+    <string name="get_started">Get Started</string>
+    <string name="enable">ENABLE</string>
+    <string name="get_direction">Get Direction in Map</string>
+    <string name="view_in_360">View in 360°</string>
+    <string name="privacy_pilocy">View in 360°</string>
+    <string name="contact_vishnustechnologies_gmail_com">Contact at: <u>vishnustechnologies@gmail.com</u></string>
+    <string name="developed_by_">Developed by <u>vishnustechnologies</u></string>
 </resources>

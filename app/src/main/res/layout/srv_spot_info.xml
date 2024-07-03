@@ -7,14 +7,16 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     android:autofillHints="75415"
-    android:backgroundTintMode="multiply"
-    app:cardBackgroundColor="#ADB0B1"
-    card_view:cardCornerRadius="20dp">
+    android:outlineAmbientShadowColor="@color/card_view_shadow"
+    android:outlineSpotShadowColor="@color/card_view_shadow"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="4dp"
+    app:cardUseCompatPadding="false">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:backgroundTintMode="add"
+        android:background="#B2F4F2F2"
         android:hapticFeedbackEnabled="true"
         android:padding="16dp">
 
@@ -34,11 +36,11 @@
             android:layout_width="120dp"
             android:layout_height="30dp"
             android:layout_marginTop="5dp"
-            android:fontFamily="@font/anonymous_pro"
+            android:fontFamily="@font/montserrat"
             android:gravity="center_horizontal|center_vertical"
-            android:text="$(location_name)"
+            android:text="location_name"
             android:textAlignment="center"
-            android:textColor="#FAFAFA"
+            android:textColor="#4A0C0C"
             android:textSize="12sp"
             android:textStyle="bold"
             card_view:layout_constraintEnd_toEndOf="parent"
@@ -60,10 +62,8 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+
 </androidx.cardview.widget.CardView>
-
-
-
 
 
 

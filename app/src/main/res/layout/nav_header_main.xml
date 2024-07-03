@@ -47,7 +47,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:fontFamily="@font/anonymous_pro"
-        android:text="$(reg_email_id)"
+        android:text="WELCOME"
         android:textColor="#CAC3C3"
         android:textSize="11sp"
         android:textStyle="bold" />

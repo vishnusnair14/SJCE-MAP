@@ -23,6 +23,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.squareup.picasso.Picasso;
+import com.vishnu.sjcemap.R;
 import com.vishnu.sjcemap.databinding.FragmentMapBinding;
 import com.vishnu.sjcemap.miscellaneous.Overlay360View;
 import com.vishnu.sjcemap.miscellaneous.SharedDataView;
@@ -63,8 +64,8 @@ public class MapFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedDataView = new ViewModelProvider(requireActivity()).get(SharedDataView.class);
-        destPlaceLat = "0.0000000000000";
-        destPlaceLon = "0.0000000000000";
+        destPlaceLat = "0.0";
+        destPlaceLon = "0.0";
 
     }
 
@@ -156,9 +157,9 @@ public class MapFragment extends Fragment {
                             String placeName = Objects.requireNonNull(dataMap.get("spot_name")).toString().toUpperCase();
                             String aboutDept;
                             if (dataMap.containsKey("about_department")) {
-                                aboutDept = Objects.requireNonNull(dataMap.get("about_department")).toString();
+                                aboutDept = "About department\n" + Objects.requireNonNull(dataMap.get("about_department"));
                             } else if (dataMap.containsKey("about_location")) {
-                                aboutDept = Objects.requireNonNull(dataMap.get("about_location")).toString();
+                                aboutDept = "About spot\n" + Objects.requireNonNull(dataMap.get("about_location"));
                             } else {
                                 aboutDept = "";
                             }
@@ -240,9 +241,9 @@ public class MapFragment extends Fragment {
 
                             /* loads destination description */
                             if (!aboutDept.isEmpty()) {
-                                binding.aboutDepartmentViewTextView.setText(MessageFormat.format("About Department:\n{0}", aboutDept));
+                                binding.aboutDepartmentViewTextView.setText(MessageFormat.format("{0}", aboutDept));
                             } else {
-                                binding.aboutDepartmentViewTextView.setText("TODO");
+                                binding.aboutDepartmentViewTextView.setText(R.string.TODO);
                             }
                             /* loads google images */
                             String[] imageUrls = {spotGoogleImage1, spotGoogleImage2, spotGoogleImage3, spotGoogleImage4};

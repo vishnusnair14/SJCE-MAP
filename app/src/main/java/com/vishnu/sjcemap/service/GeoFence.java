@@ -37,7 +37,7 @@ public class GeoFence {
             topLeftLat = 12.318289380014258;
             topLeftLon = 76.61125779310221;
 
-            // SJCE-MYSORE MAIN ENTRY GATE COORDINATES:`
+            // SJCE-MYSORE MAIN ENTRY GATE COORDINATES:
             bottomRightLat = 12.311264587819064;
             bottomRightLon = 76.61526699712476;
         }

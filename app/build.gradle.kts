@@ -11,8 +11,8 @@ android {
         applicationId = "com.vishnu.sjcemap"
         minSdk = 29
         targetSdk = 34
-        versionCode =4
-        versionName = "4.0"
+        versionCode = 5
+        versionName = "5.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -43,7 +43,6 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.ktx)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
-    implementation(libs.play.services.maps)
     implementation(libs.activity)
     implementation(libs.camera.view)
     implementation(libs.gridlayout)
@@ -54,20 +53,17 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
 
     implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
-    implementation("com.google.firebase:firebase-analytics")
+//    implementation("com.google.firebase:firebase-analytics")
 
     // Add the dependency for the Firebase Authentication library
     // When using the BoM, you don't specify versions in Firebase library dependencies
     implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-storage")
-    implementation("com.google.firebase:firebase-database:21.0.0")
-    implementation("com.google.android.gms:play-services-auth:21.2.0")
+//    implementation("com.google.android.gms:play-services-auth:21.2.0")
+    implementation("com.google.android.gms:play-services-maps:19.0.0")
 
-
-    implementation("androidx.appcompat:appcompat:1.4.1")
-    implementation("androidx.camera:camera-camera2:1.3.2")
-    implementation("androidx.camera:camera-lifecycle:1.3.2")
+    implementation("androidx.camera:camera-camera2:1.3.4")
+    implementation("androidx.camera:camera-lifecycle:1.3.4")
 
     implementation("com.google.mlkit:barcode-scanning:17.2.0")
     implementation("com.google.android.gms:play-services-vision:20.1.3")
@@ -76,7 +72,6 @@ dependencies {
     implementation("de.hdodenhof:circleimageview:3.1.0")
 
     implementation("com.google.android.gms:play-services-location:21.0.1")
-    implementation("com.google.android.gms:play-services-maps:17.0.1")
 
     implementation("org.greenrobot:eventbus:3.3.0")
 

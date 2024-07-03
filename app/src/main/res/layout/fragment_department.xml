@@ -5,7 +5,9 @@
     android:id="@+id/frameLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E6E4E4"
+    android:background="#4A4444"
+    android:backgroundTint="#B8D1CF"
+    android:backgroundTintMode="add"
     tools:context=".ui.home.DepartmentFragment">
 
     <TextView
@@ -13,7 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:fontFamily="@font/akaya_telivigala"
+        android:fontFamily="@font/advent_pro_bold"
         android:foregroundGravity="center_vertical|center_horizontal"
         android:gravity="center|center_horizontal|center_vertical"
         android:text="@string/all_departments"
@@ -26,8 +28,9 @@
     <GridView
         android:id="@+id/allDepartment_recycleView"
         android:layout_width="match_parent"
-        android:layout_height="600dp"
-        android:layout_marginBottom="10dp"
+        android:layout_height="match_parent"
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="25dp"
         android:background="@android:color/transparent"
         android:clipToPadding="false"
         android:gravity="center"
@@ -41,7 +44,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView34"
-        app:layout_constraintVertical_bias="0.0"
         app:spanCount="3"
         tools:listitem="@layout/srv_all_department_info" />
 </androidx.constraintlayout.widget.ConstraintLayout>

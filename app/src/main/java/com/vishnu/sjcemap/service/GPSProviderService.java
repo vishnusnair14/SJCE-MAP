@@ -7,9 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.LocationManager;
 import android.os.IBinder;
-import android.widget.Toast;
-
-import androidx.appcompat.widget.SwitchCompat;
 
 import java.util.Objects;
 

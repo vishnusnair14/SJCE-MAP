@@ -9,7 +9,8 @@
         android:id="@+id/nav_home"
         android:name="com.vishnu.sjcemap.ui.home.HomeFragment"
         android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" >
+        android:color="@color/colorAccent"
+        tools:layout="@layout/fragment_home">
         <action
             android:id="@+id/action_nav_home_to_departmentFragment"
             app:destination="@id/departmentFragment" />
@@ -27,12 +28,12 @@
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.vishnu.sjcemap.ui.map.MapFragment"
-        android:label="Map Details"
+        android:label="Map Assistance"
         tools:layout="@layout/fragment_map" />
     <fragment
         android:id="@+id/departmentFragment"
         android:name="com.vishnu.sjcemap.ui.home.DepartmentFragment"
-        android:label="All Departments"
+        android:label="@string/menu_home"
         tools:layout="@layout/fragment_department">
         <action
             android:id="@+id/action_departmentFragment_to_mapFragment"
@@ -41,12 +42,12 @@
     <fragment
         android:id="@+id/nav_about"
         android:name="com.vishnu.sjcemap.ui.about.AboutFragment"
-        android:label="About"
+        android:label="@string/menu_about"
         tools:layout="@layout/fragment_about" />
     <fragment
         android:id="@+id/nav_mainspots"
         android:name="com.vishnu.sjcemap.ui.home.AllLocationsFragment"
-        android:label="All Destinations"
+        android:label="@string/menu_home"
         tools:layout="@layout/fragment_main_spot">
         <action
             android:id="@+id/action_nav_mainspots_to_mapFragment"

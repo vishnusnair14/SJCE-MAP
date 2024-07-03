@@ -4,7 +4,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#4A4444"
+    android:backgroundTint="#B8D1CF"
+    android:backgroundTintMode="add">
 
     <TextView
         android:id="@+id/deviceLocNotEnabledInfoView_textView"
@@ -42,9 +45,12 @@
     <ScrollView
         android:id="@+id/homeFragment_scrollView"
         android:layout_width="match_parent"
-        android:layout_height="580dp"
-        android:layout_marginTop="5dp"
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:elevation="10dp"
         android:paddingTop="25dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/coordinatesViewHome_textView"
@@ -74,9 +80,11 @@
                 android:id="@+id/shortcutOptions_cardView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
+                android:layout_marginStart="10dp"
                 android:layout_marginTop="5dp"
-                android:layout_marginEnd="5dp"
+                android:layout_marginEnd="10dp"
+                android:outlineAmbientShadowColor="@color/alert_text_red"
+                android:outlineSpotShadowColor="@color/card_view_shadow"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -85,23 +93,24 @@
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="match_parent"
+                    android:background="#B2EAE7E7">
 
                     <Button
                         android:id="@+id/viewAllTopLocationSCB_button2"
+                        style="@style/Widget.Material3.ExtendedFloatingActionButton.Surface"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center"
+                        android:layout_gravity="center_vertical"
                         android:layout_marginStart="25dp"
                         android:layout_marginTop="25dp"
                         android:layout_marginEnd="25dp"
                         android:layout_marginBottom="25dp"
-                        android:layout_weight="1"
-                        android:backgroundTint="#304251"
-                        android:elevation="10dp"
-                        android:fontFamily="@font/anonymous_pro"
+                        android:backgroundTint="#FDD58D"
+                        android:clickable="true"
+                        android:fontFamily="@font/montserrat"
                         android:text="@string/view_all_locations"
-                        android:textSize="11sp"
+                        android:textSize="16sp"
                         android:textStyle="bold"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -115,6 +124,7 @@
                 android:id="@+id/textView32"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
                 android:layout_marginTop="25dp"
                 android:drawablePadding="5dp"
                 android:fontFamily="@font/advent_pro_bold"
@@ -129,9 +139,11 @@
                 android:id="@+id/allDepartment_cardView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
+                android:layout_marginStart="10dp"
                 android:layout_marginTop="5dp"
-                android:layout_marginEnd="5dp"
+                android:layout_marginEnd="10dp"
+                android:outlineAmbientShadowColor="@color/card_view_shadow"
+                android:outlineSpotShadowColor="@color/card_view_shadow"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -141,21 +153,23 @@
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/linearLayout"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:background="#B2EAE7E7">
 
                     <Button
                         android:id="@+id/viewAllDepartmentSCB_button"
-                        android:layout_width="347dp"
+                        style="@style/Widget.Material3.ExtendedFloatingActionButton.Surface"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
                         android:layout_marginStart="25dp"
                         android:layout_marginTop="25dp"
                         android:layout_marginEnd="25dp"
                         android:layout_marginBottom="25dp"
-                        android:backgroundTint="#304251"
-                        android:elevation="10dp"
-                        android:fontFamily="@font/anonymous_pro"
+                        android:backgroundTint="#FDD58D"
+                        android:fontFamily="@font/montserrat"
                         android:text="@string/view_all_departments"
-                        android:textSize="11sp"
+                        android:textSize="16sp"
                         android:textStyle="bold"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -175,7 +189,6 @@
                 android:fontFamily="@font/advent_pro_bold"
                 android:text="Others"
                 android:textSize="22sp"
-                android:textStyle="bold"
                 app:drawableLeftCompat="@drawable/baseline_notes_24"
                 app:layout_constraintStart_toStartOf="@+id/parkingArea_cardView1"
                 app:layout_constraintTop_toBottomOf="@+id/allDepartment_cardView" />
@@ -184,9 +197,11 @@
                 android:id="@+id/parkingArea_cardView1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
+                android:layout_marginStart="10dp"
                 android:layout_marginTop="5dp"
-                android:layout_marginEnd="5dp"
+                android:layout_marginEnd="10dp"
+                android:outlineAmbientShadowColor="@color/card_view_shadow"
+                android:outlineSpotShadowColor="@color/card_view_shadow"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -196,6 +211,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="#B2EAE7E7"
                     android:orientation="vertical"
                     android:padding="16dp">
 
@@ -207,13 +223,14 @@
 
                         <Button
                             android:id="@+id/sjceMainLibrarySCB_button"
+                            style="@style/Widget.Material3.Button.ElevatedButton.Icon"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:backgroundTint="#4F702A"
-                            android:fontFamily="@font/anonymous_pro"
+                            android:fontFamily="@font/montserrat"
                             android:text="@string/sjce_main_library"
-                            android:textSize="12sp" />
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
 
                     </LinearLayout>
 
@@ -226,25 +243,15 @@
 
                         <Button
                             android:id="@+id/sjceISSeminarHallSCB_button"
+                            style="@style/Widget.Material3.Button.ElevatedButton.Icon"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:backgroundTint="#4F702A"
-                            android:fontFamily="@font/anonymous_pro"
+                            android:fontFamily="@font/montserrat"
                             android:text="@string/is_seminar_hall"
-                            android:textSize="12sp" />
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
 
-                        <Button
-                            android:id="@+id/sjceAuditorium2SCB_button"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="5dp"
-                            android:layout_weight="1"
-                            android:backgroundTint="#4F702A"
-                            android:enabled="false"
-                            android:fontFamily="@font/anonymous_pro"
-                            android:text="SJCE AUD 1"
-                            android:textSize="12sp" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -273,9 +280,11 @@
                 android:id="@+id/parkingArea_cardView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
+                android:layout_marginStart="10dp"
                 android:layout_marginTop="5dp"
-                android:layout_marginEnd="5dp"
+                android:layout_marginEnd="10dp"
+                android:outlineAmbientShadowColor="@color/card_view_shadow"
+                android:outlineSpotShadowColor="@color/card_view_shadow"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -285,6 +294,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="#B2EAE7E7"
                     android:orientation="vertical"
                     android:padding="16dp">
 
@@ -295,13 +305,14 @@
 
                         <Button
                             android:id="@+id/sjceMainParkingSCB_button"
+                            style="@style/Widget.Material3.Button.ElevatedButton.Icon"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:backgroundTint="#4F702A"
-                            android:fontFamily="@font/anonymous_pro"
+                            android:fontFamily="@font/montserrat"
                             android:text="@string/sjce_main_parking"
-                            android:textSize="12sp" />
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
 
                     </LinearLayout>
 
@@ -313,25 +324,27 @@
 
                         <Button
                             android:id="@+id/staffParking1SCB_button"
+                            style="@style/Widget.Material3.Button.ElevatedButton.Icon"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:backgroundTint="#4F702A"
                             android:enabled="false"
-                            android:fontFamily="@font/anonymous_pro"
+                            android:fontFamily="@font/montserrat"
                             android:text="@string/staff_parking_1_n_admin_block"
-                            android:textSize="12sp" />
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
 
                         <Button
                             android:id="@+id/staffParking2SCB_button"
+                            style="@style/Widget.Material3.Button.ElevatedButton.Icon"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="5dp"
                             android:layout_weight="1"
-                            android:backgroundTint="#4F702A"
-                            android:fontFamily="@font/anonymous_pro"
+                            android:fontFamily="@font/montserrat"
                             android:text="@string/staff_parking_2_n_cms_block"
-                            android:textSize="12sp" />
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -341,26 +354,28 @@
 
                         <Button
                             android:id="@+id/vehicleParking1SCB_Button"
+                            style="@style/Widget.Material3.Button.ElevatedButton.Icon"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="5dp"
                             android:layout_weight="1"
-                            android:backgroundTint="#4F702A"
                             android:enabled="false"
-                            android:fontFamily="@font/anonymous_pro"
+                            android:fontFamily="@font/montserrat"
                             android:text="@string/vehicle_parking_1"
-                            android:textSize="12sp" />
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
 
                         <Button
                             android:id="@+id/vehicleParking2SCB_Button"
+                            style="@style/Widget.Material3.Button.ElevatedButton.Icon"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:backgroundTint="#4F702A"
                             android:enabled="false"
-                            android:fontFamily="@font/anonymous_pro"
+                            android:fontFamily="@font/montserrat"
                             android:text="@string/vehicle_parking_2"
-                            android:textSize="12sp" />
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -385,12 +400,13 @@
                 android:id="@+id/nearbyCafeteria_cardView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
+                android:layout_marginStart="10dp"
                 android:layout_marginTop="5dp"
-                android:layout_marginEnd="5dp"
-                android:layout_marginBottom="5dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginBottom="10dp"
+                android:outlineAmbientShadowColor="@color/card_view_shadow"
+                android:outlineSpotShadowColor="@color/card_view_shadow"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="5dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -399,6 +415,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="#B2EAE7E7"
                     android:orientation="vertical"
                     android:padding="16dp">
 
@@ -409,57 +426,64 @@
 
                         <Button
                             android:id="@+id/yampaCafeteriaSCB_button"
+                            style="@style/Widget.Material3.Button.ElevatedButton.Icon"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="4dp"
                             android:layout_weight="1"
-                            android:backgroundTint="#C57909"
-                            android:fontFamily="@font/anonymous_pro"
+                            android:fontFamily="@font/montserrat"
                             android:text="@string/yampa"
-                            android:textSize="12sp" />
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
 
                         <Button
                             android:id="@+id/mylariCafeteriaSCB_button"
+                            style="@style/Widget.Material3.Button.ElevatedButton.Icon"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
                             android:layout_weight="2"
-                            android:backgroundTint="#C57909"
-                            android:fontFamily="@font/anonymous_pro"
+                            android:fontFamily="@font/montserrat"
                             android:text="@string/mylari_canteen"
-                            android:textSize="12sp" />
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
                     </LinearLayout>
 
                     <!-- Second Row -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:background="#B2F4F2F2"
                         android:orientation="horizontal">
 
                         <Button
                             android:id="@+id/sjceCanteen1SCB_button"
+                            style="@style/Widget.Material3.Button.ElevatedButton.Icon"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="4dp"
                             android:layout_weight="3"
-                            android:backgroundTint="#C57909"
                             android:enabled="false"
-                            android:fontFamily="@font/anonymous_pro"
+                            android:fontFamily="@font/montserrat"
                             android:text="@string/canteen_1_n_poly_technique"
-                            android:textSize="12sp" />
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
 
                         <Button
                             android:id="@+id/sjceCanteen2SCB_button"
+                            style="@style/Widget.Material3.Button.ElevatedButton.Icon"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_gravity="center"
                             android:layout_marginStart="4dp"
                             android:layout_weight="2"
-                            android:backgroundTint="#C57909"
                             android:enabled="false"
-                            android:fontFamily="@font/anonymous_pro"
+                            android:fontFamily="@font/montserrat"
                             android:gravity="center|center_horizontal|center_vertical"
-                            android:text="CANTEEN\n2"
-                            android:textSize="11sp"
+                            android:text="@string/canteen_n2"
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
                             android:textStyle="bold" />
                     </LinearLayout>
                 </LinearLayout>
@@ -479,7 +503,7 @@
         android:text="Exceed boundary"
         android:textColor="#FFC107"
         android:textSize="11sp"
-        android:textStyle="bold"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

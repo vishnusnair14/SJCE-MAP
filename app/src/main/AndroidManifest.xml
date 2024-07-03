@@ -41,17 +41,11 @@
             android:name=".AuthQRActivity"
             android:exported="false"
             android:label="AUTHORISATION" />
-        <activity
-            android:name=".ui.authentication.HelpActivity"
-            android:exported="false"
-            android:label="HELP" />
-        <activity
-            android:name=".ui.authentication.AuthorizationActivity"
-            android:exported="false"
-            android:label="AUTHENTICATION" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:autoRemoveFromRecents="true"
             android:theme="@style/Theme.SJCEMAP.NoActionBar" />
 
         <service

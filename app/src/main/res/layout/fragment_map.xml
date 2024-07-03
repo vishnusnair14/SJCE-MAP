@@ -9,8 +9,8 @@
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/imageViewMapFrag_circleImageView"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="155dp"
+        android:layout_height="160dp"
         android:layout_marginStart="5dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="5dp"
@@ -31,7 +31,7 @@
         android:layout_marginEnd="20dp"
         android:fontFamily="@font/anonymous_pro"
         android:gravity="center"
-        android:textColor="#083451"
+        android:textColor="#021E35"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -45,6 +45,7 @@
         android:fontFamily="courier new"
         android:textSize="12sp"
         android:textStyle="bold"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/placeView_textView" />
@@ -53,70 +54,72 @@
         android:id="@+id/aboutDepartmentView_textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="25dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="35dp"
-        android:layout_marginEnd="25dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="8dp"
         android:fontFamily="@font/anonymous_pro"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/viewIn360Deg_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/coordinateView_textView"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toBottomOf="@+id/coordinateView_textView" />
 
     <Button
         android:id="@+id/assistWalkDirection_imageButton"
-        android:layout_width="wrap_content"
+        style="@style/Widget.Material3.Button.ElevatedButton.Icon"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="15dp"
-        android:layout_marginBottom="15dp"
-        android:fontFamily="@font/anonymous_pro"
-        android:text="Get Direction"
-        android:textSize="12sp"
+        android:layout_marginStart="50dp"
+        android:layout_marginEnd="50dp"
+        android:layout_marginBottom="30dp"
+        android:enabled="false"
+        android:fontFamily="@font/montserrat"
+        android:text="@string/get_direction"
         android:textStyle="bold"
         app:icon="@drawable/baseline_directions_walk_24"
-        app:layout_constraintBottom_toTopOf="@+id/googleImageBanner_textView"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/googleImageBanner_textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="5dp"
-        android:layout_marginBottom="5dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="15dp"
         android:fontFamily="@font/aldrich"
         android:textSize="11sp"
-        app:layout_constraintBottom_toTopOf="@+id/horizontalScrollView"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/aboutDepartmentView_textView" />
 
     <Button
         android:id="@+id/viewIn360Deg_button"
-        android:layout_width="wrap_content"
+        style="@style/Widget.Material3.Button.ElevatedButton.Icon"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="15dp"
-        android:layout_marginBottom="15dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginEnd="50dp"
+        android:layout_marginBottom="10dp"
         android:enabled="false"
-        android:fontFamily="@font/anonymous_pro"
-        android:text="View in 360°"
-        android:textSize="12sp"
+        android:fontFamily="@font/montserrat"
+        android:text="@string/view_in_360"
         android:textStyle="bold"
         app:icon="@drawable/baseline_360_24"
-        app:layout_constraintBottom_toTopOf="@+id/googleImageBanner_textView"
+        app:layout_constraintBottom_toTopOf="@+id/assistWalkDirection_imageButton"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <HorizontalScrollView
         android:id="@+id/horizontalScrollView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="3dp"
-        android:layout_marginEnd="3dp"
-        android:layout_marginBottom="15dp"
-        android:background="#FFFCFC"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="8dp"
+        android:background="#FDF6FE"
         android:elevation="5dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/googleImageBanner_textView">
 
         <LinearLayout
             android:layout_width="wrap_content"

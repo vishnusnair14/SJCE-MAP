@@ -11,7 +11,6 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.IBinder;
 import android.os.Looper;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -23,17 +22,9 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.vishnu.sjcemap.R;
-
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
 
 
 public class LocationService extends Service {
@@ -50,7 +41,7 @@ public class LocationService extends Service {
     private FirebaseFirestore db;
     SharedPreferences preferences;
     public static boolean isRunning = false;
-    private FirebaseUser user;
+
     private boolean isBroadcastingEnabled = true;
 
 
@@ -60,7 +51,6 @@ public class LocationService extends Service {
         isRunning = true;
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         db = FirebaseFirestore.getInstance();
-        user = FirebaseAuth.getInstance().getCurrentUser();
         preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
 
         createNotificationChannel();
@@ -107,7 +97,7 @@ public class LocationService extends Service {
         return new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Location Service")
                 .setContentText("Tracking location in the background")
-                .setSmallIcon(R.drawable.baseline_360_24)
+                .setSmallIcon(R.drawable.baseline_share_location_24)
                 .build();
     }
 

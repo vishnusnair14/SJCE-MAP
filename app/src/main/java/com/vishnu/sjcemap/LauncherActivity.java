@@ -10,17 +10,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class LauncherActivity extends AppCompatActivity {
     Button getStartedBtn;
-    FirebaseFirestore db;
-    FirebaseAuth mAuth;
-    private final String LOG_TAG = "LauncherActivity";
     String[] permissions = {
             android.Manifest.permission.ACCESS_FINE_LOCATION,
             android.Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -32,9 +26,6 @@ public class LauncherActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launcher);
-
-        db = FirebaseFirestore.getInstance();
-        mAuth = FirebaseAuth.getInstance();
 
         Intent authQRActivity = new Intent(LauncherActivity.this, AuthQRActivity.class);
         getStartedBtn = findViewById(R.id.getStartedLauncherActivity_button);
