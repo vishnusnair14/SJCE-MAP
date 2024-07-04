@@ -1,6 +1,5 @@
 package com.vishnu.sjcemap.ui.about;
 
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -30,7 +29,6 @@ public class AboutFragment extends Fragment {
         super.onCreate(savedInstanceState);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         dr = db.collection("DeveloperData").document("AppData");
-
     }
 
     @Override
@@ -41,18 +39,19 @@ public class AboutFragment extends Fragment {
 
         TextView p = view.findViewById(R.id.privacyPolicyContent_textView);
 
-        /* listener for: mainNavigationBarBottomTextOnClickLink */
+        /* listener for: privacy_policy_link */
         dr.addSnapshotListener((snapshot, e) -> {
             if (snapshot != null && snapshot.exists()) {
-                if (snapshot.contains("privacy_policy")) {
-                    if (!Objects.requireNonNull(snapshot.get("privacy_policy")).toString().isEmpty()) {
-                        p.setText((String) snapshot.get("privacy_policy"));
+                if (snapshot.contains("privacy_policy_link")) {
+                    if (!Objects.requireNonNull(snapshot.get("")).toString().isEmpty()) {
+                        p.setText((String) snapshot.get("privacy_policy_link"));
                     } else {
                         p.setText("");
                     }
                 }
             }
         });
+
         return view;
     }
 }

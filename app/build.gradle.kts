@@ -11,8 +11,8 @@ android {
         applicationId = "com.vishnu.sjcemap"
         minSdk = 29
         targetSdk = 34
-        versionCode = 5
-        versionName = "5.2"
+        versionCode = 7
+        versionName = "5.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
