@@ -6,15 +6,17 @@ import android.os.Handler;
 
 public class SoundNotify {
     public static void playGeoFenceBoundaryExceedAlert() {
-        ToneGenerator toneGenerator = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, ToneGenerator.MAX_VOLUME);
-        toneGenerator.startTone(ToneGenerator.TONE_CDMA_ABBR_INTERCEPT);
+        ToneGenerator toneGenerator = new ToneGenerator(AudioManager.STREAM_NOTIFICATION,
+                ToneGenerator.MAX_VOLUME);
+        toneGenerator.startTone(ToneGenerator.TONE_SUP_ERROR);
 
         new Handler().postDelayed(toneGenerator::release, 500);
     }
 
-    public static void playQRScanSuccessAlert() {
-        ToneGenerator toneGenerator = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, ToneGenerator.MAX_VOLUME);
-        toneGenerator.startTone(ToneGenerator.TONE_PROP_NACK);
+    public static void playAuthSuccessAlert() {
+        ToneGenerator toneGenerator = new ToneGenerator(AudioManager.STREAM_NOTIFICATION,
+                ToneGenerator.MAX_VOLUME);
+        toneGenerator.startTone(ToneGenerator.TONE_SUP_PIP);
 
         new Handler().postDelayed(toneGenerator::release, 500);
     }

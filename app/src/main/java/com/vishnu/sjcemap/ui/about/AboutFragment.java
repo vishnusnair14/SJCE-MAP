@@ -43,7 +43,7 @@ public class AboutFragment extends Fragment {
         dr.addSnapshotListener((snapshot, e) -> {
             if (snapshot != null && snapshot.exists()) {
                 if (snapshot.contains("privacy_policy_link")) {
-                    if (!Objects.requireNonNull(snapshot.get("")).toString().isEmpty()) {
+                    if (!Objects.requireNonNull(snapshot.get("privacy_policy_link")).toString().isEmpty()) {
                         p.setText((String) snapshot.get("privacy_policy_link"));
                     } else {
                         p.setText("");

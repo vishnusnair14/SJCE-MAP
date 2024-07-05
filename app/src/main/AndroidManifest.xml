@@ -14,16 +14,16 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/jss_logo"
+        android:icon="@drawable/sjce_logo"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/jss_logo"
+        android:roundIcon="@drawable/sjce_logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.SJCEMAP"
         tools:targetApi="31">
@@ -37,15 +37,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".AuthQRActivity"
-            android:exported="false"
-            android:label="AUTHORISATION" />
+            android:exported="true"
+            android:label="AUTHORIZATION" />
 
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:autoRemoveFromRecents="true"
             android:theme="@style/Theme.SJCEMAP.NoActionBar" />
 
         <service
@@ -56,6 +56,8 @@
 
         <service
             android:name=".service.GPSProviderService"
+            android:enabled="true"
+            android:exported="false"
             android:foregroundServiceType="location" />
 
         <meta-data

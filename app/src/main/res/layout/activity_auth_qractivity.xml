@@ -89,7 +89,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:fontFamily="courier new"
+                android:fontFamily="@font/montserrat"
                 android:text="@string/_0s_left"
                 android:textSize="11sp"
                 app:layout_constraintEnd_toEndOf="@+id/surfaceView"

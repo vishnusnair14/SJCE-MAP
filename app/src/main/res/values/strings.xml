@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">SJCE-MAP</string>
+    <string name="app_name">SJCE MAP</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">SJCE MAP</string>
-    <string name="nav_header_subtitle">Direction assistant for different campus locations of SJCE-Mysore</string>
+    <string name="nav_header_subtitle">Direction assistant app for SJCE-Mysore campus locations</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
@@ -11,18 +11,18 @@
     <string name="search">Search</string>
     <string name="menu_about">ABOUT</string>
 
-    <string-array name="sjce_place_list">
-        <item>CMS</item>
-        <item>golden jubilee</item>
-        <item>MCA</item>
-        <item>Polymer science</item>
-    </string-array>
+<!--    <string-array name="sjce_place_list">-->
+<!--        <item>CMS</item>-->
+<!--        <item>golden jubilee</item>-->
+<!--        <item>MCA</item>-->
+<!--        <item>Polymer science</item>-->
+<!--    </string-array>-->
 
     <string name="no_barcode_detected">No qrcode detected</string>
-    <string name="menu_settings">Settings</string>
+<!--    <string name="menu_settings">Settings</string>-->
     <string name="all_departments">All Departments</string>
     <string name="current_location">{current_location}</string>
-    <string name="change_start_type"><u>change</u></string>
+<!--    <string name="change_start_type"><u>change</u></string>-->
     <string name="scan_a_valid_qr_to_authenticate">SCAN A QR TO AUTHENTICATE</string>
     <string name="bypass_auth">Bypass Auth.</string>
     <string name="not_in_campus">YOU ARE NOT INSIDE SJCE-MYSORE CAMPUS</string>
@@ -72,7 +72,7 @@
     <string name="end_place">End place:</string>
     <string name="image">IMAGE</string>
     <string name="google_images">Google Images</string>
-    <string name="enable_your_location_provider">Enable your location provider</string>
+    <string name="enable_your_location_provider">Enable your device location</string>
     <string name="enable_your_device_gps_location">Enable your device\'s GPS provider</string>
     <string name="is_seminar_hall">IS Seminar Hall</string>
     <string name="checking">Checking…</string>
@@ -150,10 +150,17 @@
     <string name="TODO">TODO</string>
     <string name="empty" />
     <string name="get_started">Get Started</string>
-    <string name="enable">ENABLE</string>
+    <string name="enable">Enable</string>
     <string name="get_direction">Get Direction in Map</string>
     <string name="view_in_360">View in 360°</string>
-    <string name="privacy_pilocy">View in 360°</string>
     <string name="contact_vishnustechnologies_gmail_com">Contact at: <u>vishnustechnologies@gmail.com</u></string>
     <string name="developed_by_">Developed by <u>vishnustechnologies</u></string>
+    <string name="permission_required">Permission required!</string>
+    <string name="to_continue_tu">To continue, turn on device location, which uses Google\'s location service</string>
+    <string name="for_details_go_to">For details, go to location settings.</string>
+    <string name="use_google_s_locatio">Use Google\'s location services; as part of this services, Google may collect location data periodically and use this data in an anonymous way to improve location accuracy and location-based services.</string>
+    <string name="your_device_will_need_to">Your device will need to:</string>
+    <string name="use_gps_wi_fi_mobile_networks_and_sensors">Use GPS, Wi-Fi, mobile networks and sensors</string>
+    <string name="go_to_settings">Go to settings</string>
+    <string name="enable_your_device_location">Enable your device location</string>
 </resources>

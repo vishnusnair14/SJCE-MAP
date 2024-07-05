@@ -11,8 +11,8 @@ android {
         applicationId = "com.vishnu.sjcemap"
         minSdk = 29
         targetSdk = 34
-        versionCode = 7
-        versionName = "5.3"
+        versionCode = 10
+        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -59,6 +59,7 @@ dependencies {
     // When using the BoM, you don't specify versions in Firebase library dependencies
     implementation("com.google.firebase:firebase-firestore")
     implementation("com.google.firebase:firebase-storage")
+
 //    implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation("com.google.android.gms:play-services-maps:19.0.0")
 

@@ -13,13 +13,13 @@
         android:id="@+id/deviceLocNotEnabledInfoView_textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#850202"
-        android:fontFamily="@font/anonymous_pro"
+        android:background="#D3560D"
+        android:fontFamily="@font/montserrat"
         android:gravity="center|center_horizontal|center_vertical"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
-        android:text="@string/enable_your_device_gps_location"
-        android:textColor="#FFC107"
+        android:text="@string/enable_your_device_location"
+        android:textColor="#FFFFFF"
         android:textSize="12sp"
         android:textStyle="bold"
         android:visibility="gone"
@@ -86,15 +86,14 @@
                 android:outlineAmbientShadowColor="@color/alert_text_red"
                 android:outlineSpotShadowColor="@color/card_view_shadow"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView3">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="#B2EAE7E7">
+                    android:layout_height="wrap_content"
+                    android:background="#FEFEFE">
 
                     <Button
                         android:id="@+id/viewAllTopLocationSCB_button2"
@@ -145,7 +144,6 @@
                 android:outlineAmbientShadowColor="@color/card_view_shadow"
                 android:outlineSpotShadowColor="@color/card_view_shadow"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView32">
@@ -154,7 +152,7 @@
                     android:id="@+id/linearLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#B2EAE7E7">
+                    android:background="#FEFEFE">
 
                     <Button
                         android:id="@+id/viewAllDepartmentSCB_button"
@@ -203,7 +201,6 @@
                 android:outlineAmbientShadowColor="@color/card_view_shadow"
                 android:outlineSpotShadowColor="@color/card_view_shadow"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView367">
@@ -211,7 +208,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#B2EAE7E7"
+                    android:background="#B2F1ECEC"
                     android:orientation="vertical"
                     android:padding="16dp">
 
@@ -286,7 +283,6 @@
                 android:outlineAmbientShadowColor="@color/card_view_shadow"
                 android:outlineSpotShadowColor="@color/card_view_shadow"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView362">
@@ -294,7 +290,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#B2EAE7E7"
+                    android:background="#B2F1ECEC"
                     android:orientation="vertical"
                     android:padding="16dp">
 
@@ -415,7 +411,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="#B2EAE7E7"
+                    android:background="#B2F1ECEC"
                     android:orientation="vertical"
                     android:padding="16dp">
 
@@ -471,6 +467,16 @@
                             android:textStyle="bold" />
 
                         <Button
+                            android:id="@+id/exceedBoundaryBypass_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:backgroundTint="#770F0F"
+                            android:fontFamily="@font/anonymous_pro"
+                            android:text="Exceed boundary"
+                            android:textColor="#FFC107"
+                            android:textSize="11sp" />
+
+                        <Button
                             android:id="@+id/sjceCanteen2SCB_button"
                             style="@style/Widget.Material3.Button.ElevatedButton.Icon"
                             android:layout_width="0dp"
@@ -492,18 +498,4 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
-    <Button
-        android:id="@+id/exceedBoundaryBypass_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="5dp"
-        android:layout_marginBottom="5dp"
-        android:backgroundTint="#770F0F"
-        android:fontFamily="@font/anonymous_pro"
-        android:text="Exceed boundary"
-        android:textColor="#FFC107"
-        android:textSize="11sp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

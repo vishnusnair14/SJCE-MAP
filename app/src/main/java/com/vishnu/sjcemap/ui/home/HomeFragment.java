@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -36,6 +37,7 @@ public class HomeFragment extends Fragment {
     private static final String SCROLL_POSITION_KEY = "home_scroll_pos";
     ScrollView scrollView;
     private int savedScrollPosition = 0;
+    TextView locNotEnabledTV;
     boolean isGpsEnabled = false;
     FirebaseFirestore db;
     private FragmentHomeBinding binding;
@@ -58,9 +60,10 @@ public class HomeFragment extends Fragment {
         authPreference = requireContext().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
 
         scrollView = binding.homeFragmentScrollView;
+        locNotEnabledTV = binding.deviceLocNotEnabledInfoViewTextView;
 
-        binding.deviceLocNotEnabledInfoViewTextView.setOnClickListener(v -> {
-            if (binding.deviceLocNotEnabledInfoViewTextView.getVisibility() == View.VISIBLE) {
+        locNotEnabledTV.setOnClickListener(v -> {
+            if (locNotEnabledTV.getVisibility() == View.VISIBLE) {
                 showLocationSettings(requireContext());
             }
         });
@@ -157,12 +160,9 @@ public class HomeFragment extends Fragment {
             authPreference.edit().putBoolean("isAlreadyScanned", false).apply();
 
             SoundNotify.playGeoFenceBoundaryExceedAlert();
-            Toast.makeText(requireContext(), "Device exceeded geofence boundary,\nre-authentication required",
+            Toast.makeText(requireContext(), "Device exceeded geofence boundary, re-authentication required",
                     Toast.LENGTH_LONG).show();
         });
-
-        IntentFilter providerFilter = new IntentFilter(GPSProviderService.ACTION_GPS_STATUS_CHANGED);
-        requireContext().registerReceiver(gpsStatusReceiver, providerFilter, Context.RECEIVER_NOT_EXPORTED);
 
         return root;
     }
@@ -172,14 +172,14 @@ public class HomeFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             if (GPSProviderService.ACTION_GPS_STATUS_CHANGED.equals(intent.getAction())) {
                 boolean isGPSEnabled = intent.getBooleanExtra(GPSProviderService.EXTRA_IS_GPS_ENABLED, false);
-                binding.deviceLocNotEnabledInfoViewTextView.setVisibility(isGpsEnabled ? View.GONE : View.VISIBLE);
+                locNotEnabledTV.setVisibility(isGpsEnabled ? View.GONE : View.VISIBLE);
 
                 if (isGPSEnabled && !isGpsEnabled) {
-                    Toast.makeText(context, "GPS Enabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "@home: GPS Enabled", Toast.LENGTH_SHORT).show();
 
                     isGpsEnabled = true;
                 } else if (!isGPSEnabled && isGpsEnabled) {
-                    Toast.makeText(context, "GPS Disabled", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "@home: GPS Disabled", Toast.LENGTH_SHORT).show();
 
                     isGpsEnabled = false;
                 }
@@ -213,14 +213,18 @@ public class HomeFragment extends Fragment {
         outState.putInt(SCROLL_POSITION_KEY, savedScrollPosition);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @Override
     public void onResume() {
         super.onResume();
 
+        IntentFilter providerFilter = new IntentFilter(GPSProviderService.ACTION_GPS_STATUS_CHANGED);
+        requireContext().registerReceiver(gpsStatusReceiver, providerFilter, Context.RECEIVER_NOT_EXPORTED);
+
         if (MainActivity.isLocationNotEnabled(requireContext())) {
-            binding.deviceLocNotEnabledInfoViewTextView.setVisibility(View.VISIBLE);
+            locNotEnabledTV.setVisibility(View.VISIBLE);
         } else {
-            binding.deviceLocNotEnabledInfoViewTextView.setVisibility(View.GONE);
+            locNotEnabledTV.setVisibility(View.GONE);
         }
     }
 
@@ -228,6 +232,8 @@ public class HomeFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+
+        requireContext().unregisterReceiver(gpsStatusReceiver);
     }
 
     @Override

@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.IBinder;
 import android.os.Looper;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -23,12 +24,10 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.vishnu.sjcemap.R;
 
 
 public class LocationService extends Service {
-
     private final String LOG_TAG = "LocationService";
     private static final String CHANNEL_ID = "LocationServiceChannel";
     public static final String ACTION_LOCATION_BROADCAST = "LocationService.LocationBroadcast";
@@ -38,7 +37,6 @@ public class LocationService extends Service {
     public static final String ACTION_DISABLE_BROADCAST = "ACTION_DISABLE_BROADCAST";
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
-    private FirebaseFirestore db;
     SharedPreferences preferences;
     public static boolean isRunning = false;
 
@@ -50,7 +48,6 @@ public class LocationService extends Service {
         super.onCreate();
         isRunning = true;
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        db = FirebaseFirestore.getInstance();
         preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
 
         createNotificationChannel();
@@ -63,6 +60,8 @@ public class LocationService extends Service {
                 for (Location location : locationResult.getLocations()) {
                     if (isBroadcastingEnabled) {
                         sendLocationBroadcast(location);
+                        Log.d(LOG_TAG, "loc-service: loc-coords: " +
+                                location.getLatitude() + "°N " + location.getLongitude() + "E°");
                     }
                 }
             }
@@ -93,11 +92,12 @@ public class LocationService extends Service {
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
     }
 
+    @NonNull
     private Notification createNotification() {
         return new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle("Location Service")
                 .setContentText("Tracking location in the background")
-                .setSmallIcon(R.drawable.baseline_share_location_24)
+                .setSmallIcon(R.drawable.baseline_location_on_24)
                 .build();
     }
 
@@ -113,8 +113,9 @@ public class LocationService extends Service {
         }
     }
 
-    private void sendLocationBroadcast(Location location) {
+    private void sendLocationBroadcast(@NonNull Location location) {
         Intent intent = new Intent(ACTION_LOCATION_BROADCAST);
+        intent.setPackage(getPackageName());
         intent.putExtra(EXTRA_LATITUDE, location.getLatitude());
         intent.putExtra(EXTRA_LONGITUDE, location.getLongitude());
         sendBroadcast(intent);

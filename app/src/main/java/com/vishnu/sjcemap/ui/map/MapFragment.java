@@ -1,32 +1,43 @@
 package com.vishnu.sjcemap.ui.map;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
 import com.squareup.picasso.Picasso;
+import com.vishnu.sjcemap.MainActivity;
 import com.vishnu.sjcemap.R;
 import com.vishnu.sjcemap.databinding.FragmentMapBinding;
 import com.vishnu.sjcemap.miscellaneous.Overlay360View;
 import com.vishnu.sjcemap.miscellaneous.SharedDataView;
+import com.vishnu.sjcemap.service.GPSProviderService;
 import com.vishnu.sjcemap.service.GeoFence;
 
 import java.text.DecimalFormat;
@@ -42,10 +53,14 @@ public class MapFragment extends Fragment {
     private String destPlaceLon;
     String gmap360ViewUrl;
     Overlay360View gmap360ViewPopup;
+    TextView locNotEnabledTV;
     ConstraintLayout layout;
     private FragmentMapBinding binding;
+    boolean isGpsEnabled = false;
+    LocationManager locationManager;
     private double clientLat;
     private double clientLon;
+    BottomSheetDialog locNotEnabledWarningBtmView;
     private final String NO_IMG_FOUND_URL = "https://firebasestorage.googleapis.com/v0/b/sjce-map.appspot.com/o/" +
             "SJCE-MAP-IMAGES%2FNO_IMAGE_FOUND_IMG.jpg?alt=media&token=ec64235b-374c-458a-aaf9-7dc67c110513";
     private final String NO_IMG_FOUND_URL_1 = "https://firebasestorage.googleapis.com/v0/b/sjce-map.appspot.com/o/" +
@@ -66,7 +81,6 @@ public class MapFragment extends Fragment {
         sharedDataView = new ViewModelProvider(requireActivity()).get(SharedDataView.class);
         destPlaceLat = "0.0";
         destPlaceLon = "0.0";
-
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -77,6 +91,9 @@ public class MapFragment extends Fragment {
 
         layout = binding.mapFragmentLayoutConstraintLayout;
         binding.assistWalkDirectionImageButton.setEnabled(false);
+        locNotEnabledTV = binding.locNotEnabledBannerMapFragViewTextView;
+
+        locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
 
         /* Get spot-place and associated data */
         sharedDataView.getPlace().observe(getViewLifecycleOwner(), pl -> {
@@ -114,8 +131,118 @@ public class MapFragment extends Fragment {
             }
         });
 
+//        if (MainActivity.isLocationNotEnabled(requireContext())) {
+//            locNotEnabledTV.setVisibility(View.VISIBLE);
+//        } else {
+//            locNotEnabledTV.setVisibility(View.GONE);
+//        }
+
         return root;
     }
+
+    //    private void showLocNotEnabledWarningBtmView(){
+//        // Show a loading indicator or message to the user
+//
+//        View gpsCheckBtmView = LayoutInflater.from(requireContext()).inflate(
+//                R.layout.bottomview_enable_location, null, false);
+//
+//        // Create a BottomSheetDialog with TOP gravity
+//        BottomSheetDialog gpsCheckBtmDialog = new BottomSheetDialog(requireContext());
+//        gpsCheckBtmDialog.setContentView(gpsCheckBtmView);
+//        gpsCheckBtmDialog.setCanceledOnTouchOutside(false);
+//        Objects.requireNonNull(gpsCheckBtmDialog.getWindow()).setGravity(Gravity.TOP);
+//
+//        if (!gpsCheckBtmDialog.isShowing()) {
+////            gpsCheckBtmDialog.show();
+//        }
+//    }
+
+    private void showLocNotEnabledWarningBtmView() {
+        // Inflate the bottom sheet layout
+        View bottomSheetView = LayoutInflater.from(requireContext()).inflate(R.layout.bottomview_loc_not_enabled_warning, null, false);
+
+        // Create the BottomSheetDialog
+        locNotEnabledWarningBtmView = new BottomSheetDialog(requireContext());
+        locNotEnabledWarningBtmView.setContentView(bottomSheetView);
+        locNotEnabledWarningBtmView.setCanceledOnTouchOutside(false);
+
+        Button actionButton = bottomSheetView.findViewById(R.id.button_action);
+
+        actionButton.setOnClickListener(v -> {
+            // Handle button action
+            showLocationSettings(requireContext());
+            if (locNotEnabledWarningBtmView != null) {
+                locNotEnabledWarningBtmView.hide();
+                locNotEnabledWarningBtmView.dismiss();
+            }
+        });
+
+        // Show the bottom sheet dialog
+        if (locNotEnabledWarningBtmView != null) {
+            locNotEnabledWarningBtmView.show();
+        }
+    }
+
+    private void showLocationSettings(Context context) {
+        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+        context.startActivity(intent);
+    }
+
+    private final BroadcastReceiver gpsStatusReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (GPSProviderService.ACTION_GPS_STATUS_CHANGED.equals(intent.getAction())) {
+                boolean isGPSEnabled = intent.getBooleanExtra(GPSProviderService.EXTRA_IS_GPS_ENABLED, false);
+
+                if (isGPSEnabled && !isGpsEnabled) {
+                    Toast.makeText(context, "@map: GPS Enabled", Toast.LENGTH_SHORT).show();
+                    locNotEnabledTV.setVisibility(View.GONE);
+
+                    isGpsEnabled = true;
+                } else if (!isGPSEnabled && isGpsEnabled) {
+                    Toast.makeText(context, "@map: GPS Disabled", Toast.LENGTH_SHORT).show();
+                    locNotEnabledTV.setVisibility(View.VISIBLE);
+
+                    isGpsEnabled = false;
+                }
+            }
+        }
+    };
+
+//    private boolean isLocationNotEnabled() {
+//
+//        // Check if the LocationManager is not null
+//        if (locationManager == null) {
+//            return true;
+//        }
+//
+//        // Check if either GPS or Network Provider is enabled
+//        boolean gpsEnabled = false;
+//        boolean networkEnabled = false;
+//
+//        try {
+//            gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+//        } catch (Exception ex) {
+//            Log.e(LOG_TAG, ex.toString());
+//        }
+//
+//        try {
+//            networkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+//        } catch (Exception ex) {
+//            Log.e(LOG_TAG, ex.toString());
+//        }
+//
+//        return !gpsEnabled && !networkEnabled;
+//    }
+
+//    public static boolean isLocationNotEnabled1(@NonNull Context context) {
+//        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+//
+//        /* Check if either GPS or network provider is enabled */
+//        return locationManager == null ||
+//                (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) &&
+//                        !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
+//    }
 
 
     private void openMapView(String sourceLatitude, String sourceLongitude,
@@ -132,10 +259,19 @@ public class MapFragment extends Fragment {
                     "&travelmode=walking");
         }
 
-        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-        intent.setPackage("com.google.android.apps.maps");
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+        if (MainActivity.isLocationNotEnabled(requireContext())) {
+            showLocNotEnabledWarningBtmView();
+        } else {
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            intent.setPackage("com.google.android.apps.maps");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+
+            if (locNotEnabledWarningBtmView != null) {
+                locNotEnabledWarningBtmView.hide();
+                locNotEnabledWarningBtmView.dismiss();
+            }
+        }
     }
 
 
@@ -197,11 +333,14 @@ public class MapFragment extends Fragment {
                             if (geoPoint != null) {
                                 if ((geoPoint.getLatitude() == 0.00) && (geoPoint.getLongitude() == 0.00)) {
                                     binding.assistWalkDirectionImageButton.setEnabled(false);
+                                    locNotEnabledTV.setVisibility(View.GONE);
                                     binding.assistWalkDirectionImageButton.setOnClickListener(null);
                                 } else {
                                     binding.assistWalkDirectionImageButton.setEnabled(true);
+                                    locNotEnabledTV.setVisibility(View.VISIBLE);
+
                                     binding.assistWalkDirectionImageButton.setOnClickListener(v -> {
-                                        // TODO: set client realtime-loc
+
                                         boolean isInsideGJB = GeoFence.isInsideGJB(clientLat, clientLon);
                                         boolean isInsideCMS = GeoFence.isInsideCMS(clientLat, clientLon);
 
@@ -221,6 +360,7 @@ public class MapFragment extends Fragment {
                                     });
                                 }
                             } else {
+                                locNotEnabledTV.setVisibility(View.GONE);
                                 binding.assistWalkDirectionImageButton.setEnabled(false);
                                 binding.assistWalkDirectionImageButton.setOnClickListener(null);
                             }
@@ -280,8 +420,27 @@ public class MapFragment extends Fragment {
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @Override
     public void onResume() {
         super.onResume();
+
+        IntentFilter providerFilter = new IntentFilter(GPSProviderService.ACTION_GPS_STATUS_CHANGED);
+        requireContext().registerReceiver(gpsStatusReceiver, providerFilter, Context.RECEIVER_NOT_EXPORTED);
+
+        if (MainActivity.isLocationNotEnabled(requireContext())) {
+            locNotEnabledTV.setVisibility(View.VISIBLE);
+            Toast.makeText(requireContext(), "notna map", Toast.LENGTH_SHORT).show();
+        } else {
+            locNotEnabledTV.setVisibility(View.GONE);
+            Toast.makeText(requireContext(), "ena map", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        requireContext().unregisterReceiver(gpsStatusReceiver);
     }
 }

@@ -61,12 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private double client_lon;
     TextView locNotEnaViewTV;
     FirebaseFirestore db;
-    String[] permissions = {
-            Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_BACKGROUND_LOCATION
-    };
+
     private AppBarConfiguration mAppBarConfiguration;
     private com.vishnu.sjcemap.databinding.ActivityMainBinding binding;
     private Vibrator vibrator;
@@ -110,9 +105,9 @@ public class MainActivity extends AppCompatActivity {
         RegisteredUsersEmailRef = db.collection("AuthenticationData")
                 .document("RegisteredUsersEmail");
 
-        locNotEnableBuilder.setView(R.layout.loc_not_enable_dialog);
-        locNotEnableBuilder.setPositiveButton("ENABLE", (dialog, which) -> showLocationSettings(this));
-        locNotEnableAlertDialog = locNotEnableBuilder.create();
+//        locNotEnableBuilder.setView(R.layout.loc_not_enable_dialog);
+//        locNotEnableBuilder.setPositiveButton("ENABLE", (dialog, which) -> showLocationSettings(this));
+//        locNotEnableAlertDialog = locNotEnableBuilder.create();
 
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
@@ -160,17 +155,6 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
-        // OnCreate permission request
-        List<String> permissionsToRequest = new ArrayList<>();
-        for (String permission : permissions) {
-            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                permissionsToRequest.add(permission);
-            }
-        }
-
-        if (!permissionsToRequest.isEmpty()) {
-            ActivityCompat.requestPermissions(this, permissionsToRequest.toArray(new String[0]), 1);
-        }
     }
 
 
@@ -183,6 +167,14 @@ public class MainActivity extends AppCompatActivity {
 
 //                locationTV.setText(MessageFormat.format("{0}°N\n{1}°E",
 //                        client_lat, client_lon));
+
+                if (!GeoFence.isInsideGeoFenceArea(client_lat, client_lon, "GKLM")) {
+                    preferences.edit().putBoolean("isAuthenticated", false).apply();
+                    Toast.makeText(context, "Device exceeded SJCE boundary, re-authentication required", Toast.LENGTH_SHORT).show();
+                    Log.i(LOG_TAG, "isAuthenticated: False");
+                }
+                Log.d("MAIN-ACT:BROADCAST-RECV:" + LOG_TAG, client_lat + "°N " + client_lon + "°E");
+
             }
         }
     };
@@ -191,6 +183,7 @@ public class MainActivity extends AppCompatActivity {
         if (!LocationService.isRunning) {
             Intent serviceIntent = new Intent(this, LocationService.class);
             serviceIntent.setAction(LocationService.ACTION_ENABLE_BROADCAST);
+            serviceIntent.setPackage(getPackageName());
             startService(serviceIntent);
 //            Toast.makeText(this, "MainAct: Location service started", Toast.LENGTH_SHORT).show();
         } else {
@@ -202,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
     private void stopLocationService() {
         Intent serviceIntent = new Intent(this, LocationService.class);
         serviceIntent.setAction(LocationService.ACTION_DISABLE_BROADCAST);
+        serviceIntent.setPackage(getPackageName());
         stopService(serviceIntent);
 //        Toast.makeText(this, "MainAct: Location service stopped!", Toast.LENGTH_SHORT).show();
     }
@@ -224,13 +218,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void showLocNotEnableDialog(boolean showFlag) {
-        if (showFlag) {
-            locNotEnableAlertDialog.setCanceledOnTouchOutside(false);
-            locNotEnableAlertDialog.show();
-        } else {
-            locNotEnableAlertDialog.hide();
-            locNotEnableAlertDialog.cancel();
-        }
+
     }
 
     private void startVibration() {
@@ -287,16 +275,15 @@ public class MainActivity extends AppCompatActivity {
             }
         } else {
             locNotEnaViewTV.setVisibility(View.GONE);
-            showLocNotEnableDialog(false);
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (!GeoFence.isInsideGeoFenceArea(client_lat, client_lon, "sjce")) {
+        if (!GeoFence.isInsideGeoFenceArea(client_lat, client_lon, "GKLM")) {
             preferences.edit().putBoolean("isAuthenticated", false).apply();
-            Toast.makeText(this, "Device exceeded geofence boundary,\nre-authentication required", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Device exceeded SJCE boundary, re-authentication required", Toast.LENGTH_SHORT).show();
             Log.i(LOG_TAG, "isAuthenticated: False");
         }
         try {
@@ -314,20 +301,6 @@ public class MainActivity extends AppCompatActivity {
         stopGPSProviderService();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 101) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted, start geofencing
-                Toast.makeText(this, "Permission granted", Toast.LENGTH_SHORT).show();
-            } else {
-                // Permission denied, handle accordingly
-                Toast.makeText(this, "Permission denied!", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

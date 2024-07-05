@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -39,7 +40,6 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.vision.CameraSource;
@@ -53,18 +53,11 @@ import com.vishnu.sjcemap.miscellaneous.SoundNotify;
 import com.vishnu.sjcemap.miscellaneous.Utils;
 import com.vishnu.sjcemap.service.GeoFence;
 import com.vishnu.sjcemap.service.LocationService;
-import com.vishnu.sjcemap.service.MyEvent;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -102,9 +95,11 @@ public class AuthQRActivity extends AppCompatActivity {
     private double client_lon;
     private boolean alertCallFlag = false;
     AlertDialog.Builder locNotEnableBuilder;
+    ActivityResultLauncher<String[]> locationPermissionRequest;
     TextView alertTV;
     private boolean isAlreadyScanned = false;
     private Handler gpsCheckHandler;
+    private boolean isReceiverRegistered = false;
     private static final int REQUEST_CAMERA_PERMISSION = 201;
     String[] permissions = {
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -120,28 +115,61 @@ public class AuthQRActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_auth_qractivity);
 
+        locationPermissionRequest = registerForActivityResult(new ActivityResultContracts
+                        .RequestMultiplePermissions(), result -> {
+                    Boolean fineLocationGranted = result.getOrDefault(
+                            Manifest.permission.ACCESS_FINE_LOCATION, false);
+                    Boolean coarseLocationGranted = result.getOrDefault(
+                            Manifest.permission.ACCESS_COARSE_LOCATION, false);
+                    Boolean cameraGranted = result.getOrDefault(Manifest.permission.CAMERA, false);
+
+                    if (fineLocationGranted != null && fineLocationGranted) {
+                        // Precise location access granted.
+                        Log.d(LOG_TAG, "Precise location access granted!");
+                        startLocationService();
+                        // Register the BroadcastReceiver
+                        IntentFilter filter = new IntentFilter(LocationService.ACTION_LOCATION_BROADCAST);
+                        registerReceiver(locationReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+                        isReceiverRegistered = true;
+                        Log.d(LOG_TAG, "Broadcast receiver registered");
+                    } else if (coarseLocationGranted != null && coarseLocationGranted) {
+                        // Only approximate location access granted.
+                        startLocationService();
+                        IntentFilter filter = new IntentFilter(LocationService.ACTION_LOCATION_BROADCAST);
+                        registerReceiver(locationReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+                        isReceiverRegistered = true;
+                        Log.d(LOG_TAG, "approximate location access granted!");
+                    } else {
+                        // No location access granted.
+                        requestPermissions();
+                        Log.d(LOG_TAG, "No location access granted!");
+                    }
+
+                    if (cameraGranted != null && cameraGranted) {
+                        Log.d(LOG_TAG, "camera access granted");
+                    } else {
+                        Log.d(LOG_TAG, "camera access not granted");
+                    }
+                }
+        );
+
+        // asking permission
+        locationPermissionRequest.launch(new String[]{
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.CAMERA
+        });
+
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         sharedDataView = new ViewModelProvider(this).get(SharedDataView.class);
         vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         locNotEnableBuilder = new AlertDialog.Builder(this);
         timeoutHandler = new Handler(Looper.getMainLooper());
-        List<String> permissionsToRequest = new ArrayList<>();
 
         gpsCheckHandler = new Handler(Looper.getMainLooper());
 
         preferences = getSharedPreferences("MyPrefs", MODE_PRIVATE);
 
-
-        // OnCreate permission request
-        for (String permission : permissions) {
-            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                permissionsToRequest.add(permission);
-            }
-        }
-
-        if (!permissionsToRequest.isEmpty()) {
-            ActivityCompat.requestPermissions(this, permissionsToRequest.toArray(new String[0]), 1);
-        }
 
         byPassBtn = findViewById(R.id.byPassAuth_button);
         locationTV = findViewById(R.id.authActivityCoordinatesView_textView);
@@ -180,6 +208,9 @@ public class AuthQRActivity extends AppCompatActivity {
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (Utils.isGPSEnabled(this)) {
+                        IntentFilter filter = new IntentFilter(LocationService.ACTION_LOCATION_BROADCAST);
+                        registerReceiver(locationReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+                        isReceiverRegistered = true;
                         init();
                         Toast.makeText(this, "GPS Enabled", Toast.LENGTH_SHORT).show();
                     } else {
@@ -192,6 +223,20 @@ public class AuthQRActivity extends AppCompatActivity {
         init();
     }
 
+
+    private void requestPermissions() {
+        new AlertDialog.Builder(this)
+                .setTitle("Permission Needed")
+                .setMessage("Location permission is needed for core functionality")
+                .setPositiveButton("OK", (dialogInterface, i) -> {
+                    setStatusMsgView(R.string.permission_required, false);
+                    openAppSettings();
+                })
+                .create()
+                .show();
+    }
+
+
     public void init() {
         isAlreadyScanned = preferences.getBoolean("isAlreadyScanned", false);
 
@@ -202,7 +247,7 @@ public class AuthQRActivity extends AppCompatActivity {
                 if (isLocationNotEnabled(this)) {
                     setStatusMsgView(R.string.please_enable_yr_gps, false);
                 } else {
-                    startLocationService();
+//                    startLocationService();
                     startGpsCheckAndSetScanView();
                 }
             } else {
@@ -217,6 +262,7 @@ public class AuthQRActivity extends AppCompatActivity {
     }
 
     private void startGpsCheckAndSetScanView() {
+
         // Show a loading indicator or message to the user
 //        View gpsCheckBtmView = LayoutInflater.from(this).inflate(
 //                R.layout.bottomview_init_device_gps, null, false);
@@ -279,9 +325,9 @@ public class AuthQRActivity extends AppCompatActivity {
         locationTV.setVisibility(View.GONE);
         authBannerTV.setText(R.string.please_wait);
 
-        if (cameraSource != null) {
-            cameraSource.release();
-        }
+//        if (cameraSource != null) {
+//            cameraSource.release();
+//        }
     }
 
     private void initialiseScanDetectorsAndSources() {
@@ -325,6 +371,9 @@ public class AuthQRActivity extends AppCompatActivity {
         barcodeDetector.setProcessor(new Detector.Processor<>() {
             @Override
             public void release() {
+                if (isReceiverRegistered) {
+                    unregisterReceiver(locationReceiver);
+                }
                 Toast.makeText(getApplicationContext(), "Barcode scanner has been stopped", Toast.LENGTH_SHORT).show();
                 Log.i(LOG_TAG, "QR-Code scanner has been stopped");
             }
@@ -362,7 +411,7 @@ public class AuthQRActivity extends AppCompatActivity {
                                             finish();
                                         }, 500);
                                         startActivityFlag = true;
-                                        SoundNotify.playQRScanSuccessAlert();
+                                        SoundNotify.playAuthSuccessAlert();
                                         startVibration();
                                     });
                                 }
@@ -428,6 +477,7 @@ public class AuthQRActivity extends AppCompatActivity {
             data.put(String.valueOf(new Date()), getDeviceInfo());
             return data;
         }
+
     }
 
     private final BroadcastReceiver locationReceiver = new BroadcastReceiver() {
@@ -436,7 +486,9 @@ public class AuthQRActivity extends AppCompatActivity {
             if (LocationService.ACTION_LOCATION_BROADCAST.equals(intent.getAction())) {
                 client_lat = intent.getDoubleExtra(LocationService.EXTRA_LATITUDE, 0.00);
                 client_lon = intent.getDoubleExtra(LocationService.EXTRA_LONGITUDE, 0.00);
-                Log.d(LOG_TAG, client_lat + " " + client_lon);
+                Log.d("AUTH-ACT:BROADCAST-RECV:" + LOG_TAG, client_lat + "°N " + client_lon + "°E");
+            } else {
+                Log.d("AUTH-ACT:BROADCAST-RECV(else):" + LOG_TAG, client_lat + "°N " + client_lon + "°E");
             }
         }
     };
@@ -469,20 +521,28 @@ public class AuthQRActivity extends AppCompatActivity {
                 enableLocBtmDialog.dismiss();
             }
         }
-
     }
+
 
     private void startLocationService() {
         if (!LocationService.isRunning) {
             Intent serviceIntent = new Intent(this, LocationService.class);
             serviceIntent.setAction(LocationService.ACTION_ENABLE_BROADCAST);
-            startService(serviceIntent);
-//            Toast.makeText(this, "AuthQR: location service started!", Toast.LENGTH_SHORT).show();
+            serviceIntent.setPackage(getPackageName());
+            startForegroundService(serviceIntent);
         } else {
-//            Toast.makeText(this, "Location service is already running", Toast.LENGTH_SHORT).show();
             Log.i(LOG_TAG, "AuthQR: Location service is already running");
         }
     }
+
+    private void openAppSettings() {
+        Intent intent = new Intent();
+        intent.setAction(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
+        intent.setData(uri);
+        startActivity(intent);
+    }
+
 
     private void stopLocationService() {
         Intent serviceIntent = new Intent(this, LocationService.class);
@@ -513,7 +573,7 @@ public class AuthQRActivity extends AppCompatActivity {
     }
 
     private void startVibration() {
-        vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE));
+        vibrator.vibrate(VibrationEffect.createOneShot(150, VibrationEffect.EFFECT_HEAVY_CLICK));
     }
 
     private boolean isLocationNotEnabled(@NonNull Context context) {
@@ -538,7 +598,8 @@ public class AuthQRActivity extends AppCompatActivity {
                     timeoutHandler.postDelayed(this, COUNTDOWN_INTERVAL);
                 } else {
                     if (!isIntentPassedToMain) {
-                        Toast.makeText(AuthQRActivity.this, "QR code not found.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(AuthQRActivity.this,
+                                "QR code not found.", Toast.LENGTH_SHORT).show();
                     }
                     finish();
                 }
@@ -549,7 +610,6 @@ public class AuthQRActivity extends AppCompatActivity {
         timeoutHandler.postDelayed(countdownRunnable, COUNTDOWN_INTERVAL);
     }
 
-    /* Method to reset the countdown timer */
     private void resetCountdownTimer() {
         timeoutHandler.removeCallbacks(countdownRunnable);
         startCountdownTimer();
@@ -578,45 +638,42 @@ public class AuthQRActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        IntentFilter filter = new IntentFilter(LocationService.ACTION_LOCATION_BROADCAST);
-        registerReceiver(locationReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
-
         alertTV.setVisibility(View.GONE);
-        showEnableLocationBtmView(isLocationNotEnabled(this));
+        if (!preferences.getBoolean("isAlreadyScanned", false)) {
+            showEnableLocationBtmView(isLocationNotEnabled(this));
+        }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @Override
     protected void onStart() {
         super.onStart();
-//        EventBus.getDefault().register(this);
+
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-//        EventBus.getDefault().unregister(this);
+
+        try {
+            if (locationReceiver != null && isReceiverRegistered) {
+                unregisterReceiver(locationReceiver);
+            }
+        } catch (Exception e) {
+            Log.e(LOG_TAG, e.toString());
+        }
+
         if (enableLocBtmDialog != null) {
             enableLocBtmDialog.hide();
             enableLocBtmDialog.dismiss();
         }
     }
 
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        stopLocationService();
-        unregisterReceiver(locationReceiver);
+//        stopLocationService();
     }
 
-//    @Subscribe(threadMode = ThreadMode.MAIN)
-//    public void onEvent(MyEvent event) {
-//        // Handle the event here
-//        statusTV.setText(R.string.please_wait);
-//        statusTV.setTextColor(getColor(R.color.please_wait));
-//        if (isLocationNotEnabled(this)) {
-//            setStatusMsgView(R.string.please_enable_yr_gps, false);
-//        } else {
-//            init();
-//        }
-//    }
 }

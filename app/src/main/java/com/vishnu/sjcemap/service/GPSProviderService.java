@@ -36,6 +36,7 @@ public class GPSProviderService extends Service {
 
                 // Send broadcast
                 Intent gpsStatusIntent = new Intent(ACTION_GPS_STATUS_CHANGED);
+                gpsStatusIntent.setPackage(getPackageName());
                 gpsStatusIntent.putExtra(EXTRA_IS_GPS_ENABLED, isGpsEnabled);
                 sendBroadcast(gpsStatusIntent);
             }
