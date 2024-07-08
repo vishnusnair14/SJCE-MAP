@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,7 +31,7 @@ public class LauncherActivity extends AppCompatActivity {
 
         Intent authQRActivity = new Intent(LauncherActivity.this, AuthQRActivity.class);
         getStartedBtn = findViewById(R.id.getStartedLauncherActivity_button);
-
+        getStartedBtn.setEnabled(false);
 //        // OnCreate permission request
 //        List<String> permissionsToRequest = new ArrayList<>();
 //        for (String permission : permissions) {
@@ -47,6 +48,10 @@ public class LauncherActivity extends AppCompatActivity {
             startActivity(authQRActivity);
             finish();
         });
+
+        new Handler().postDelayed(() -> {
+            getStartedBtn.performClick();
+        }, 750);
     }
 
 

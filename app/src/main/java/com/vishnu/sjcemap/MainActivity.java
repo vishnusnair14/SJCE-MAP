@@ -40,6 +40,7 @@ import com.vishnu.sjcemap.service.GPSProviderService;
 import com.vishnu.sjcemap.service.GeoFence;
 import com.vishnu.sjcemap.service.LocationService;
 
+import java.text.MessageFormat;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     SharedDataView sharedDataView;
     TextView locationTV;
     private double client_lat;
+    private boolean isReceiverRegistered = false;
     private double client_lon;
     TextView locNotEnaViewTV;
     FirebaseFirestore db;
@@ -77,10 +79,6 @@ public class MainActivity extends AppCompatActivity {
         locationTV = findViewById(R.id.coordinatesViewHome_textView);
         locNotEnaViewTV = findViewById(R.id.deviceLocNotEnabledInfoView_textView);
         locNotEnaViewTV.setVisibility(View.GONE);
-
-        // Register the receiver
-        IntentFilter filter = new IntentFilter(LocationService.ACTION_LOCATION_BROADCAST);
-        registerReceiver(locationReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         sharedDataView = new ViewModelProvider(this).get(SharedDataView.class);
@@ -148,6 +146,13 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
+        startLocationBroadcastInService();
+        registerLocationBroadcastReceiver();
+        startGPSProviderService();
+
+//        // Register the receiver
+//        IntentFilter filter = new IntentFilter(LocationService.ACTION_LOCATION_BROADCAST);
+//        registerReceiver(locationReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
     }
 
 
@@ -166,31 +171,61 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(context, "Device exceeded SJCE boundary, re-authentication required", Toast.LENGTH_SHORT).show();
                     Log.i(LOG_TAG, "isAuthenticated: False");
                 }
-                Log.d("MAIN-ACT:BROADCAST-RECV:" + LOG_TAG, client_lat + "°N " + client_lon + "°E");
+
+                Log.d(LOG_TAG, "main-activity-broadcast-receiver: loc-coords " + client_lat + "°N " + client_lon + "°E");
 
             }
         }
     };
 
-    private void startLocationService() {
+//    private void startLocationService() {
+//        if (!LocationService.isRunning) {
+//            Intent serviceIntent = new Intent(this, LocationService.class);
+//            serviceIntent.setAction(LocationService.ACTION_ENABLE_BROADCAST);
+//            serviceIntent.setPackage(getPackageName());
+//            startForegroundService(serviceIntent);
+////            Toast.makeText(this, "MainAct: Location service started", Toast.LENGTH_SHORT).show();
+//        } else {
+//            Toast.makeText(this, "Location service is already running", Toast.LENGTH_SHORT).show();
+//            Log.i(LOG_TAG, "Location service is already running");
+//        }
+//    }
+//
+//    private void stopLocationService() {
+//        Intent serviceIntent = new Intent(this, LocationService.class);
+//        serviceIntent.setAction(LocationService.ACTION_DISABLE_BROADCAST);
+//        serviceIntent.setPackage(getPackageName());
+//        stopService(serviceIntent);
+////        Toast.makeText(this, "MainAct: Location service stopped!", Toast.LENGTH_SHORT).show();
+//    }
+
+    private void startLocationBroadcastInService() {
         if (!LocationService.isRunning) {
             Intent serviceIntent = new Intent(this, LocationService.class);
             serviceIntent.setAction(LocationService.ACTION_ENABLE_BROADCAST);
             serviceIntent.setPackage(getPackageName());
-            startService(serviceIntent);
-//            Toast.makeText(this, "MainAct: Location service started", Toast.LENGTH_SHORT).show();
+            startForegroundService(serviceIntent);
+            Toast.makeText(this, "location-service-started", Toast.LENGTH_SHORT).show();
         } else {
-//            Toast.makeText(this, "Location service is already running", Toast.LENGTH_SHORT).show();
-            Log.i(LOG_TAG, "Location service is already running");
+            Log.i(LOG_TAG, "AuthQR: Location service is already running");
+            Toast.makeText(this, "location-service-already-running", Toast.LENGTH_SHORT).show();
+
         }
     }
 
-    private void stopLocationService() {
+    private void stopLocationBroadcastInService() {
         Intent serviceIntent = new Intent(this, LocationService.class);
         serviceIntent.setAction(LocationService.ACTION_DISABLE_BROADCAST);
         serviceIntent.setPackage(getPackageName());
         stopService(serviceIntent);
-//        Toast.makeText(this, "MainAct: Location service stopped!", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "AuthQR: location service stopped!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void registerLocationBroadcastReceiver() {
+        IntentFilter filter = new IntentFilter(LocationService.ACTION_LOCATION_BROADCAST);
+        registerReceiver(locationReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        isReceiverRegistered = true;
+        Log.d(LOG_TAG, "Broadcast receiver registered");
     }
 
     private void startGPSProviderService() {
@@ -248,6 +283,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
+
     }
 
     @Override
@@ -258,8 +295,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        startLocationService();
-        startGPSProviderService();
+
+        startLocationBroadcastInService();
+        registerLocationBroadcastReceiver();
 
         if (isLocationNotEnabled(this)) {
             if (!preferences.getBoolean("isAlreadyScanned", false)) {
@@ -281,7 +319,7 @@ public class MainActivity extends AppCompatActivity {
         }
         try {
             unregisterReceiver(locationReceiver);
-            stopLocationService();
+//            stopLocationService();
         } catch (Exception e) {
             Log.e(LOG_TAG, e.toString());
         }
@@ -290,8 +328,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        stopLocationService();
-        stopGPSProviderService();
+
     }
 
 

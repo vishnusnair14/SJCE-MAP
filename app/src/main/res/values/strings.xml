@@ -28,7 +28,7 @@
     <string name="not_in_campus">YOU ARE NOT INSIDE SJCE-MYSORE CAMPUS</string>
     <string name="_7c0505">#7C0505</string>
     <string name="user_authenticated">User Authenticated Successfully</string>
-    <string name="_inside_the_sjce_mysore">You should scan the QR code within the SJCE Mysore Campus to authenticate</string>
+    <string name="_inside_the_sjce_mysore">You should scan the QR code within SJCE Mysore Campus to authenticate</string>
     <string name="qr_authenticated">QR AUTHENTICATED</string>
     <string name="invalid_qr">INVALID QR</string>
     <string name="_app_dev">©2024 vishnustechnologies</string>
@@ -144,7 +144,7 @@
     <string name="REGISTER">REGISTER</string>
     <string name="gps_initialization_under">Please wait while android system initialize GPS, This may take only few seconds…</string>
     <string name="device_location_not_enabled">Device location not enabled!</string>
-    <string name="authentication_works_">Authentication works properly only if device location is enabled. Tap Settings>Location, and turn location access.</string>
+    <string name="authentication_works_">Authentication works properly only if device location is enabled. Tap Settings>Location, and turn on location access.</string>
     <string name="init_gps_please_wait">Initializing GPS…</string>
     <string name="starting_app">Starting app…</string>
     <string name="TODO">TODO</string>
@@ -165,10 +165,19 @@
     <string name="enable_your_device_location">Enable your device location</string>
     <string name="loading_maps">loading maps…</string>
     <string name="progressLeft">progress left</string>
-    <string name="loading">loading...</string>
+    <string name="loading">loading…</string>
     <string name="location_permission_required">Location permission required</string>
     <string name="camera_permission_required">Camera permission required</string>
     <string name="uses_locatio">Uses location to verify user identity based on their geographical position.</string>
     <string name="location_is_n">Location is not accessed when the app is not in use.</string>
     <string name="camera_is_not_accessed_">Camera is not accessed when the app is not in use.</string>
+    <string name="enable_cam_permission">Enable cam permission</string>
+    <string name="checking_permission">Checking permission</string>
+    <string name="all_permission_granted">All permission granted</string>
+    <string name="waiting_for_device_loc">Waiting for device location…</string>
+    <string name="GPS_enabled">GPS enabled</string>
+    <string name="ready_to_scan">Ready to scan</string>
+    <string name="starting_scanner">Starting scanner…</string>
+    <string name="scanner_paused">Scanner paused</string>
+    <string name="restarting_scanner">Restarting scanner…</string>
 </resources>

@@ -178,7 +178,7 @@ public class MapFragment extends Fragment {
 
     private void showLocNotEnabledWarningBtmView() {
         // Inflate the bottom sheet layout
-        View bottomSheetView = LayoutInflater.from(requireContext()).inflate(R.layout.bottomview_loc_not_enabled_warning, null, false);
+        View bottomSheetView = LayoutInflater.from(requireContext()).inflate(R.layout.bottomview_enable_location, null, false);
 
         // Create the BottomSheetDialog
         locNotEnabledWarningBtmView = new BottomSheetDialog(requireContext());
@@ -227,7 +227,7 @@ public class MapFragment extends Fragment {
             }
         });
 
-        Button actionButton = bottomSheetView.findViewById(R.id.button_action);
+        Button actionButton = bottomSheetView.findViewById(R.id.goToSettings_button);
 
         actionButton.setOnClickListener(v -> {
             // Handle go to settings button action
