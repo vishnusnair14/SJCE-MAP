@@ -1,13 +1,11 @@
 package com.vishnu.sjcemap;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
@@ -26,8 +24,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -44,8 +40,6 @@ import com.vishnu.sjcemap.service.GPSProviderService;
 import com.vishnu.sjcemap.service.GeoFence;
 import com.vishnu.sjcemap.service.LocationService;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
@@ -61,7 +55,6 @@ public class MainActivity extends AppCompatActivity {
     private double client_lon;
     TextView locNotEnaViewTV;
     FirebaseFirestore db;
-
     private AppBarConfiguration mAppBarConfiguration;
     private com.vishnu.sjcemap.databinding.ActivityMainBinding binding;
     private Vibrator vibrator;

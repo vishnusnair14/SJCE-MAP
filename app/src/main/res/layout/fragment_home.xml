@@ -467,16 +467,6 @@
                             android:textStyle="bold" />
 
                         <Button
-                            android:id="@+id/exceedBoundaryBypass_button"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:backgroundTint="#770F0F"
-                            android:fontFamily="@font/anonymous_pro"
-                            android:text="Exceed boundary"
-                            android:textColor="#FFC107"
-                            android:textSize="11sp" />
-
-                        <Button
                             android:id="@+id/sjceCanteen2SCB_button"
                             style="@style/Widget.Material3.Button.ElevatedButton.Icon"
                             android:layout_width="0dp"
@@ -497,5 +487,18 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
+
+    <Button
+        android:id="@+id/exceedBoundaryBypass_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#770F0F"
+        android:fontFamily="@font/anonymous_pro"
+        android:text="Exceed boundary"
+        android:textColor="#FFC107"
+        android:textSize="11sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

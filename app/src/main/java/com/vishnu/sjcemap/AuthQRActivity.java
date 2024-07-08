@@ -40,6 +40,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.vision.CameraSource;
@@ -47,6 +48,7 @@ import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.gms.vision.barcode.BarcodeDetector;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.vishnu.sjcemap.miscellaneous.SharedDataView;
 import com.vishnu.sjcemap.miscellaneous.SoundNotify;
@@ -98,14 +100,17 @@ public class AuthQRActivity extends AppCompatActivity {
     ActivityResultLauncher<String[]> locationPermissionRequest;
     TextView alertTV;
     private boolean isAlreadyScanned = false;
+    boolean isFineLocationGranted;
+    boolean isCoarseLocationGranted;
+    boolean isCameraGranted;
     private Handler gpsCheckHandler;
     private boolean isReceiverRegistered = false;
     private static final int REQUEST_CAMERA_PERMISSION = 201;
-    String[] permissions = {
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.CAMERA
-    };
+//    String[] permissions = {
+//            Manifest.permission.ACCESS_FINE_LOCATION,
+//            Manifest.permission.ACCESS_COARSE_LOCATION,
+//            Manifest.permission.CAMERA
+//    };
 
 
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
@@ -115,50 +120,8 @@ public class AuthQRActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_auth_qractivity);
 
-        locationPermissionRequest = registerForActivityResult(new ActivityResultContracts
-                        .RequestMultiplePermissions(), result -> {
-                    Boolean fineLocationGranted = result.getOrDefault(
-                            Manifest.permission.ACCESS_FINE_LOCATION, false);
-                    Boolean coarseLocationGranted = result.getOrDefault(
-                            Manifest.permission.ACCESS_COARSE_LOCATION, false);
-                    Boolean cameraGranted = result.getOrDefault(Manifest.permission.CAMERA, false);
-
-                    if (fineLocationGranted != null && fineLocationGranted) {
-                        // Precise location access granted.
-                        Log.d(LOG_TAG, "Precise location access granted!");
-                        startLocationService();
-                        // Register the BroadcastReceiver
-                        IntentFilter filter = new IntentFilter(LocationService.ACTION_LOCATION_BROADCAST);
-                        registerReceiver(locationReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
-                        isReceiverRegistered = true;
-                        Log.d(LOG_TAG, "Broadcast receiver registered");
-                    } else if (coarseLocationGranted != null && coarseLocationGranted) {
-                        // Only approximate location access granted.
-                        startLocationService();
-                        IntentFilter filter = new IntentFilter(LocationService.ACTION_LOCATION_BROADCAST);
-                        registerReceiver(locationReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
-                        isReceiverRegistered = true;
-                        Log.d(LOG_TAG, "approximate location access granted!");
-                    } else {
-                        // No location access granted.
-                        requestPermissions();
-                        Log.d(LOG_TAG, "No location access granted!");
-                    }
-
-                    if (cameraGranted != null && cameraGranted) {
-                        Log.d(LOG_TAG, "camera access granted");
-                    } else {
-                        Log.d(LOG_TAG, "camera access not granted");
-                    }
-                }
-        );
-
-        // asking permission
-        locationPermissionRequest.launch(new String[]{
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.CAMERA
-        });
+        registerPermissionListener();
+        checkPermission();
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         sharedDataView = new ViewModelProvider(this).get(SharedDataView.class);
@@ -221,6 +184,114 @@ public class AuthQRActivity extends AppCompatActivity {
         );
 
         init();
+    }
+
+    private void checkPermission() {
+        isFineLocationGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        isCoarseLocationGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        isCameraGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED;
+
+        if (!isFineLocationGranted || !isCoarseLocationGranted) {
+            showProminentDisclosure("Turn on your location",
+                    "To authenticate user, allow SJCE MAP to access your location", "loc");
+        } else {
+            startLocationService();
+            IntentFilter filter = new IntentFilter(LocationService.ACTION_LOCATION_BROADCAST);
+            registerReceiver(locationReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+            isReceiverRegistered = true;
+        }
+
+        if (!isCameraGranted) {
+            showProminentDisclosure("Turn on your camera",
+                    "To scan QR code , allow SJCE MAP to access your camera", "cam");
+        }
+    }
+
+    private void registerPermissionListener() {
+        // asking permission
+        locationPermissionRequest = registerForActivityResult(new ActivityResultContracts
+                        .RequestMultiplePermissions(), result -> {
+                    Boolean fineLocationGranted = result.getOrDefault(
+                            Manifest.permission.ACCESS_FINE_LOCATION, false);
+                    Boolean coarseLocationGranted = result.getOrDefault(
+                            Manifest.permission.ACCESS_COARSE_LOCATION, false);
+                    Boolean cameraGranted = result.getOrDefault(Manifest.permission.CAMERA, false);
+
+                    if (fineLocationGranted != null && fineLocationGranted) {
+                        // Precise location access granted.
+                        Log.d(LOG_TAG, "Precise location access granted!");
+
+                        startLocationService();
+                        // Register the BroadcastReceiver
+                        IntentFilter filter = new IntentFilter(LocationService.ACTION_LOCATION_BROADCAST);
+                        registerReceiver(locationReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+                        isReceiverRegistered = true;
+
+                        Log.d(LOG_TAG, "Broadcast receiver registered");
+                    } else if (coarseLocationGranted != null && coarseLocationGranted) {
+
+                        // Only approximate location access granted.
+                        startLocationService();
+                        IntentFilter filter = new IntentFilter(LocationService.ACTION_LOCATION_BROADCAST);
+                        registerReceiver(locationReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+                        isReceiverRegistered = true;
+                        Log.d(LOG_TAG, "approximate location access granted!");
+                    } else {
+                        Log.d(LOG_TAG, "No location access granted!");
+                    }
+
+                    if (cameraGranted != null && cameraGranted) {
+                        Log.d(LOG_TAG, "camera access granted");
+                    } else {
+                        Log.d(LOG_TAG, "camera access not granted");
+                    }
+
+                    if (isFineLocationGranted && isCoarseLocationGranted) {
+                        if (isLocationNotEnabled(this)) {
+                            showEnableLocationBtmView(true);
+                        }
+                    } else if (isCameraGranted) {
+                        if (isLocationNotEnabled(this)) {
+                            showEnableLocationBtmView(true);
+                        }
+                    }
+                }
+        );
+
+    }
+
+    private void showProminentDisclosure(String title, String message, String type) {
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.permission_prominent_disclosure, null);
+        TextView headingTxt = dialogView.findViewById(R.id.prominentDisclosureHeading_textView);
+        TextView subHeadingTxt1 = dialogView.findViewById(R.id.prominentDisclosureSubPoint1_textView);
+        TextView subHeadingTxt2 = dialogView.findViewById(R.id.prominentDisclosureSubPoint2_textView);
+
+        if (type.equals("cam")) {
+            headingTxt.setText(R.string.camera_permission_required);
+            subHeadingTxt1.setText(message);
+            subHeadingTxt2.setText(R.string.camera_is_not_accessed_);
+        } else {
+            headingTxt.setText(R.string.location_permission_required);
+            subHeadingTxt1.setText(R.string.uses_locatio);
+            subHeadingTxt2.setText(R.string.location_is_n);
+        }
+
+        new MaterialAlertDialogBuilder(this)
+                .setView(dialogView)
+                .setNegativeButton("Not now", (dialog, which) -> {
+                    Log.d(LOG_TAG, "prominent disclosure cancelled");
+                }).setPositiveButton("Continue", (dialog, which) -> {
+                    if (type.equals("cam")) {
+                        locationPermissionRequest.launch(new String[]{
+                                Manifest.permission.CAMERA
+                        });
+                    } else {
+                        locationPermissionRequest.launch(new String[]{
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION,
+                        });
+                    }
+                }).show();
     }
 
 
@@ -288,7 +359,7 @@ public class AuthQRActivity extends AppCompatActivity {
                     setScanView();
                 } else {
                     // GPS coordinates are not valid, check again after the interval
-                    setStatusMsgView(R.string.init_gps_please_wait, true);
+                    setStatusMsgView(R.string.loading, true);
                     gpsCheckHandler.postDelayed(this, GPS_CHECK_INTERVAL);
                 }
             }
@@ -403,7 +474,6 @@ public class AuthQRActivity extends AppCompatActivity {
 
                                         resetCountdownTimer();
                                         setStatusMsgView(R.string.starting_app, true);
-                                        saveDeviceInfoToFirestore();
 
                                         stopCountdownTimer();
                                         new Handler().postDelayed(() -> {
@@ -443,43 +513,6 @@ public class AuthQRActivity extends AppCompatActivity {
         });
     }
 
-    private void saveDeviceInfoToFirestore() {
-        // Get device info
-        Map<String, Object> deviceInfo = DeviceInfo.getDeviceData();
-
-        // Save device info to Firestore under a specific document
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("UserInformation").document("DeviceInfo")
-                .update(deviceInfo)
-                .addOnSuccessListener(aVoid -> {
-                    // Handle success
-                    System.out.println("DocumentSnapshot successfully written!");
-                })
-                .addOnFailureListener(e -> {
-                    // Handle failure
-                    System.err.println("Error writing document: " + e.getMessage());
-                });
-    }
-
-    public static class DeviceInfo {
-        public static Map<String, Object> getDeviceInfo() {
-            Map<String, Object> deviceInfo = new HashMap<>();
-            deviceInfo.put("Manufacturer", Build.MANUFACTURER);
-            deviceInfo.put("Model", Build.MODEL);
-            deviceInfo.put("SDK Version", String.valueOf(Build.VERSION.SDK_INT));
-            deviceInfo.put("Device", Build.DEVICE);
-            deviceInfo.put("Product", Build.PRODUCT);
-            return deviceInfo;
-        }
-
-        public static Map<String, Object> getDeviceData() {
-            Map<String, Object> data = new HashMap<>();
-            data.put(String.valueOf(new Date()), getDeviceInfo());
-            return data;
-        }
-
-    }
-
     private final BroadcastReceiver locationReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -493,8 +526,8 @@ public class AuthQRActivity extends AppCompatActivity {
         }
     };
 
-    private void showEnableLocationBtmView(boolean _state) {
-        if (_state) {
+    private void showEnableLocationBtmView(boolean _show) {
+        if (_show) {
             View enableLocationBottomView = LayoutInflater.from(this).inflate(
                     R.layout.bottomview_enable_location, null, false);
 
@@ -505,7 +538,7 @@ public class AuthQRActivity extends AppCompatActivity {
             enableLocBtmDialog.setCancelable(false);
             Objects.requireNonNull(enableLocBtmDialog.getWindow()).setGravity(Gravity.TOP);
 
-            Button enableLocationBtn = enableLocationBottomView.findViewById(R.id.enableDeviceLocation1_button);
+            Button enableLocationBtn = enableLocationBottomView.findViewById(R.id.button_action_auth);
 
             enableLocationBtn.setOnClickListener(v -> {
                 enableLocBtmDialog.hide();
@@ -640,7 +673,9 @@ public class AuthQRActivity extends AppCompatActivity {
 
         alertTV.setVisibility(View.GONE);
         if (!preferences.getBoolean("isAlreadyScanned", false)) {
-            showEnableLocationBtmView(isLocationNotEnabled(this));
+            if (isCoarseLocationGranted && isFineLocationGranted) {
+                showEnableLocationBtmView(isLocationNotEnabled(this));
+            }
         }
     }
 
@@ -673,7 +708,7 @@ public class AuthQRActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        stopLocationService();
+        stopLocationService();
     }
 
 }

@@ -9,8 +9,8 @@
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/imageViewMapFrag_circleImageView"
-        android:layout_width="155dp"
-        android:layout_height="160dp"
+        android:layout_width="match_parent"
+        android:layout_height="175dp"
         android:layout_marginStart="5dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="5dp"
@@ -109,7 +109,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <HorizontalScrollView
-        android:id="@+id/horizontalScrollView"
+        android:id="@+id/spotImageView_horizontalScrollView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"

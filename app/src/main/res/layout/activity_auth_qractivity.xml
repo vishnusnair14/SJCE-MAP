@@ -180,6 +180,7 @@
         android:textSelectHandle="@drawable/baseline_directions_walk_24"
         android:textSize="12sp"
         android:textStyle="bold"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -190,6 +191,7 @@
         android:layout_marginStart="5dp"
         android:layout_marginBottom="20dp"
         android:spinnerMode="dropdown"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/byPassAuth_button"
         app:layout_constraintStart_toStartOf="parent" />
 

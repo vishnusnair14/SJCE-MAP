@@ -4,10 +4,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
@@ -19,6 +19,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -26,6 +28,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -37,6 +40,7 @@ import com.vishnu.sjcemap.R;
 import com.vishnu.sjcemap.databinding.FragmentMapBinding;
 import com.vishnu.sjcemap.miscellaneous.Overlay360View;
 import com.vishnu.sjcemap.miscellaneous.SharedDataView;
+import com.vishnu.sjcemap.miscellaneous.Utils;
 import com.vishnu.sjcemap.service.GPSProviderService;
 import com.vishnu.sjcemap.service.GeoFence;
 
@@ -52,12 +56,12 @@ public class MapFragment extends Fragment {
     private String destPlaceLat;
     private String destPlaceLon;
     String gmap360ViewUrl;
+    private ActivityResultLauncher<Intent> gpsActivityResultLauncher;
     Overlay360View gmap360ViewPopup;
-    TextView locNotEnabledTV;
     ConstraintLayout layout;
     private FragmentMapBinding binding;
+    private BottomSheetBehavior<View> bottomSheetBehavior;
     boolean isGpsEnabled = false;
-    LocationManager locationManager;
     private double clientLat;
     private double clientLon;
     BottomSheetDialog locNotEnabledWarningBtmView;
@@ -69,8 +73,8 @@ public class MapFragment extends Fragment {
     /* virtual location coordinates */
     private final LatLng GJB_MAIN_COORD = new LatLng(12.316369879317168, 76.61386933078991);
     private final LatLng CMS_MAIN_COORD = new LatLng(12.31780527062543, 76.61398336881378);
-    private final LatLng BACK_GATE_COORD = new LatLng(12.318453451797078, 76.61465640667447);
-    private final LatLng DUMMY_LOC_COORD = new LatLng(12.317626645254657, 76.6145323909735);
+//    private final LatLng BACK_GATE_COORD = new LatLng(12.318453451797078, 76.61465640667447);
+//    private final LatLng DUMMY_LOC_COORD = new LatLng(12.317626645254657, 76.6145323909735);
 
     public MapFragment() {
     }
@@ -91,9 +95,6 @@ public class MapFragment extends Fragment {
 
         layout = binding.mapFragmentLayoutConstraintLayout;
         binding.assistWalkDirectionImageButton.setEnabled(false);
-        locNotEnabledTV = binding.locNotEnabledBannerMapFragViewTextView;
-
-        locationManager = (LocationManager) requireContext().getSystemService(Context.LOCATION_SERVICE);
 
         /* Get spot-place and associated data */
         sharedDataView.getPlace().observe(getViewLifecycleOwner(), pl -> {
@@ -131,31 +132,49 @@ public class MapFragment extends Fragment {
             }
         });
 
-//        if (MainActivity.isLocationNotEnabled(requireContext())) {
-//            locNotEnabledTV.setVisibility(View.VISIBLE);
-//        } else {
-//            locNotEnabledTV.setVisibility(View.GONE);
-//        }
+        // Initialize the ActivityResultLauncher
+        gpsActivityResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (Utils.isGPSEnabled(requireContext())) {
+                        hideLocNotEnaView();
+                        setLoadingViewMapBtn();
+
+                        new Handler().postDelayed(() -> {
+                            binding.assistWalkDirectionImageButton.performClick();
+                            setClickViewMapBtn();
+                        }, 1000);
+                        Log.d(LOG_TAG, "gpsActivityResultLauncher: GPS Enabled");
+                    } else {
+                        showLocNotEnaView();
+                        setClickViewMapBtn();
+                        Log.d(LOG_TAG, "gpsActivityResultLauncher: GPS not Enabled");
+                    }
+                }
+        );
+
 
         return root;
     }
 
-    //    private void showLocNotEnabledWarningBtmView(){
-//        // Show a loading indicator or message to the user
-//
-//        View gpsCheckBtmView = LayoutInflater.from(requireContext()).inflate(
-//                R.layout.bottomview_enable_location, null, false);
-//
-//        // Create a BottomSheetDialog with TOP gravity
-//        BottomSheetDialog gpsCheckBtmDialog = new BottomSheetDialog(requireContext());
-//        gpsCheckBtmDialog.setContentView(gpsCheckBtmView);
-//        gpsCheckBtmDialog.setCanceledOnTouchOutside(false);
-//        Objects.requireNonNull(gpsCheckBtmDialog.getWindow()).setGravity(Gravity.TOP);
-//
-//        if (!gpsCheckBtmDialog.isShowing()) {
-////            gpsCheckBtmDialog.show();
-//        }
-//    }
+    private void showLocNotEnaView() {
+        TextView locNotEnabledTV = binding.locNotEnabledBannerMapFragViewTextView;
+        locNotEnabledTV.setVisibility(View.VISIBLE);
+        locNotEnabledTV.setText(R.string.device_location_not_enabled);
+
+        locNotEnabledTV.setTextColor(getResources().getColor(R.color.white, null));
+        locNotEnabledTV.setBackgroundColor(getResources().getColor(R.color.colorPrimary, null));
+    }
+
+    private void hideLocNotEnaView() {
+        TextView locNotEnabledTV = binding.locNotEnabledBannerMapFragViewTextView;
+        locNotEnabledTV.setVisibility(View.GONE);
+        locNotEnabledTV.setText("");
+
+        locNotEnabledTV.setTextColor(getResources().getColor(R.color.back_color, null));
+        locNotEnabledTV.setBackgroundColor(getResources().getColor(R.color.back_color, null));
+    }
+
 
     private void showLocNotEnabledWarningBtmView() {
         // Inflate the bottom sheet layout
@@ -166,11 +185,53 @@ public class MapFragment extends Fragment {
         locNotEnabledWarningBtmView.setContentView(bottomSheetView);
         locNotEnabledWarningBtmView.setCanceledOnTouchOutside(false);
 
+        bottomSheetBehavior = BottomSheetBehavior.from((View) bottomSheetView.getParent());
+
+        // Set a BottomSheetCallback to listen for state changes
+        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                switch (newState) {
+                    case BottomSheetBehavior.STATE_EXPANDED:
+                        Log.d(LOG_TAG, "BottomSheet state: EXPANDED");
+                        // Handle the expanded state
+                        break;
+                    case BottomSheetBehavior.STATE_COLLAPSED:
+                        Log.d(LOG_TAG, "BottomSheet state: COLLAPSED");
+                        // Handle the collapsed state
+                        break;
+                    case BottomSheetBehavior.STATE_DRAGGING:
+                        Log.d(LOG_TAG, "BottomSheet state: DRAGGING");
+                        // Handle the dragging state
+                        break;
+                    case BottomSheetBehavior.STATE_SETTLING:
+                        Log.d(LOG_TAG, "BottomSheet state: SETTLING");
+                        // Handle the settling state
+                        break;
+                    case BottomSheetBehavior.STATE_HIDDEN:
+                        Log.d(LOG_TAG, "BottomSheet state: HIDDEN");
+                        setClickViewMapBtn();
+                        // Handle the hidden state
+                        if (locNotEnabledWarningBtmView != null) {
+                            locNotEnabledWarningBtmView.dismiss();
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                // Handle the sliding state (slideOffset ranges from 0 to 1 as the bottom sheet slides up)
+            }
+        });
+
         Button actionButton = bottomSheetView.findViewById(R.id.button_action);
 
         actionButton.setOnClickListener(v -> {
-            // Handle button action
-            showLocationSettings(requireContext());
+            // Handle go to settings button action
+            showLocationSettings();
             if (locNotEnabledWarningBtmView != null) {
                 locNotEnabledWarningBtmView.hide();
                 locNotEnabledWarningBtmView.dismiss();
@@ -183,10 +244,10 @@ public class MapFragment extends Fragment {
         }
     }
 
-    private void showLocationSettings(Context context) {
-        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-        context.startActivity(intent);
-    }
+//    private void showLocationSettings(Context context) {
+//        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+//        context.startActivity(intent);
+//    }
 
     private final BroadcastReceiver gpsStatusReceiver = new BroadcastReceiver() {
         @Override
@@ -196,12 +257,12 @@ public class MapFragment extends Fragment {
 
                 if (isGPSEnabled && !isGpsEnabled) {
                     Toast.makeText(context, "@map: GPS Enabled", Toast.LENGTH_SHORT).show();
-                    locNotEnabledTV.setVisibility(View.GONE);
+                    hideLocNotEnaView();
 
                     isGpsEnabled = true;
                 } else if (!isGPSEnabled && isGpsEnabled) {
                     Toast.makeText(context, "@map: GPS Disabled", Toast.LENGTH_SHORT).show();
-                    locNotEnabledTV.setVisibility(View.VISIBLE);
+                    showLocNotEnaView();
 
                     isGpsEnabled = false;
                 }
@@ -209,44 +270,14 @@ public class MapFragment extends Fragment {
         }
     };
 
-//    private boolean isLocationNotEnabled() {
-//
-//        // Check if the LocationManager is not null
-//        if (locationManager == null) {
-//            return true;
-//        }
-//
-//        // Check if either GPS or Network Provider is enabled
-//        boolean gpsEnabled = false;
-//        boolean networkEnabled = false;
-//
-//        try {
-//            gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-//        } catch (Exception ex) {
-//            Log.e(LOG_TAG, ex.toString());
-//        }
-//
-//        try {
-//            networkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-//        } catch (Exception ex) {
-//            Log.e(LOG_TAG, ex.toString());
-//        }
-//
-//        return !gpsEnabled && !networkEnabled;
-//    }
+    private void showLocationSettings() {
+        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+        gpsActivityResultLauncher.launch(intent);
+    }
 
-//    public static boolean isLocationNotEnabled1(@NonNull Context context) {
-//        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-//
-//        /* Check if either GPS or network provider is enabled */
-//        return locationManager == null ||
-//                (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) &&
-//                        !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
-//    }
-
-
-    private void openMapView(String sourceLatitude, String sourceLongitude,
-                             String destinationLatitude, String destinationLongitude, boolean isSourceProvided) {
+    private void loadGoogleMap(String sourceLatitude, String sourceLongitude,
+                               String destinationLatitude, String destinationLongitude,
+                               boolean isSourceProvided, String msg) {
         Uri uri;
         if (isSourceProvided) {
             uri = Uri.parse("https://www.google.com/maps/dir/?api=1" +
@@ -267,6 +298,9 @@ public class MapFragment extends Fragment {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
 
+            Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
+            Log.i(LOG_TAG, msg);
+
             if (locNotEnabledWarningBtmView != null) {
                 locNotEnabledWarningBtmView.hide();
                 locNotEnabledWarningBtmView.dismiss();
@@ -274,6 +308,17 @@ public class MapFragment extends Fragment {
         }
     }
 
+    private void setLoadingViewMapBtn() {
+        Button btn = binding.assistWalkDirectionImageButton;
+        btn.setText(R.string.loading_maps);
+        btn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_keyboard_arrow_left_24, 0, 0, 0);
+    }
+
+    private void setClickViewMapBtn() {
+        Button btn = binding.assistWalkDirectionImageButton;
+        btn.setText(R.string.get_direction);
+        btn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_directions_walk_24, 0, 0, 0);
+    }
 
     private void loadDataFromDB(@NonNull String docPath, @NonNull String key, TextView ltv, TextView ptv) {
         DocumentReference documentRef = FirebaseFirestore.getInstance().collection("LocationData").document(docPath);
@@ -333,34 +378,30 @@ public class MapFragment extends Fragment {
                             if (geoPoint != null) {
                                 if ((geoPoint.getLatitude() == 0.00) && (geoPoint.getLongitude() == 0.00)) {
                                     binding.assistWalkDirectionImageButton.setEnabled(false);
-                                    locNotEnabledTV.setVisibility(View.GONE);
                                     binding.assistWalkDirectionImageButton.setOnClickListener(null);
                                 } else {
                                     binding.assistWalkDirectionImageButton.setEnabled(true);
-                                    locNotEnabledTV.setVisibility(View.VISIBLE);
 
                                     binding.assistWalkDirectionImageButton.setOnClickListener(v -> {
-
+                                        setLoadingViewMapBtn();
                                         boolean isInsideGJB = GeoFence.isInsideGJB(clientLat, clientLon);
                                         boolean isInsideCMS = GeoFence.isInsideCMS(clientLat, clientLon);
 
                                         if (isInsideGJB) {
-                                            openMapView(String.valueOf(GJB_MAIN_COORD.latitude), String.valueOf(GJB_MAIN_COORD.longitude),
-                                                    destPlaceLat, destPlaceLon, true);
-                                            Toast.makeText(requireContext(), "You are inside GJB,\nsource set from: GJB MAIN ENTRY", Toast.LENGTH_LONG).show();
-                                            Log.i(LOG_TAG, "You are inside GJB, source set from: GJB MAIN ENTRY");
+                                            loadGoogleMap(String.valueOf(GJB_MAIN_COORD.latitude), String.valueOf(GJB_MAIN_COORD.longitude),
+                                                    destPlaceLat, destPlaceLon, true, "You are inside GJB,\nsource set from: GJB MAIN ENTRY");
                                         } else if (isInsideCMS) {
-                                            openMapView(String.valueOf(CMS_MAIN_COORD.latitude), String.valueOf(CMS_MAIN_COORD.longitude),
-                                                    destPlaceLat, destPlaceLon, true);
-                                            Toast.makeText(requireContext(), "You are inside CMS,\nsource set from: CMS MAIN ENTRY", Toast.LENGTH_LONG).show();
-                                            Log.i(LOG_TAG, "You are inside CMS, source set from: CMS MAIN ENTRY");
+                                            loadGoogleMap(String.valueOf(CMS_MAIN_COORD.latitude), String.valueOf(CMS_MAIN_COORD.longitude),
+                                                    destPlaceLat, destPlaceLon, true, "You are inside CMS,\nsource set from: CMS MAIN ENTRY");
                                         } else {
-                                            openMapView(null, null, destPlaceLat, destPlaceLon, false);
+                                            loadGoogleMap(null, null, destPlaceLat, destPlaceLon, false,
+                                                    "Source set from current location");
+
                                         }
                                     });
                                 }
                             } else {
-                                locNotEnabledTV.setVisibility(View.GONE);
+                                hideLocNotEnaView();
                                 binding.assistWalkDirectionImageButton.setEnabled(false);
                                 binding.assistWalkDirectionImageButton.setOnClickListener(null);
                             }
@@ -385,19 +426,27 @@ public class MapFragment extends Fragment {
                             } else {
                                 binding.aboutDepartmentViewTextView.setText(R.string.TODO);
                             }
-                            /* loads google images */
-                            String[] imageUrls = {spotGoogleImage1, spotGoogleImage2, spotGoogleImage3, spotGoogleImage4};
-                            ImageView[] imageViews = {binding.mapFragImageView1ImageView, binding.mapFragImageView2ImageView,
-                                    binding.mapFragImageView3ImageView, binding.mapFragImageView4ImageView};
 
-                            for (int i = 0; i < imageUrls.length; i++) {
-                                String imageUrl = imageUrls[i];
-                                ImageView imageView = imageViews[i];
-                                if (Objects.equals(imageUrl, "")) {
-                                    Picasso.get().load(NO_IMG_FOUND_URL_1).into(imageView);
-                                } else {
-                                    Picasso.get().load(imageUrl).into(imageView);
+                            /* loads google images */
+                            if (Objects.equals(spotGoogleImage1, "")) {
+                                binding.spotImageViewHorizontalScrollView.setVisibility(View.GONE);
+                                binding.googleImageBannerTextView.setVisibility(View.GONE);
+                            } else {
+                                String[] imageUrls = {spotGoogleImage1, spotGoogleImage2, spotGoogleImage3, spotGoogleImage4};
+                                ImageView[] imageViews = {binding.mapFragImageView1ImageView, binding.mapFragImageView2ImageView,
+                                        binding.mapFragImageView3ImageView, binding.mapFragImageView4ImageView};
+
+                                for (int i = 0; i < imageUrls.length; i++) {
+                                    String imageUrl = imageUrls[i];
+                                    ImageView imageView = imageViews[i];
+                                    if (Objects.equals(imageUrl, "")) {
+                                        Picasso.get().load(NO_IMG_FOUND_URL_1).into(imageView);
+                                    } else {
+                                        Picasso.get().load(imageUrl).into(imageView);
+                                    }
                                 }
+                                binding.googleImageBannerTextView.setVisibility(View.VISIBLE);
+                                binding.spotImageViewHorizontalScrollView.setVisibility(View.VISIBLE);
                             }
 
                             binding.googleImageBannerTextView.setText(MessageFormat.format("Images of {0}", placeName.toLowerCase()));
@@ -424,17 +473,19 @@ public class MapFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+//        setClickViewMapBtn();
 
         IntentFilter providerFilter = new IntentFilter(GPSProviderService.ACTION_GPS_STATUS_CHANGED);
         requireContext().registerReceiver(gpsStatusReceiver, providerFilter, Context.RECEIVER_NOT_EXPORTED);
 
         if (MainActivity.isLocationNotEnabled(requireContext())) {
-            locNotEnabledTV.setVisibility(View.VISIBLE);
-            Toast.makeText(requireContext(), "notna map", Toast.LENGTH_SHORT).show();
+            showLocNotEnaView();
+//            Toast.makeText(requireContext(), "notna map", Toast.LENGTH_SHORT).show();
         } else {
-            locNotEnabledTV.setVisibility(View.GONE);
-            Toast.makeText(requireContext(), "ena map", Toast.LENGTH_SHORT).show();
+            hideLocNotEnaView();
+//            Toast.makeText(requireContext(), "ena map", Toast.LENGTH_SHORT).show();
         }
+
     }
 
     @Override

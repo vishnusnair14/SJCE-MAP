@@ -47,20 +47,20 @@ public class GeoFence {
 
     public static boolean isInsideGJB(double lat, double lon) {
         // golden-jubilee-block boundary
-        double topLeftLat = 12.31700026871531;
-        double topLeftLon = 76.61384665081256;
-        double bottomRightLat = 12.315803282353533;
-        double bottomRightLon = 76.61474608292343;
+        double topLeftLat = 12.316922331475787;
+        double topLeftLon = 76.61379157361107;
+        double bottomRightLat = 12.315785795753865;
+        double bottomRightLon = 76.6145838842119;
 
         return (lat >= bottomRightLat && lat <= topLeftLat && lon >= topLeftLon && lon <= bottomRightLon);
     }
 
     public static boolean isInsideCMS(double lat, double lon) {
         // CMS-block boundary
-        double topLeftLat = 12.317812749625686;
-        double topLeftLon = 76.61399819105716;
-        double bottomRightLat = 12.31743221981478;
-        double bottomRightLon = 76.61470260061012;
+        double topLeftLat = 12.317789268069578;
+        double topLeftLon = 76.61396170532967;
+        double bottomRightLat = 12.317432436138859;
+        double bottomRightLon = 76.61474788930391;
 
         return (lat >= bottomRightLat && lat <= topLeftLat && lon >= topLeftLon && lon <= bottomRightLon);
     }
