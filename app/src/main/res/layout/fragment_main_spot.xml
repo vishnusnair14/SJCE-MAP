@@ -8,7 +8,18 @@
     android:background="#4A4444"
     android:backgroundTint="#B8D1CF"
     android:backgroundTintMode="add"
-    tools:context=".ui.home.AllLocationsFragment">
+    tools:context=".ui.home.campusspots.CampusSpotsFragment">
+
+    <ProgressBar
+        android:id="@+id/campusSpotGridView_progressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminateTint="#D3560D"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView341" />
 
     <TextView
         android:id="@+id/textView341"
@@ -28,9 +39,9 @@
     <GridView
         android:id="@+id/all_locations_grid_view"
         android:layout_width="match_parent"
-        android:layout_height="650dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
+        android:layout_height="match_parent"
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="25dp"
         android:background="@android:color/transparent"
         android:clipToPadding="false"
         android:gravity="center"

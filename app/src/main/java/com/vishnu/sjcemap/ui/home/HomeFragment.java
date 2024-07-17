@@ -41,11 +41,13 @@ public class HomeFragment extends Fragment {
     boolean isGpsEnabled = false;
     FirebaseFirestore db;
     private FragmentHomeBinding binding;
+    private Bundle bundle;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         db = FirebaseFirestore.getInstance();
+        bundle = new Bundle();
 
         sharedDataView = new ViewModelProvider(requireActivity()).get(SharedDataView.class);
     }
@@ -69,92 +71,32 @@ public class HomeFragment extends Fragment {
         });
 
         /* shortcut button click listeners */
-//        binding.registrationSectionSCBButton.setOnClickListener(v -> {
-//            updateShortcutBtnData("registration_dept_scb");
-//            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
-//        });
-//
-//        binding.adminBlockSCBButton.setOnClickListener(v -> {
-//            updateShortcutBtnData("administrative_dept_scb");
-//            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
-//        });
-//
-//        binding.principalOfficeSCBButton.setOnClickListener(v -> {
-//            updateShortcutBtnData("principal_office_scb");
-//            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
-//        });
-//
 
         binding.viewAllTopLocationSCBButton2.setOnClickListener(v ->
                 NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_nav_mainspots));
-//
-//        binding.cseDeptSCBButton.setOnClickListener(v -> {
-//            updateShortcutBtnData("cse_dept_scb");
-//            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
-//        });
-//
-//        binding.mcaDeptSCBButton.setOnClickListener(v -> {
-//            updateShortcutBtnData("mca_dept_scb");
-//            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
-//        });
-//
-//        binding.eceDeptSCBButton.setOnClickListener(v -> {
-//            updateShortcutBtnData("ece_dept_scb");
-//            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
-//        });
 
         binding.viewAllDepartmentSCBButton.setOnClickListener(v ->
                 NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_departmentFragment));
 
-        binding.sjceMainLibrarySCBButton.setOnClickListener(v -> {
-            updateShortcutBtnData("sjce_main_library_scb");
-            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
-        });
+        binding.sjceMainLibrarySCBButton.setOnClickListener(v -> navigateToMap("SJCELibrary"));
 
-        binding.sjceISSeminarHallSCBButton.setOnClickListener(v -> {
-            updateShortcutBtnData("sjce_is_seminar_hall_scb");
-            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
-        });
+        binding.sjceISSeminarHallSCBButton.setOnClickListener(v -> navigateToMap("SJCEISSeminarHall"));
 
-//        binding.sjceAuditorium2SCBButton.setOnClickListener(v -> {
-//            updateShortcutBtnData("sjce_auditorium2_scb");
-//            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
-//        });
+        binding.sjceReferenceSectionSCBButton.setOnClickListener(v -> navigateToMap("SJCEReferenceSection"));
 
-        binding.sjceMainParkingSCBButton.setOnClickListener(v -> {
-            updateShortcutBtnData("sjce_main_parking_scb");
-            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
-        });
+        binding.sjceMainParkingSCBButton.setOnClickListener(v -> navigateToMap("SJCEMainParking"));
 
-        binding.staffParking1SCBButton.setOnClickListener(v -> {
-            updateShortcutBtnData("staff_parking_1_scb");
-            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
-        });
+        binding.staffParking1SCBButton.setOnClickListener(v -> navigateToMap("StaffParking1"));
 
-        binding.staffParking2SCBButton.setOnClickListener(v -> {
-            updateShortcutBtnData("staff_parking_2_scb");
-            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
-        });
+        binding.staffParking2SCBButton.setOnClickListener(v -> navigateToMap("StaffParking2"));
 
-        binding.vehicleParking1SCBButton.setOnClickListener(v -> {
-            updateShortcutBtnData("sjce_vehicle_parking_1_scb");
-            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
-        });
+        binding.vehicleParking1SCBButton.setOnClickListener(v -> navigateToMap("VehicleParkingLot1"));
 
-        binding.vehicleParking2SCBButton.setOnClickListener(v -> {
-            updateShortcutBtnData("sjce_vehicle_parking_2_scb");
-            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
-        });
+        binding.vehicleParking2SCBButton.setOnClickListener(v -> navigateToMap("VehicleParkingLot2"));
 
-        binding.yampaCafeteriaSCBButton.setOnClickListener(v -> {
-            updateShortcutBtnData("sjce_yampa_cafeteria_sbc");
-            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
-        });
+        binding.yampaCafeteriaSCBButton.setOnClickListener(v -> navigateToMap("Yampa"));
 
-        binding.mylariCafeteriaSCBButton.setOnClickListener(v -> {
-            updateShortcutBtnData("sjce_mylari_cafeteria_scb");
-            NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment);
-        });
+        binding.mylariCafeteriaSCBButton.setOnClickListener(v -> navigateToMap("AnnapoornaCanteen"));
 
         binding.exceedBoundaryBypassButton.setOnClickListener(v -> {
             authPreference.edit().putBoolean("isAlreadyScanned", false).apply();
@@ -165,6 +107,16 @@ public class HomeFragment extends Fragment {
         });
 
         return root;
+    }
+
+    private void navigateToMap(String docID) {
+        bundle.clear();
+
+        bundle.putString("doc_path", "otherCampusLocations");
+        bundle.putString("doc_id", docID);
+        bundle.putBoolean("load_from_db", true);
+
+        NavHostFragment.findNavController(this).navigate(R.id.action_nav_home_to_mapFragment, bundle);
     }
 
     private final BroadcastReceiver gpsStatusReceiver = new BroadcastReceiver() {

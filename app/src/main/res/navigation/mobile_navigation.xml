@@ -32,8 +32,8 @@
         tools:layout="@layout/fragment_map" />
     <fragment
         android:id="@+id/departmentFragment"
-        android:name="com.vishnu.sjcemap.ui.home.DepartmentFragment"
-        android:label="@string/menu_home"
+        android:name="com.vishnu.sjcemap.ui.home.departments.DepartmentFragment"
+        android:label="Locations"
         tools:layout="@layout/fragment_department">
         <action
             android:id="@+id/action_departmentFragment_to_mapFragment"
@@ -46,8 +46,8 @@
         tools:layout="@layout/fragment_about" />
     <fragment
         android:id="@+id/nav_mainspots"
-        android:name="com.vishnu.sjcemap.ui.home.AllLocationsFragment"
-        android:label="@string/menu_home"
+        android:name="com.vishnu.sjcemap.ui.home.campusspots.CampusSpotsFragment"
+        android:label="Locations"
         tools:layout="@layout/fragment_main_spot">
         <action
             android:id="@+id/action_nav_mainspots_to_mapFragment"

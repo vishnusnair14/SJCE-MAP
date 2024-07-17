@@ -155,11 +155,12 @@ public class AuthQRActivity extends AppCompatActivity {
                     if (Utils.isGPSEnabled(this)) {
                         setStatusMsgView(R.string.GPS_enabled, true);
                         startScannerOrRedirect();
-                        Toast.makeText(this, "GPS Enabled", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(this, "GPS Enabled", Toast.LENGTH_SHORT).show();
                     } else {
                         showEnableLocationBtmView(true);
-                        Toast.makeText(this, "GPS is not enabled", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(this, "GPS is not enabled", Toast.LENGTH_SHORT).show();
                     }
+
                 }
         );
 
@@ -248,25 +249,43 @@ public class AuthQRActivity extends AppCompatActivity {
         TextView headingTxt = dialogView.findViewById(R.id.prominentDisclosureHeading_textView);
         TextView subHeadingTxt1 = dialogView.findViewById(R.id.prominentDisclosureSubPoint1_textView);
         TextView subHeadingTxt2 = dialogView.findViewById(R.id.prominentDisclosureSubPoint2_textView);
+        TextView subHeadingTxt3 = dialogView.findViewById(R.id.prominentDisclosureSubPoint3_textView);
 
-        if (type.equals("loc")) {
-            headingTxt.setText(R.string.location_permission_required);
-            subHeadingTxt1.setText(R.string.uses_locatio);
-            subHeadingTxt2.setText(R.string.location_is_n);
+        if (preferences.getInt("permissionDenyCount", 1) >= 3) {
+            if (type.equals("loc")) {
+                headingTxt.setText(R.string.location_permission_required);
+                subHeadingTxt1.setText(R.string.location_permission_consent_1);
+                subHeadingTxt2.setText(R.string.location_permission_consent_2);
+                subHeadingTxt3.setText(R.string.go_to_app_settings_app_permission);
+            } else {
+                headingTxt.setText(R.string.camera_permission_required);
+                subHeadingTxt1.setText(R.string.cam_permission_consent_1);
+                subHeadingTxt2.setText(R.string.cam_permission_consent_2);
+                subHeadingTxt3.setText(R.string.go_to_app_settings_app_permission);
+            }
         } else {
-            headingTxt.setText(R.string.camera_permission_required);
-            subHeadingTxt1.setText(R.string.enable_cam_permission);
-            subHeadingTxt2.setText(R.string.camera_is_not_accessed_);
+            if (type.equals("loc")) {
+                headingTxt.setText(R.string.secure_qr_login_with_continue);
+                subHeadingTxt1.setText(R.string.location_permission_consent_1);
+                subHeadingTxt2.setText(R.string.location_permission_consent_2);
+            } else {
+                headingTxt.setText(R.string.camera_permission_required);
+                subHeadingTxt1.setText(R.string.cam_permission_consent_1);
+                subHeadingTxt2.setText(R.string.cam_permission_consent_2);
+            }
         }
 
         new MaterialAlertDialogBuilder(this)
                 .setView(dialogView)
                 .setCancelable(false)
                 .setNegativeButton("Not now", (dialog, which) -> {
+                    preferences.edit().putInt("permissionDenyCount", preferences.getInt("permissionDenyCount", 1) + 1).apply();
                     if (type.equals("loc")) {
-                        setStatusMsgView(R.string.location_permission_required, false);
+                        setStatusMsgView(R.string.Permission_required,
+                                R.string.location_permission_required, false);
                     } else {
-                        setStatusMsgView(R.string.camera_permission_required, false);
+                        setStatusMsgView(R.string.Permission_required,
+                                R.string.camera_permission_required, false);
                     }
                     Log.d(LOG_TAG, "prominent disclosure cancelled");
                 }).setPositiveButton("Continue", (dialog, which) -> {
@@ -274,7 +293,9 @@ public class AuthQRActivity extends AppCompatActivity {
                         locationPermissionRequest.launch(new String[]{
                                 android.Manifest.permission.ACCESS_FINE_LOCATION,
                                 android.Manifest.permission.ACCESS_COARSE_LOCATION,
+
                         });
+
                     } else {
                         cameraPermissionRequest.launch(new String[]{
                                 Manifest.permission.CAMERA
@@ -283,7 +304,7 @@ public class AuthQRActivity extends AppCompatActivity {
                 }).show();
     }
 
-    private void setStatusMsgView(int txt, boolean showpb) {
+    private void setStatusMsgView(int statusTxt, boolean showpb) {
         if (showpb) {
             statusPB.setVisibility(View.VISIBLE);
             statusTV.setVisibility(View.VISIBLE);
@@ -291,13 +312,30 @@ public class AuthQRActivity extends AppCompatActivity {
             statusPB.setVisibility(View.GONE);
             statusTV.setVisibility(View.VISIBLE);
         }
-        statusTV.setText(txt);
+        statusTV.setText(statusTxt);
         surfaceView.setVisibility(View.GONE);
         countDownTmrTV.setVisibility(View.GONE);
         txtBarcodeValue.setVisibility(View.GONE);
         alertTV.setVisibility(View.GONE);
         locationTV.setVisibility(View.GONE);
         authBannerTV.setText(R.string.please_wait);
+    }
+
+    private void setStatusMsgView(int authBannerTxt, int statusTxt, boolean showpb) {
+        if (showpb) {
+            statusPB.setVisibility(View.VISIBLE);
+            statusTV.setVisibility(View.VISIBLE);
+        } else {
+            statusPB.setVisibility(View.GONE);
+            statusTV.setVisibility(View.VISIBLE);
+        }
+        statusTV.setText(statusTxt);
+        surfaceView.setVisibility(View.GONE);
+        countDownTmrTV.setVisibility(View.GONE);
+        txtBarcodeValue.setVisibility(View.GONE);
+        alertTV.setVisibility(View.GONE);
+        locationTV.setVisibility(View.GONE);
+        authBannerTV.setText(authBannerTxt);
     }
 
     private void showEnableLocationBtmView(boolean _show) {
@@ -338,17 +376,16 @@ public class AuthQRActivity extends AppCompatActivity {
     }
 
     private void startLocationBroadcastInService() {
-        if (!LocationService.isRunning) {
-            Intent serviceIntent = new Intent(this, LocationService.class);
-            serviceIntent.setAction(LocationService.ACTION_ENABLE_BROADCAST);
-            serviceIntent.setPackage(getPackageName());
-            startForegroundService(serviceIntent);
-            Toast.makeText(this, "location-service-started", Toast.LENGTH_SHORT).show();
-        } else {
-            Log.i(LOG_TAG, "AuthQR: Location service is already running");
-            Toast.makeText(this, "location-service-already-running", Toast.LENGTH_SHORT).show();
+        Intent serviceIntent = new Intent(this, LocationService.class);
+        serviceIntent.setAction(LocationService.ACTION_ENABLE_BROADCAST);
+        serviceIntent.setPackage(getPackageName());
+        startForegroundService(serviceIntent);
 
-        }
+//            Toast.makeText(this, "location-service-started", Toast.LENGTH_SHORT).show();
+//            Log.i(LOG_TAG, "AuthQR: Location service is already running");
+////            Toast.makeText(this, "location-service-already-running", Toast.LENGTH_SHORT).show();
+//
+//        }
     }
 
     private void stopLocationBroadcastInService() {
@@ -497,7 +534,7 @@ public class AuthQRActivity extends AppCompatActivity {
                         } else {
                             // Check whether the user inside defined geofence-area
                             if (GeoFence.isInsideGeoFenceArea(client_lat,
-                                    client_lon, testSpinner.getSelectedItem().toString())) {
+                                    client_lon, testSpinner.getSelectedItem().toString())) { //testSpinner.getSelectedItem().toString()
                                 if (!startActivityFlag) {
                                     runOnUiThread(() -> {
                                         preferences.edit().putBoolean("isAlreadyScanned", true).apply();
@@ -527,6 +564,7 @@ public class AuthQRActivity extends AppCompatActivity {
                                     txtBarcodeValue.setText(R.string.qr_authenticated);
                                     startTVBlink(alertTV);
                                     resetCountdownTimer();
+                                    Log.d(LOG_TAG, "QR authenticated but, YOU ARE NOT INSIDE SJCE-MYSORE CAMPUS");
                                 });
                             }
                         }
@@ -538,10 +576,12 @@ public class AuthQRActivity extends AppCompatActivity {
                             alertTV.setText(" ");
                             alertCallFlag = false;
                             resetCountdownTimer();
+                            Log.d(LOG_TAG, "Invalid QR");
+
                         });
                     }
                 } else {
-                    txtBarcodeValue.setText(" ");
+                    txtBarcodeValue.setText("");
                 }
             }
         });

@@ -11,19 +11,12 @@
     <string name="search">Search</string>
     <string name="menu_about">ABOUT</string>
 
-    <!--    <string-array name="sjce_place_list">-->
-    <!--        <item>CMS</item>-->
-    <!--        <item>golden jubilee</item>-->
-    <!--        <item>MCA</item>-->
-    <!--        <item>Polymer science</item>-->
-    <!--    </string-array>-->
-
     <string name="no_barcode_detected">No qrcode detected</string>
     <!--    <string name="menu_settings">Settings</string>-->
     <string name="all_departments">All Departments</string>
     <string name="current_location">{current_location}</string>
     <!--    <string name="change_start_type"><u>change</u></string>-->
-    <string name="scan_a_valid_qr_to_authenticate">SCAN A QR TO AUTHENTICATE</string>
+    <string name="scan_a_valid_qr_to_authenticate">Scan a QR to Authenticate</string>
     <string name="bypass_auth">Bypass Auth.</string>
     <string name="not_in_campus">YOU ARE NOT INSIDE SJCE-MYSORE CAMPUS</string>
     <string name="_7c0505">#7C0505</string>
@@ -155,10 +148,11 @@
     <string name="view_in_360">View in 360°</string>
     <string name="contact_vishnustechnologies_gmail_com">Contact at: <u>vishnustechnologies@gmail.com</u></string>
     <string name="developed_by_">Developed by <u>vishnustechnologies</u></string>
-    <string name="permission_required">Permission required!</string>
+    <string name="permission_required">permission required\!</string>
+    <string name="Permission_required">Permission required</string>
     <string name="to_continue_tu">To continue, turn on device location</string>
     <string name="for_details_go_to">For details, go to location settings.</string>
-    <string name="use_google_s_locatio">Use Google\'s location services; as part of this services, Google may collect location data periodically and use this data in an anonymous way to improve location accuracy and location-based services.</string>
+    <string name="use_google_s_location">Use Google\'s location services\; as part of this services, Google may collect location data periodically and use this data in an anonymous way to improve location accuracy and location-based services.</string>
     <string name="your_device_will_need_to">Your device will need to:</string>
     <string name="use_gps_wi_fi_mobile_networks_and_sensors">Use GPS, Wi-Fi, mobile networks and sensors</string>
     <string name="go_to_settings">Go to settings</string>
@@ -166,12 +160,12 @@
     <string name="loading_maps">loading maps…</string>
     <string name="progressLeft">progress left</string>
     <string name="loading">loading…</string>
-    <string name="location_permission_required">Location permission required</string>
+    <string name="location_permission_required">location permission required</string>
     <string name="camera_permission_required">Camera permission required</string>
-    <string name="uses_locatio">Uses location to verify user identity based on their geographical position.</string>
-    <string name="location_is_n">Location is not accessed when the app is not in use.</string>
-    <string name="camera_is_not_accessed_">Camera is not accessed when the app is not in use.</string>
-    <string name="enable_cam_permission">Enable cam permission</string>
+    <string name="location_permission_consent_1">This app uses your location data (which may include precise GPS location or approximate location) to verify that your initial QR code login originates from within SJCE MYSORE CAMPUS.\n\nTo ensure continued security, we may also use your location data in subsequent activities within the app to confirm you remain within SJCE MYSORE CAMPUS. If your location falls outside the campus, you may be prompted to rescan the QR code for verification. We will only access your location when necessary and will not store your location data beyond verification purposes.</string>
+    <string name="location_permission_consent_2">Features that use location in the background include user authentication and unauthorized prevention.\n\nBy tapping \'Continue,\' you consent to the use of your location data for the purposes described above.</string>
+    <string name="cam_permission_consent_1">This app uses your device\'s camera to scan QR codes for secure login. When you scan a QR code, the app will only capture the code itself and will not access or store any other images or videos.</string>
+    <string name="cam_permission_consent_2">By tapping \'Continue,\' you consent to the app using your camera for QR code scanning purposes only. </string>
     <string name="checking_permission">Checking permission</string>
     <string name="all_permission_granted">All permission granted</string>
     <string name="waiting_for_device_loc">Waiting for device location…</string>
@@ -180,4 +174,7 @@
     <string name="starting_scanner">Starting scanner…</string>
     <string name="scanner_paused">Scanner paused</string>
     <string name="restarting_scanner">Restarting scanner…</string>
+    <string name="go_to_app_settings_app_permission"><![CDATA[Go to App Settings>App permission> enable necessary permissions]]></string>
+    <string name="secure_qr_login_with_continue">Secure QR Login with Location Verification</string>
+    <string name="reference_hall">Reference Hall</string>
 </resources>

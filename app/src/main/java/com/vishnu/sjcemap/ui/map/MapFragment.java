@@ -33,7 +33,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.GeoPoint;
 import com.squareup.picasso.Picasso;
 import com.vishnu.sjcemap.MainActivity;
 import com.vishnu.sjcemap.R;
@@ -46,15 +45,14 @@ import com.vishnu.sjcemap.service.GeoFence;
 
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
-import java.util.Map;
 import java.util.Objects;
 
 public class MapFragment extends Fragment {
     SharedDataView sharedDataView;
     private static final String LOG_TAG = "MapFragment";
     DecimalFormat coordViewFormat = new DecimalFormat("#.##########");
-    private String destPlaceLat;
-    private String destPlaceLon;
+    //    private String destPlaceLat;
+//    private String destPlaceLon;
     String gmap360ViewUrl;
     private ActivityResultLauncher<Intent> gpsActivityResultLauncher;
     Overlay360View gmap360ViewPopup;
@@ -70,6 +68,21 @@ public class MapFragment extends Fragment {
     private final String NO_IMG_FOUND_URL_1 = "https://firebasestorage.googleapis.com/v0/b/sjce-map.appspot.com/o/" +
             "SJCE-MAP-IMAGES%2FNO_IMG_FOUND_IMG.jpg?alt=media&token=2705f83b-a59c-4def-bcd3-18600626b290";
 
+    private String docPath;
+    private String docID;
+    private boolean loadFromDb;
+
+    private String spotName;
+    private String aboutDept;
+    private String spotImageUrl;
+    private String spot360ViewUrl;
+    private String spotLat;
+    private String spotLon;
+    private String spotGoogleImage1;
+    private String spotGoogleImage2;
+    private String spotGoogleImage3;
+    private String spotGoogleImage4;
+
     /* virtual location coordinates */
     private final LatLng GJB_MAIN_COORD = new LatLng(12.316369879317168, 76.61386933078991);
     private final LatLng CMS_MAIN_COORD = new LatLng(12.31780527062543, 76.61398336881378);
@@ -83,8 +96,30 @@ public class MapFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         sharedDataView = new ViewModelProvider(requireActivity()).get(SharedDataView.class);
-        destPlaceLat = "0.0";
-        destPlaceLon = "0.0";
+//        destPlaceLat = "0.0";
+//        destPlaceLon = "0.0";
+
+        if (getArguments() != null) {
+            docPath = getArguments().getString("doc_path");
+            docID = getArguments().getString("doc_id");
+            loadFromDb = getArguments().getBoolean("load_from_db");
+
+//            clientLat = getArguments().getDouble("client_lat");
+//            clientLon = getArguments().getDouble("client_lon");
+
+            if (!getArguments().getBoolean("load_from_db")) {
+                spotName = getArguments().getString("spot_name");
+                aboutDept = getArguments().getString("about_department");
+                spotImageUrl = getArguments().getString("spot_image_url");
+                spot360ViewUrl = getArguments().getString("spot_360_view_gmap_url");
+                spotLat = getArguments().getString("spot_lat", "0");
+                spotLon = getArguments().getString("spot_lon", "0");
+                spotGoogleImage1 = getArguments().getString("spot_google_image_url_1");
+                spotGoogleImage2 = getArguments().getString("spot_google_image_url_2");
+                spotGoogleImage3 = getArguments().getString("spot_google_image_url_3");
+                spotGoogleImage4 = getArguments().getString("spot_google_image_url_4");
+            }
+        }
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -95,24 +130,25 @@ public class MapFragment extends Fragment {
 
         layout = binding.mapFragmentLayoutConstraintLayout;
         binding.assistWalkDirectionImageButton.setEnabled(false);
+        binding.mapFragmentProgressBar.setVisibility(View.VISIBLE);
 
         /* Get spot-place and associated data */
-        sharedDataView.getPlace().observe(getViewLifecycleOwner(), pl -> {
-            if (pl != null) {
-                sharedDataView.getDocPath().observe(getViewLifecycleOwner(), path -> {
-                    if (path != null) {
-                        loadDataFromDB(path, pl, binding.coordinateViewTextView, binding.placeViewTextView);
-                        Log.d(LOG_TAG, "PLACE-NAME: " + pl);
-                    } else {
-                        Toast.makeText(requireContext(), "docPath: NullRef", Toast.LENGTH_SHORT).show();
-                        Log.i(LOG_TAG, "docPath: @null-reference");
-                    }
-                });
-            } else {
-                Toast.makeText(requireContext(), "placeName: NullRef", Toast.LENGTH_SHORT).show();
-                Log.i(LOG_TAG, "placeName: @null-reference");
-            }
-        });
+//        sharedDataView.getPlace().observe(getViewLifecycleOwner(), pl -> {
+//            if (pl != null) {
+//                sharedDataView.getDocPath().observe(getViewLifecycleOwner(), path -> {
+//                    if (path != null) {
+//                        loadDataFromDB(path, pl, binding.coordinateViewTextView, binding.placeViewTextView);
+//                        Log.d(LOG_TAG, "PLACE-NAME: " + pl);
+//                    } else {
+//                        Toast.makeText(requireContext(), "docPath: NullRef", Toast.LENGTH_SHORT).show();
+//                        Log.i(LOG_TAG, "docPath: @null-reference");
+//                    }
+//                });
+//            } else {
+//                Toast.makeText(requireContext(), "placeName: NullRef", Toast.LENGTH_SHORT).show();
+//                Log.i(LOG_TAG, "placeName: @null-reference");
+//            }
+//        });
 
         /* updates LAT, LON TV */
         sharedDataView.getClientLat().observe(getViewLifecycleOwner(), lat -> {
@@ -153,6 +189,11 @@ public class MapFragment extends Fragment {
                 }
         );
 
+        if (loadFromDb) {
+            loadDataFromDB(docPath, docID, binding.placeViewTextView);
+        } else {
+            loadDataFromModel(binding.placeViewTextView);
+        }
 
         return root;
     }
@@ -320,160 +361,242 @@ public class MapFragment extends Fragment {
         btn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_directions_walk_24, 0, 0, 0);
     }
 
-    private void loadDataFromDB(@NonNull String docPath, @NonNull String key, TextView ltv, TextView ptv) {
-        DocumentReference documentRef = FirebaseFirestore.getInstance().collection("LocationData").document(docPath);
+    private void loadDataFromDB(@NonNull String docPath, @NonNull String docID, TextView ptv) {
+        DocumentReference documentRef = FirebaseFirestore.getInstance()
+                .collection("AllLocations")
+                .document(docPath).collection("data")
+                .document(docID);
 
         documentRef.get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 DocumentSnapshot document = task.getResult();
                 if (document.exists()) {
-                    // Retrieve data for the specified key
-                    Object value = document.get(key);
 
-                    if (value != null) {
-                        if (value instanceof Map) {
-                            Map<String, Object> dataMap = (Map<String, Object>) value;
+                    String placeName = (String) document.get("spot_name");
+                    String spotImageUrl = (String) document.get("spot_image_url");
+                    String spotLat = (String) document.get("spot_lat");
+                    String spotLon = (String) document.get("spot_lon");
+                    String spotDescription = (String) document.get("spot_description");
+                    String spot360ViewUrl = (String) document.get("spot_360_view_gmap_url");
+                    String spotGoogleImage1 = (String) document.get("spot_google_image_url_1");
+                    String spotGoogleImage2 = (String) document.get("spot_google_image_url_2");
+                    String spotGoogleImage3 = (String) document.get("spot_google_image_url_3");
+                    String spotGoogleImage4 = (String) document.get("spot_google_image_url_4");
 
-                            // Extract required fields from the dataMap
-                            String placeName = Objects.requireNonNull(dataMap.get("spot_name")).toString().toUpperCase();
-                            String aboutDept;
-                            if (dataMap.containsKey("about_department")) {
-                                aboutDept = "About department\n" + Objects.requireNonNull(dataMap.get("about_department"));
-                            } else if (dataMap.containsKey("about_location")) {
-                                aboutDept = "About spot\n" + Objects.requireNonNull(dataMap.get("about_location"));
-                            } else {
-                                aboutDept = "";
-                            }
+                    if (Objects.equals(spot360ViewUrl, "")) {
+                        layout.setVisibility(View.VISIBLE);
+                        binding.viewIn360DegButton.setEnabled(false);
 
-                            String spotImageUrl = (String) dataMap.get("spot_image_url");
-                            GeoPoint geoPoint = (GeoPoint) dataMap.get("spot_coordinates");
-                            String spot360ViewUrl = (String) dataMap.get("spot_360_view_gmap_url");
-                            String spotGoogleImage1 = (String) dataMap.get("spot_google_image_url_1");
-                            String spotGoogleImage2 = (String) dataMap.get("spot_google_image_url_2");
-                            String spotGoogleImage3 = (String) dataMap.get("spot_google_image_url_3");
-                            String spotGoogleImage4 = (String) dataMap.get("spot_google_image_url_4");
+                        binding.viewIn360DegButton.setOnClickListener(null);
+                    } else {
+                        gmap360ViewUrl = spot360ViewUrl;
 
-                            if (Objects.equals(spot360ViewUrl, "")) {
-                                layout.setVisibility(View.VISIBLE);
-                                binding.viewIn360DegButton.setEnabled(false);
-//                                binding.viewIn360DegButton.setVisibility(View.INVISIBLE);
+                        binding.viewIn360DegButton.setVisibility(View.VISIBLE);
+                        binding.viewIn360DegButton.setEnabled(true);
 
-                                gmap360ViewUrl = "";
-                                binding.viewIn360DegButton.setOnClickListener(null);
-                            } else {
-                                gmap360ViewUrl = spot360ViewUrl;
+                        binding.viewIn360DegButton.setOnClickListener(v -> {
+                            gmap360ViewPopup = new Overlay360View(requireContext(), gmap360ViewUrl);
+                            gmap360ViewPopup.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
+                            gmap360ViewPopup.setHeight(ViewGroup.LayoutParams.MATCH_PARENT);
 
-                                binding.viewIn360DegButton.setVisibility(View.VISIBLE);
-                                binding.viewIn360DegButton.setEnabled(true);
+                            gmap360ViewPopup.showAtLocation(requireActivity().getWindow()
+                                    .getDecorView(), Gravity.CENTER, 0, 0);
+                        });
+                    }
 
-                                binding.viewIn360DegButton.setOnClickListener(v -> {
-                                    gmap360ViewPopup = new Overlay360View(requireContext(), gmap360ViewUrl);
-                                    gmap360ViewPopup.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
-                                    gmap360ViewPopup.setHeight(ViewGroup.LayoutParams.MATCH_PARENT);
-
-                                    gmap360ViewPopup.showAtLocation(requireActivity().getWindow()
-                                            .getDecorView(), Gravity.CENTER, 0, 0);
-                                });
-                            }
-                            if (geoPoint != null) {
-                                if ((geoPoint.getLatitude() == 0.00) && (geoPoint.getLongitude() == 0.00)) {
-                                    binding.assistWalkDirectionImageButton.setEnabled(false);
-                                    binding.assistWalkDirectionImageButton.setOnClickListener(null);
-                                } else {
-                                    binding.assistWalkDirectionImageButton.setEnabled(true);
-
-                                    binding.assistWalkDirectionImageButton.setOnClickListener(v -> {
-                                        setLoadingViewMapBtn();
-                                        boolean isInsideGJB = GeoFence.isInsideGJB(clientLat, clientLon);
-                                        boolean isInsideCMS = GeoFence.isInsideCMS(clientLat, clientLon);
-
-                                        if (isInsideGJB) {
-                                            loadGoogleMap(String.valueOf(GJB_MAIN_COORD.latitude), String.valueOf(GJB_MAIN_COORD.longitude),
-                                                    destPlaceLat, destPlaceLon, true, "You are inside GJB,\nsource set from: GJB MAIN ENTRY");
-                                        } else if (isInsideCMS) {
-                                            loadGoogleMap(String.valueOf(CMS_MAIN_COORD.latitude), String.valueOf(CMS_MAIN_COORD.longitude),
-                                                    destPlaceLat, destPlaceLon, true, "You are inside CMS,\nsource set from: CMS MAIN ENTRY");
-                                        } else {
-                                            loadGoogleMap(null, null, destPlaceLat, destPlaceLon, false,
-                                                    "Source set from current location");
-
-                                        }
-                                    });
-                                }
-                            } else {
-                                hideLocNotEnaView();
-                                binding.assistWalkDirectionImageButton.setEnabled(false);
-                                binding.assistWalkDirectionImageButton.setOnClickListener(null);
-                            }
-
-                            if (Objects.equals(spotImageUrl, "")) {
-                                Picasso.get().load(NO_IMG_FOUND_URL).into(binding.imageViewMapFragCircleImageView);
-                            } else {
-                                Picasso.get().load(spotImageUrl).into(binding.imageViewMapFragCircleImageView);
-                            }
-
-                            /* loads destination name */
-                            ptv.setText(placeName);
-
-                            /* loads destination coordinates */
-                            assert geoPoint != null;
-                            ltv.setText(MessageFormat.format("{0}°N {1}°E", coordViewFormat.format(geoPoint.getLatitude()),
-                                    coordViewFormat.format(geoPoint.getLongitude())));
-
-                            /* loads destination description */
-                            if (!aboutDept.isEmpty()) {
-                                binding.aboutDepartmentViewTextView.setText(MessageFormat.format("{0}", aboutDept));
-                            } else {
-                                binding.aboutDepartmentViewTextView.setText(R.string.TODO);
-                            }
-
-                            /* loads google images */
-                            if (Objects.equals(spotGoogleImage1, "")) {
-                                binding.spotImageViewHorizontalScrollView.setVisibility(View.GONE);
-                                binding.googleImageBannerTextView.setVisibility(View.GONE);
-                            } else {
-                                String[] imageUrls = {spotGoogleImage1, spotGoogleImage2, spotGoogleImage3, spotGoogleImage4};
-                                ImageView[] imageViews = {binding.mapFragImageView1ImageView, binding.mapFragImageView2ImageView,
-                                        binding.mapFragImageView3ImageView, binding.mapFragImageView4ImageView};
-
-                                for (int i = 0; i < imageUrls.length; i++) {
-                                    String imageUrl = imageUrls[i];
-                                    ImageView imageView = imageViews[i];
-                                    if (Objects.equals(imageUrl, "")) {
-                                        Picasso.get().load(NO_IMG_FOUND_URL_1).into(imageView);
-                                    } else {
-                                        Picasso.get().load(imageUrl).into(imageView);
-                                    }
-                                }
-                                binding.googleImageBannerTextView.setVisibility(View.VISIBLE);
-                                binding.spotImageViewHorizontalScrollView.setVisibility(View.VISIBLE);
-                            }
-
-                            binding.googleImageBannerTextView.setText(MessageFormat.format("Images of {0}", placeName.toLowerCase()));
-
-                            destPlaceLat = coordViewFormat.format(geoPoint.getLatitude());
-                            destPlaceLon = coordViewFormat.format(geoPoint.getLongitude());
-
+                    if (spotLon != null && spotLat != null) {
+                        if (spotLon.isEmpty() && spotLat.isEmpty()) {
+                            binding.assistWalkDirectionImageButton.setEnabled(false);
+                            binding.assistWalkDirectionImageButton.setOnClickListener(null);
                         } else {
-                            Log.d(LOG_TAG, "value");
+                            binding.assistWalkDirectionImageButton.setEnabled(true);
+
+                            binding.assistWalkDirectionImageButton.setOnClickListener(v -> {
+                                setLoadingViewMapBtn();
+                                boolean isInsideGJB = GeoFence.isInsideGJB(clientLat, clientLon);
+                                boolean isInsideCMS = GeoFence.isInsideCMS(clientLat, clientLon);
+
+                                if (isInsideGJB) {
+                                    loadGoogleMap(String.valueOf(GJB_MAIN_COORD.latitude), String.valueOf(GJB_MAIN_COORD.longitude),
+                                            spotLat, spotLon, true, "You are inside GJB,\nsource set from: GJB MAIN ENTRY");
+                                } else if (isInsideCMS) {
+                                    loadGoogleMap(String.valueOf(CMS_MAIN_COORD.latitude), String.valueOf(CMS_MAIN_COORD.longitude),
+                                            spotLat, spotLon, true, "You are inside CMS,\nsource set from: CMS MAIN ENTRY");
+                                } else {
+                                    loadGoogleMap(null, null, spotLat, spotLon, false,
+                                            "Source set from current location");
+
+                                }
+                            });
                         }
                     } else {
-                        Log.d(LOG_TAG, "key not found");
-                        ptv.setText("");
-                        ltv.setText("");
+                        hideLocNotEnaView();
+                        binding.assistWalkDirectionImageButton.setEnabled(false);
+                        binding.assistWalkDirectionImageButton.setOnClickListener(null);
                     }
+
+                    if (Objects.equals(spotImageUrl, "")) {
+                        Picasso.get().load(NO_IMG_FOUND_URL).into(binding.imageViewMapFragCircleImageView);
+                    } else {
+                        Picasso.get().load(spotImageUrl).into(binding.imageViewMapFragCircleImageView);
+                    }
+
+                    /* loads destination name */
+                    if (placeName != null) {
+                        ptv.setText(placeName.toUpperCase());
+                    }
+
+                    /* loads destination coordinates */
+//                            assert geoPoint != null;
+//                            ltv.setText(MessageFormat.format("{0}°N {1}°E", coordViewFormat.format(geoPoint.getLatitude()),
+//                                    coordViewFormat.format(geoPoint.getLongitude())));
+
+                    /* loads destination description */
+                    assert spotDescription != null;
+                    if (!spotDescription.isEmpty()) {
+                        binding.aboutDepartmentViewTextView.setText(MessageFormat.format("{0}", spotDescription));
+                    } else {
+                        binding.aboutDepartmentViewTextView.setText(R.string.TODO);
+                    }
+
+                    /* loads google images */
+                    if (Objects.equals(spotGoogleImage1, "")) {
+                        binding.spotImageViewHorizontalScrollView.setVisibility(View.GONE);
+                        binding.googleImageBannerTextView.setVisibility(View.GONE);
+                    } else {
+                        String[] imageUrls = {spotGoogleImage1, spotGoogleImage2, spotGoogleImage3, spotGoogleImage4};
+                        ImageView[] imageViews = {binding.mapFragImageView1ImageView, binding.mapFragImageView2ImageView,
+                                binding.mapFragImageView3ImageView, binding.mapFragImageView4ImageView};
+
+                        for (int i = 0; i < imageUrls.length; i++) {
+                            String imageUrl = imageUrls[i];
+                            ImageView imageView = imageViews[i];
+                            if (Objects.equals(imageUrl, "")) {
+                                Picasso.get().load(NO_IMG_FOUND_URL_1).into(imageView);
+                            } else {
+                                Picasso.get().load(imageUrl).into(imageView);
+                            }
+                        }
+                        binding.googleImageBannerTextView.setVisibility(View.VISIBLE);
+                        binding.spotImageViewHorizontalScrollView.setVisibility(View.VISIBLE);
+                    }
+
+                    assert placeName != null;
+                    binding.googleImageBannerTextView.setText(MessageFormat.format("Images of {0}", placeName.toLowerCase()));
+
+//                    destPlaceLat = coordViewFormat.format(spotLat);
+//                    destPlaceLon = coordViewFormat.format(spotLon);
+                    binding.mapFragmentProgressBar.setVisibility(View.GONE);
+
                 } else {
                     Log.d(LOG_TAG, "Error fetching document: ", task.getException());
+                    binding.mapFragmentProgressBar.setVisibility(View.GONE);
                 }
             }
         });
     }
 
+    private void loadDataFromModel(TextView ptv) {
+
+        if (Objects.equals(spot360ViewUrl, "")) {
+            layout.setVisibility(View.VISIBLE);
+            binding.viewIn360DegButton.setEnabled(false);
+            binding.viewIn360DegButton.setOnClickListener(null);
+        } else {
+
+            binding.viewIn360DegButton.setVisibility(View.VISIBLE);
+            binding.viewIn360DegButton.setEnabled(true);
+
+            binding.viewIn360DegButton.setOnClickListener(v -> {
+                gmap360ViewPopup = new Overlay360View(requireContext(), spot360ViewUrl);
+                gmap360ViewPopup.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
+                gmap360ViewPopup.setHeight(ViewGroup.LayoutParams.MATCH_PARENT);
+
+                gmap360ViewPopup.showAtLocation(requireActivity().getWindow()
+                        .getDecorView(), Gravity.CENTER, 0, 0);
+            });
+        }
+        if (spotLon != null && spotLat != null) {
+            if (spotLon.isEmpty() && spotLat.isEmpty()) {
+                binding.assistWalkDirectionImageButton.setEnabled(false);
+                binding.assistWalkDirectionImageButton.setOnClickListener(null);
+            } else {
+                binding.assistWalkDirectionImageButton.setEnabled(true);
+
+                binding.assistWalkDirectionImageButton.setOnClickListener(v -> {
+                    setLoadingViewMapBtn();
+                    boolean isInsideGJB = GeoFence.isInsideGJB(clientLat, clientLon);
+                    boolean isInsideCMS = GeoFence.isInsideCMS(clientLat, clientLon);
+
+                    if (isInsideGJB) {
+                        loadGoogleMap(String.valueOf(GJB_MAIN_COORD.latitude), String.valueOf(GJB_MAIN_COORD.longitude),
+                                spotLat, spotLon, true, "You are inside GJB,\nsource set from: GJB MAIN ENTRY");
+                    } else if (isInsideCMS) {
+                        loadGoogleMap(String.valueOf(CMS_MAIN_COORD.latitude), String.valueOf(CMS_MAIN_COORD.longitude),
+                                spotLat, spotLon, true, "You are inside CMS,\nsource set from: CMS MAIN ENTRY");
+                    } else {
+                        loadGoogleMap(null, null, spotLat, spotLon, false,
+                                "Source set from current location");
+
+                    }
+                });
+            }
+        } else {
+            hideLocNotEnaView();
+            binding.assistWalkDirectionImageButton.setEnabled(false);
+            binding.assistWalkDirectionImageButton.setOnClickListener(null);
+        }
+
+        if (Objects.equals(spotImageUrl, "")) {
+            Picasso.get().load(NO_IMG_FOUND_URL).into(binding.imageViewMapFragCircleImageView);
+        } else {
+            Picasso.get().load(spotImageUrl).into(binding.imageViewMapFragCircleImageView);
+        }
+
+        /* loads destination name */
+        ptv.setText(spotName);
+
+        /* loads destination coordinates */
+//                    assert geoPoint != null;
+//                    ltv.setText(MessageFormat.format("{0}°N {1}°E", coordViewFormat.format(geoPoint.getLatitude()),
+//                            coordViewFormat.format(geoPoint.getLongitude())));
+
+        /* loads destination description */
+        binding.aboutDepartmentViewTextView.setText(MessageFormat.format("{0}", aboutDept));
+
+        /* loads google images */
+        if (Objects.equals(spotGoogleImage1, "")) {
+            binding.spotImageViewHorizontalScrollView.setVisibility(View.GONE);
+            binding.googleImageBannerTextView.setVisibility(View.GONE);
+        } else {
+            String[] imageUrls = {spotGoogleImage1, spotGoogleImage2, spotGoogleImage3, spotGoogleImage4};
+            ImageView[] imageViews = {binding.mapFragImageView1ImageView, binding.mapFragImageView2ImageView,
+                    binding.mapFragImageView3ImageView, binding.mapFragImageView4ImageView};
+
+            for (int i = 0; i < imageUrls.length; i++) {
+                String imageUrl = imageUrls[i];
+                ImageView imageView = imageViews[i];
+                if (Objects.equals(imageUrl, "")) {
+                    Picasso.get().load(NO_IMG_FOUND_URL_1).into(imageView);
+                } else {
+                    Picasso.get().load(imageUrl).into(imageView);
+                }
+            }
+            binding.googleImageBannerTextView.setVisibility(View.VISIBLE);
+            binding.spotImageViewHorizontalScrollView.setVisibility(View.VISIBLE);
+        }
+
+        binding.googleImageBannerTextView.setText(MessageFormat.format("Images of {0}", spotName.toLowerCase()));
+        binding.mapFragmentProgressBar.setVisibility(View.GONE);
+//        destPlaceLat = coordViewFormat.format(spotLat);
+//        destPlaceLon = coordViewFormat.format(spotLon);
+    }
+
+
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @Override
     public void onResume() {
         super.onResume();
-//        setClickViewMapBtn();
 
         IntentFilter providerFilter = new IntentFilter(GPSProviderService.ACTION_GPS_STATUS_CHANGED);
         requireContext().registerReceiver(gpsStatusReceiver, providerFilter, Context.RECEIVER_NOT_EXPORTED);
@@ -493,5 +616,12 @@ public class MapFragment extends Fragment {
         super.onPause();
 
         requireContext().unregisterReceiver(gpsStatusReceiver);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        binding.assistWalkDirectionImageButton.setText(R.string.get_direction);
+
     }
 }

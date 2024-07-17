@@ -31,8 +31,8 @@ public class LauncherActivity extends AppCompatActivity {
 
         Intent authQRActivity = new Intent(LauncherActivity.this, AuthQRActivity.class);
         getStartedBtn = findViewById(R.id.getStartedLauncherActivity_button);
-        getStartedBtn.setEnabled(false);
-//        // OnCreate permission request
+
+        // OnCreate permission request
 //        List<String> permissionsToRequest = new ArrayList<>();
 //        for (String permission : permissions) {
 //            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
@@ -49,9 +49,6 @@ public class LauncherActivity extends AppCompatActivity {
             finish();
         });
 
-        new Handler().postDelayed(() -> {
-            getStartedBtn.performClick();
-        }, 750);
     }
 
 

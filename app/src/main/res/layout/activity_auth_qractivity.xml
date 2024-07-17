@@ -21,6 +21,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
         android:outlineAmbientShadowColor="#FB6309"
         android:outlineSpotShadowColor="#FB6309"
         app:cardCornerRadius="20dp"
@@ -28,8 +30,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.2">
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -41,7 +42,7 @@
                 android:id="@+id/authBannerAuthQrActivity_textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/anonymous_pro_bold"
+                android:fontFamily="@font/montserrat"
                 android:lineSpacingExtra="5dp"
                 android:paddingHorizontal="5dp"
                 android:paddingStart="5dp"
@@ -60,7 +61,7 @@
                 android:id="@+id/textView8"
                 android:layout_width="250dp"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/anonymous_pro"
+                android:fontFamily="@font/montserrat"
                 android:text="@string/_inside_the_sjce_mysore"
                 android:textAlignment="center"
                 android:textSize="12sp"
@@ -191,7 +192,6 @@
         android:layout_marginStart="5dp"
         android:layout_marginBottom="20dp"
         android:spinnerMode="dropdown"
-        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/byPassAuth_button"
         app:layout_constraintStart_toStartOf="parent" />
 

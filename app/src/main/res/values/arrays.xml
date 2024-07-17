@@ -10,8 +10,8 @@
     </string-array>
 
     <string-array name="auth_locations">
-        <item>GKLM</item>
         <item>SJCE</item>
+        <item>GKLM</item>
         <item>KKY</item>
         <item>NJKD</item>
     </string-array>

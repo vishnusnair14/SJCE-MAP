@@ -10,6 +10,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
@@ -24,10 +25,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
@@ -40,13 +43,11 @@ import com.vishnu.sjcemap.service.GPSProviderService;
 import com.vishnu.sjcemap.service.GeoFence;
 import com.vishnu.sjcemap.service.LocationService;
 
-import java.text.MessageFormat;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     private static LocationManager locationManager;
     private final String LOG_TAG = "MainActivity";
-    AlertDialog locNotEnableAlertDialog;
     AlertDialog.Builder locNotEnableBuilder;
     DocumentReference RegisteredUsersCredentialsRef;
     DocumentReference RegisteredUsersEmailRef;
@@ -62,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     private Vibrator vibrator;
     private SharedPreferences preferences;
     private SearchQueryListener searchQueryListener;
-
+    MenuItem searchItem;
 
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @Override
@@ -71,6 +72,8 @@ public class MainActivity extends AppCompatActivity {
 
         binding = com.vishnu.sjcemap.databinding.ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        Toolbar toolbar = binding.appBarMain.toolbar;
 
         setSupportActionBar(binding.appBarMain.toolbar);
 
@@ -93,17 +96,37 @@ public class MainActivity extends AppCompatActivity {
 
         RegisteredUsersCredentialsRef = db.collection("AuthenticationData")
                 .document("RegisteredUsersCredentials");
+
         RegisteredUsersEmailRef = db.collection("AuthenticationData")
                 .document("RegisteredUsersEmail");
-
-//        locNotEnableBuilder.setView(R.layout.loc_not_enable_dialog);
-//        locNotEnableBuilder.setPositiveButton("ENABLE", (dialog, which) -> showLocationSettings(this));
-//        locNotEnableAlertDialog = locNotEnableBuilder.create();
 
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
 
         TextView navBtmBannerTV = findViewById(R.id.textView10);
+
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.nav_host_fragment_content_main);
+        if (navHostFragment != null) {
+            NavController navController = navHostFragment.getNavController();
+            navController.addOnDestinationChangedListener((navController1, navDestination, bundle) -> {
+                // Ensure navDestination or its label is not null
+                if (navDestination.getLabel() != null) {
+                    String currentDestID = navDestination.getLabel().toString();
+
+                    // Get the options menu
+                    Menu menu = toolbar.getMenu(); // Assuming you have a toolbar setup
+
+                    // Find the searchItem in the menu
+                    MenuItem searchItem = menu.findItem(R.id.action_search);
+
+                    // Update visibility based on destination label
+                    if (searchItem != null) {
+                        searchItem.setVisible(currentDestID.equals("Locations"));
+                    }
+                }
+            });
+        }
 
         navBtmBannerTV.setOnClickListener(v -> {
             try {
@@ -140,19 +163,12 @@ public class MainActivity extends AppCompatActivity {
 
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        mAppBarConfiguration = new AppBarConfiguration.Builder(R.id.nav_home, R.id.nav_about).setOpenableLayout(drawer).build();
+        mAppBarConfiguration = new AppBarConfiguration.Builder(R.id.nav_home,
+                R.id.nav_about).setOpenableLayout(drawer).build();
 
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
-
-        startLocationBroadcastInService();
-        registerLocationBroadcastReceiver();
-        startGPSProviderService();
-
-//        // Register the receiver
-//        IntentFilter filter = new IntentFilter(LocationService.ACTION_LOCATION_BROADCAST);
-//        registerReceiver(locationReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
     }
 
 
@@ -173,44 +189,27 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 Log.d(LOG_TAG, "main-activity-broadcast-receiver: loc-coords " + client_lat + "°N " + client_lon + "°E");
-
             }
         }
     };
 
-//    private void startLocationService() {
-//        if (!LocationService.isRunning) {
-//            Intent serviceIntent = new Intent(this, LocationService.class);
-//            serviceIntent.setAction(LocationService.ACTION_ENABLE_BROADCAST);
-//            serviceIntent.setPackage(getPackageName());
-//            startForegroundService(serviceIntent);
-////            Toast.makeText(this, "MainAct: Location service started", Toast.LENGTH_SHORT).show();
-//        } else {
-//            Toast.makeText(this, "Location service is already running", Toast.LENGTH_SHORT).show();
-//            Log.i(LOG_TAG, "Location service is already running");
-//        }
-//    }
-//
-//    private void stopLocationService() {
-//        Intent serviceIntent = new Intent(this, LocationService.class);
-//        serviceIntent.setAction(LocationService.ACTION_DISABLE_BROADCAST);
-//        serviceIntent.setPackage(getPackageName());
-//        stopService(serviceIntent);
-////        Toast.makeText(this, "MainAct: Location service stopped!", Toast.LENGTH_SHORT).show();
-//    }
 
     private void startLocationBroadcastInService() {
-        if (!LocationService.isRunning) {
-            Intent serviceIntent = new Intent(this, LocationService.class);
-            serviceIntent.setAction(LocationService.ACTION_ENABLE_BROADCAST);
-            serviceIntent.setPackage(getPackageName());
-            startForegroundService(serviceIntent);
-            Toast.makeText(this, "location-service-started", Toast.LENGTH_SHORT).show();
-        } else {
-            Log.i(LOG_TAG, "AuthQR: Location service is already running");
-            Toast.makeText(this, "location-service-already-running", Toast.LENGTH_SHORT).show();
+        Intent serviceIntent = new Intent(this, LocationService.class);
+        serviceIntent.setAction(LocationService.ACTION_ENABLE_BROADCAST);
+        serviceIntent.setPackage(getPackageName());
 
-        }
+        new Handler().postDelayed(() -> {
+            startForegroundService(serviceIntent);
+//            Toast.makeText(this, "location-service-started", Toast.LENGTH_SHORT).show();
+            Log.d(LOG_TAG, "location-service-started");
+        }, 1500);
+
+
+//            Log.i(LOG_TAG, "AuthQR: Location service is already running");
+//            Toast.makeText(this, "location-service-already-running", Toast.LENGTH_SHORT).show();
+
+
     }
 
     private void stopLocationBroadcastInService() {
@@ -218,7 +217,6 @@ public class MainActivity extends AppCompatActivity {
         serviceIntent.setAction(LocationService.ACTION_DISABLE_BROADCAST);
         serviceIntent.setPackage(getPackageName());
         stopService(serviceIntent);
-//        Toast.makeText(this, "AuthQR: location service stopped!", Toast.LENGTH_SHORT).show();
     }
 
     private void registerLocationBroadcastReceiver() {
@@ -284,20 +282,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
+        startLocationBroadcastInService();
+        registerLocationBroadcastReceiver();
 
+        startGPSProviderService();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+
+        stopLocationBroadcastInService();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        startLocationBroadcastInService();
-        registerLocationBroadcastReceiver();
 
         if (isLocationNotEnabled(this)) {
             if (!preferences.getBoolean("isAlreadyScanned", false)) {
@@ -312,14 +312,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
         if (!GeoFence.isInsideGeoFenceArea(client_lat, client_lon, "GKLM")) {
             preferences.edit().putBoolean("isAuthenticated", false).apply();
             Toast.makeText(this, "Device exceeded SJCE boundary, re-authentication required", Toast.LENGTH_SHORT).show();
             Log.i(LOG_TAG, "isAuthenticated: False");
         }
         try {
+            stopLocationBroadcastInService();
             unregisterReceiver(locationReceiver);
-//            stopLocationService();
         } catch (Exception e) {
             Log.e(LOG_TAG, e.toString());
         }
@@ -329,6 +330,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
 
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        searchItem = menu.findItem(R.id.action_search);
+
+
+        if (searchItem != null) {
+            searchItem.setVisible(false);
+        }
+
+        return super.onPrepareOptionsMenu(menu);
     }
 
 
@@ -341,7 +354,7 @@ public class MainActivity extends AppCompatActivity {
         assert searchView != null;
 
         searchView.setOnCloseListener(() -> {
-            findViewById(R.id.shortcutOptions_cardView).setVisibility(View.VISIBLE);
+//            findViewById(R.id.shortcutOptions_cardView).setVisibility(View.VISIBLE);
             return false;
         });
 
